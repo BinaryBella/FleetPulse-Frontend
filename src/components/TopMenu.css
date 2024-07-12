@@ -1,0 +1,15 @@
+.notification {
+    position: relative;
+    display: inline-block;
+}
+
+.badge {
+    position: absolute;
+    top: 18px;
+    right: 6px;
+    padding: 2px 4px;
+    border-radius: 75%;
+    background-color: #ff8f49;
+    color: black;
+    font-size: 10px;
+}
