@@ -5,7 +5,8 @@ import PageHeader from "../components/PageHeader.jsx";
 import { Button, Checkbox, Input, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, useDisclosure } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
 
-export default function AddMaintenanceType() {
+
+export default function AddVehicleType() {
     const navigate = useNavigate();
     const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
     const { isOpen: isSuccessDialogOpen, onOpen: onSuccessDialogOpen, onClose: onSuccessDialogClose } = useDisclosure();
@@ -13,65 +14,62 @@ export default function AddMaintenanceType() {
     const [successDialogMessage, setSuccessDialogMessage] = useState("");
 
     const breadcrumbs = [
-        {label: 'Vehicle', link: '/app/Vehicle'}, //yashmi
-        {label: 'Vehicle Maintenance type Details', link: '/app/MaintenanceTypeTable'},
-        {label: 'Add Maintenance Type Details', link: '/app/AddMaintenanceType'}
+        { label: 'Vehicle', link: '/app/VehicleDetails' },
+        { label: 'Vehicle Type Details', link: '/app/VehicleTypeDetails' },
+        { label: 'Add Vehicle Type Details', link: '/app/AddVehicleTypeDetails' }
     ];
 
     const handleSubmit = async (values) => {
         try {
             console.log(values.TypeName, values.isActive);
-            const status = values.isActive || false; // Ensure it defaults to false if not set
+            const status = values.isActive === false ? "false" : "true";
 
-            const response = await fetch('https://localhost:7265/api/VehicleMaintenanceType', {
+            const response = await fetch('https://localhost:7265/api/VehicleType', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    TypeName: values.TypeName,
-                    status: status
+                    Type: values.TypeName,
+                    Status: status
                 })
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to add maintenance type.');
+                throw new Error(data.message || 'Failed to add vehicle type.');
             }
 
             if (data.message && data.message.toLowerCase().includes('exist')) {
-                setDialogMessage('Vehicle Maintenance Type already exists');
+                setDialogMessage('Vehicle Type already exists');
                 onDialogOpen();
             } else {
-                setSuccessDialogMessage('Maintenance type added successfully.');
+                setSuccessDialogMessage('Vehicle type added successfully.');
                 onSuccessDialogOpen();
             }
         } catch (error) {
             if (error instanceof TypeError) {
                 setDialogMessage('Failed to connect to the server.');
             } else {
-                setDialogMessage(error.message || 'Failed to add maintenance type.');
+                setDialogMessage(error.message || 'Failed to add vehicle type.');
             }
             onDialogOpen();
         }
     };
 
     const handleCancel = () => {
-        // Redirect to the vehicle maintenance type table page
-        navigate('/app/MaintenanceTypeTable');
+        navigate('/app/VehicleTypeDetails');
     };
 
     const handleSuccessDialogClose = () => {
-        // Close the success dialog
         onSuccessDialogClose();
-        // Redirect to the vehicle maintenance type table page
-        navigate('/app/MaintenanceTypeTable');
+        navigate('/app/VehicleTypeDetails');
     };
 
     return (
         <>
-            <PageHeader title="Add Vehicle Maintenance Type Details" breadcrumbs={breadcrumbs}/>
+            <PageHeader title="Add Vehicle Type Details" breadcrumbs={breadcrumbs} />
             <Formik
                 initialValues={{
                     TypeName: "",
@@ -82,11 +80,11 @@ export default function AddMaintenanceType() {
                 {({ errors, touched }) => (
                     <Form className="grid grid-cols-2 gap-10 mt-8">
                         <div className="flex flex-col gap-3">
-                            <p>Vehicle Maintenance Type</p>
+                            <p>Vehicle Type</p>
                             <Field name="TypeName" validate={(value) => {
                                 let error;
                                 if (!value) {
-                                    error = "Maintenance type is required.";
+                                    error = "Vehicle type is required.";
                                 }
                                 return error;
                             }}>
@@ -100,9 +98,9 @@ export default function AddMaintenanceType() {
                                             px={3}
                                             py={2}
                                             mt={1}
-                                            width="500px"
+                                            width="400px"
                                             id="TypeName"
-                                            placeholder="Enter Vehicle Maintenance Type"
+                                            placeholder="Vehicle Type"
                                         />
                                         {errors.TypeName && touched.TypeName && (
                                             <div className="text-red-500">{errors.TypeName}</div>
@@ -134,7 +132,7 @@ export default function AddMaintenanceType() {
                                     _hover={{ bg: "gray.500" }}
                                     color="#ffffff"
                                     variant="solid"
-                                    w="230px"
+                                    w="180px"
                                     marginTop="10"
                                     onClick={handleCancel}
                                 >
@@ -145,7 +143,7 @@ export default function AddMaintenanceType() {
                                     _hover={{ bg: theme.onHoverPurple }}
                                     color="#ffffff"
                                     variant="solid"
-                                    w="230px"
+                                    w="180px"
                                     marginTop="10"
                                     type="submit"
                                 >

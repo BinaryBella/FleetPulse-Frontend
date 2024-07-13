@@ -43,7 +43,7 @@ import {
 } from '@tanstack/react-table';
 import { flexRender } from '@tanstack/react-table';
 
-export default function Manufacturer() {
+export default function ManufacturerDetails() {
     const [manufacturerDetails, setManufacturerDetails] = useState([]);
     const [sorting, setSorting] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
@@ -142,8 +142,8 @@ export default function Manufacturer() {
     };
 
     const breadcrumbs = [
-        { label: "Manufacturer", link: "/" },
-        { label: "Manufacturer Details", link: "/app/Manufacturer" },
+        { label: "Vehicle", link: "/app/VehicleDetails" },
+        { label: "Manufacturer Details", link: "/app/ManufacturerDetails" },
     ];
 
     const handlePageClick = ({ selected }) => {
@@ -174,7 +174,7 @@ export default function Manufacturer() {
                         width="300px"
                     />
                 </InputGroup>
-                <Link to="/app/AddManufacturerTypeDetails">
+                <Link to="/app/AddManufacturerDetails">
                     <Button
                         bg={theme.purple}
                         _hover={{ bg: theme.onHoverPurple }}

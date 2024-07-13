@@ -19,97 +19,122 @@ import {
     InputGroup,
     InputLeftElement,
     Text,
+    useDisclosure,
+    AlertDialog,
     AlertDialogOverlay,
     AlertDialogContent,
     AlertDialogHeader,
     AlertDialogBody,
     AlertDialogFooter,
-    AlertDialog,
-    useDisclosure,
-    useToast
 } from "@chakra-ui/react";
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
 import { TiArrowUnsorted } from "react-icons/ti";
-import { IoSettingsSharp, IoSearchOutline } from "react-icons/io5";
+import { IoSearchOutline, IoSettingsSharp } from "react-icons/io5";
 import theme from "../config/ThemeConfig.jsx";
 import PageHeader from "../components/PageHeader.jsx";
-import Pagination from "../components/Pagination";
+import Pagination from "../components/Pagination.jsx";
 import {
     useReactTable,
     getCoreRowModel,
     getSortedRowModel,
-    getFilteredRowModel
-} from '@tanstack/react-table';
-import { flexRender } from '@tanstack/react-table';
+    getFilteredRowModel,
+} from "@tanstack/react-table";
+import { flexRender } from "@tanstack/react-table";
 
-export default function VehicleType() {
-    const [vehicleDetails, setVehicleDetails] = useState([]);
+export default function VehicleMaintenanceDetails() {
+    const [vehicleMaintenance, setVehicleMaintenance] = useState([]);
     const [sorting, setSorting] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [searchInput, setSearchInput] = useState("");
-    const [selectedType, setSelectedType] = useState(null);
-    const cancelRef = useRef();
-    const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
+    const [selectedMaintenance, setSelectedMaintenance] = useState(null);
     const itemsPerPage = 10;
-    const toast = useToast();
+    const cancelRef = useRef();
 
     useEffect(() => {
-        fetchVehicleTypes();
+        fetchVehicleMaintenance();
     }, []);
 
-    const onClickDelete = (vehicleType) => {
-        setSelectedType(vehicleType);
+    const fetchVehicleMaintenance = async () => {
+        try {
+            const response = await axios.get("https://localhost:7265/api/VehicleMaintenance");
+            setVehicleMaintenance(response.data);
+            console.log(response.data);
+        } catch (error) {
+            console.error("Error fetching vehicle maintenance:", error);
+        }
+    };
+
+    const onClickDelete = (maintenance) => {
+        setSelectedMaintenance(maintenance);
         onDialogOpen();
     };
 
     const onConfirmDelete = async () => {
         try {
-            const endpoint = `https://localhost:7265/api/VehicleType/${selectedType.id}/${selectedType.status ? 'deactivate' : 'activate'}`;
-            await axios.put(endpoint);
-            fetchVehicleTypes();
+            await axios.put(`https://localhost:7265/api/VehicleMaintenance/${selectedMaintenance.maintenanceId}`, {
+                ...selectedMaintenance,
+                status: !selectedMaintenance.status,
+            });
+            setVehicleMaintenance((prev) =>
+                prev.map((maintenance) =>
+                    maintenance.maintenanceId === selectedMaintenance.maintenanceId
+                        ? { ...maintenance, status: !maintenance.status }
+                        : maintenance
+                )
+            );
             onDialogClose();
         } catch (error) {
-            if (error.response && error.response.status === 400 && error.response.data === "Vehicle Type is active and associated with type records. Cannot deactivate.") {
-                toast({
-                    title: "Error",
-                    description: "Vehicle Type is active and associated with type records. Cannot deactivate.",
-                    status: "error",
-                    duration: 5000,
-                    isClosable: true,
-                });
-            } else {
-                console.error("Error updating vehicle type status:", error);
-            }
-        }
-    };
-
-    const fetchVehicleTypes = async () => {
-        try {
-            const response = await axios.get("https://localhost:7265/api/VehicleType");
-            console.log(response.data);
-            setVehicleDetails(response.data);
-
-        } catch (error) {
-            console.error("Error fetching vehicle types:", error);
+            console.error("Error updating maintenance status:", error);
         }
     };
 
     const columns = [
         {
-            accessorKey: 'typeName',
-            header: 'Vehicle Type',
-            meta: { isNumeric: false, filter: 'text' }
+            accessorKey: "vehicleRegistrationNo",
+            header: "Vehicle Registration No",
+            meta: { isNumeric: false, filter: "text" },
         },
         {
-            accessorKey: 'status',
-            header: 'Status',
-            cell: info => (info.getValue() ? "Active" : "Inactive"),
-            meta: { isNumeric: false, filter: 'boolean' }
+            accessorKey: "typeName",
+            header: "Maintenance Type",
+            meta: { isNumeric: false, filter: "text" },
         },
         {
-            id: 'actions',
-            header: 'Actions',
+            accessorKey: "maintenanceDate",
+            header: "Date",
+            cell: (info) => formatDate(info.row.original),
+            meta: { isNumeric: false, filter: "date" },
+        },
+        {
+            accessorKey: "cost",
+            header: "Cost",
+            meta: { isNumeric: true, filter: "text" },
+        },
+        {
+            accessorKey: "partsReplaced",
+            header: "Parts Replaced",
+            meta: { isNumeric: false, filter: "text" },
+        },
+        {
+            accessorKey: "serviceProvider",
+            header: "Service Provider",
+            meta: { isNumeric: false, filter: "text" },
+        },
+        {
+            accessorKey: "specialNotes",
+            header: "Special Notes",
+            meta: { isNumeric: false, filter: "text" },
+        },
+        {
+            accessorKey: "status",
+            header: "Status",
+            cell: (info) => (info.getValue() ? "Active" : "Inactive"),
+            meta: { isNumeric: false, filter: "boolean" },
+        },
+        {
+            accessorKey: "actions",
+            header: "Actions",
             cell: ({ row }) => (
                 <Menu>
                     <MenuButton
@@ -121,7 +146,7 @@ export default function VehicleType() {
                     />
                     <MenuList>
                         <MenuItem>
-                            <Link to={`/app/EditVehicleType/${row.original.id}`}>
+                            <Link to={`/app/EditMaintenance/${row.original.maintenanceId}`}>
                                 Edit
                             </Link>
                         </MenuItem>
@@ -137,7 +162,7 @@ export default function VehicleType() {
     ];
 
     const table = useReactTable({
-        data: vehicleDetails,
+        data: vehicleMaintenance,
         columns,
         state: { sorting, globalFilter: searchInput },
         onSortingChange: setSorting,
@@ -157,24 +182,30 @@ export default function VehicleType() {
         setCurrentPage(selected);
     };
 
-    const breadcrumbs = [
-        { label: 'Vehicle', link: '/' },
-        { label: 'Vehicle Type Details', link: '/app/VehicleType' },
-    ];
-
     const startOffset = currentPage * itemsPerPage;
     const endOffset = startOffset + itemsPerPage;
-    const sortedData = table.getRowModel().rows.map(row => row.original);
+    const sortedData = table.getRowModel().rows.map((row) => row.original);
     const currentData = sortedData.slice(startOffset, endOffset);
     const pageCount = Math.ceil(table.getFilteredRowModel().rows.length / itemsPerPage);
     const isEmpty = currentData.length === 0;
     const iconStyle = { display: "inline-block", verticalAlign: "middle", marginLeft: "5px" };
+    const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
+
+    const formatDate = (maintenance) => {
+        if (!maintenance.maintenanceDate) return "N/A";
+        const datetimeParts = maintenance.maintenanceDate.split("T");
+        return datetimeParts[0] || "Invalid Date";
+    };
+
+    const breadcrumbs = [
+        { label: "Vehicle", link: "/app/VehicleDetailsTable" },
+        { label: "Vehicle Maintenance Details", link: "/app/VehicleMaintenanceDetails" },
+    ];
 
     return (
         <div className="main-content">
-            <PageHeader title="Vehicle Type Details" breadcrumbs={breadcrumbs} />
-
-            <Box mb="20px" mt="50px" display="flex" alignItems="center" gap="20px">
+            <PageHeader title="Vehicle Maintenance Details" breadcrumbs={breadcrumbs} />
+            <Box mb="20px" mt="50px" display="flex" alignItems="center" gap="20px" marginTop="60px" marginBottom="10px">
                 <InputGroup>
                     <InputLeftElement pointerEvents="none">
                         <IoSearchOutline />
@@ -187,25 +218,25 @@ export default function VehicleType() {
                         width="300px"
                     />
                 </InputGroup>
-                <Link to="/app/AddVehicleType">
+                <Link to="/app/AddVehicleMaintenanceDetails">
                     <Button
                         bg={theme.purple}
                         _hover={{ bg: theme.onHoverPurple }}
                         color="white"
                         variant="solid"
-                        w="230px"
+                        w="300px"
                         mr="50px"
                     >
-                        Add New Vehicle Type Details
+                        Add New Vehicle Maintenance Details
                     </Button>
                 </Link>
             </Box>
 
             <Table className="custom-table">
                 <Thead>
-                    {table.getHeaderGroups().map(headerGroup => (
+                    {table.getHeaderGroups().map((headerGroup) => (
                         <Tr key={headerGroup.id}>
-                            {headerGroup.headers.map(header => {
+                            {headerGroup.headers.map((header) => {
                                 const meta = header.column.columnDef.meta;
                                 return (
                                     <Th
@@ -215,17 +246,19 @@ export default function VehicleType() {
                                         className="custom-table-th"
                                     >
                                         {flexRender(header.column.columnDef.header, header.getContext())}
-                                        <chakra.span pl="4">
-                                            {header.column.getIsSorted() ? (
-                                                header.column.getIsSorted() === "desc" ? (
-                                                    <TriangleDownIcon aria-label="sorted descending" style={iconStyle} />
+                                        {header.column.getCanSort() && (
+                                            <chakra.span pl="4">
+                                                {header.column.getIsSorted() ? (
+                                                    header.column.getIsSorted() === "desc" ? (
+                                                        <TriangleDownIcon aria-label="sorted descending" style={iconStyle} />
+                                                    ) : (
+                                                        <TriangleUpIcon aria-label="sorted ascending" style={iconStyle} />
+                                                    )
                                                 ) : (
-                                                    <TriangleUpIcon aria-label="sorted ascending" style={iconStyle} />
-                                                )
-                                            ) : (
-                                                <TiArrowUnsorted aria-label="unsorted" style={iconStyle} />
-                                            )}
-                                        </chakra.span>
+                                                    <TiArrowUnsorted aria-label="unsorted" style={iconStyle} />
+                                                )}
+                                            </chakra.span>
+                                        )}
                                     </Th>
                                 );
                             })}
@@ -240,11 +273,17 @@ export default function VehicleType() {
                             </Td>
                         </Tr>
                     ) : (
-                        currentData.map((vehicleType, index) => (
+                        currentData.map((maintenance, index) => (
                             <Tr key={index}>
-                                <Td className="custom-table-td">{vehicleType.type}</Td>
-                                <Td className="custom-table-td">{vehicleType.status ? "Active" : "Inactive"}</Td>
-                                <Td className="custom-table-td">
+                                <Td>{maintenance.vehicleRegistrationNo}</Td>
+                                <Td>{maintenance.typeName}</Td>
+                                <Td>{formatDate(maintenance)}</Td>
+                                <Td>{maintenance.cost}</Td>
+                                <Td>{maintenance.partsReplaced}</Td>
+                                <Td>{maintenance.serviceProvider}</Td>
+                                <Td>{maintenance.specialNotes}</Td>
+                                <Td>{maintenance.status ? "Active" : "Inactive"}</Td>
+                                <Td>
                                     <Menu>
                                         <MenuButton
                                             color={theme.purple}
@@ -255,12 +294,12 @@ export default function VehicleType() {
                                         />
                                         <MenuList>
                                             <MenuItem>
-                                                <Link to='{/app/EditVehicleType/${vehicleType.vehicleTypeId}}'>
+                                                <Link to={`/app/EditMaintenance/${maintenance.maintenanceId}`}>
                                                     Edit
                                                 </Link>
                                             </MenuItem>
-                                            <MenuItem onClick={() => onClickDelete(vehicleType)}>
-                                                {vehicleType.status ? "Deactivate" : "Activate"}
+                                            <MenuItem onClick={() => onClickDelete(maintenance)}>
+                                                {maintenance.status ? "Deactivate" : "Activate"}
                                             </MenuItem>
                                         </MenuList>
                                     </Menu>
@@ -271,26 +310,23 @@ export default function VehicleType() {
                 </Tbody>
             </Table>
             {!isEmpty && (
-                <Pagination
-                    pageCount={pageCount}
-                    onPageChange={handlePageClick}
-                />
+                <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
             )}
 
             <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom" leastDestructiveRef={cancelRef}>
                 <AlertDialogOverlay />
                 <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
-                    <AlertDialogHeader>{selectedType?.status ? "Deactivate" : "Activate"} Vehicle Type</AlertDialogHeader>
+                    <AlertDialogHeader>{selectedMaintenance?.status ? "Deactivate" : "Activate"} Maintenance Details</AlertDialogHeader>
                     <AlertDialogBody>
-                        Are you sure you want to {selectedType?.status ? "deactivate" : "activate"} {selectedType?.typeName} Vehicle Type?
+                        Are you sure you want to {selectedMaintenance?.status ? "deactivate" : "activate"} {selectedMaintenance?.typeName} Maintenance?
                     </AlertDialogBody>
                     <AlertDialogFooter>
                         <div className="flex flex-row gap-8">
                             <Button bg="gray.400" _hover={{ bg: "gray.500" }} color="#ffffff" variant="solid" onClick={onDialogClose} ref={cancelRef}>
                                 Cancel
                             </Button>
-                            <Button colorScheme='red' color="#FFFFFF" onClick={onConfirmDelete}>
-                                {selectedType?.status ? "Deactivate" : "Activate"}
+                            <Button colorScheme="red" color="#FFFFFF" onClick={onConfirmDelete}>
+                                {selectedMaintenance?.status ? "Deactivate" : "Activate"}
                             </Button>
                         </div>
                     </AlertDialogFooter>

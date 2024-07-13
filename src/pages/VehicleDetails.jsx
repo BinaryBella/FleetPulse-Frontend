@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import {
     Table,
     Thead,
@@ -19,112 +19,119 @@ import {
     InputGroup,
     InputLeftElement,
     Text,
-    useDisclosure,
-    AlertDialog,
     AlertDialogOverlay,
     AlertDialogContent,
     AlertDialogHeader,
     AlertDialogBody,
     AlertDialogFooter,
+    AlertDialog,
+    useDisclosure,
+    useToast
 } from "@chakra-ui/react";
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
-import { TiArrowUnsorted } from "react-icons/ti";
-import { IoSearchOutline, IoSettingsSharp } from "react-icons/io5";
-import { useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table';
-import { flexRender } from '@tanstack/react-table';
 import { Link } from "react-router-dom";
+import { TiArrowUnsorted } from "react-icons/ti";
+import { IoSettingsSharp, IoSearchOutline } from "react-icons/io5";
 import theme from "../config/ThemeConfig.jsx";
 import PageHeader from "../components/PageHeader.jsx";
-import ReactPaginate from 'react-paginate';
+import Pagination from "../components/Pagination.jsx";
+import {
+    useReactTable,
+    getCoreRowModel,
+    getSortedRowModel,
+    getFilteredRowModel
+} from '@tanstack/react-table';
+import { flexRender } from '@tanstack/react-table';
 
-export default function FuelRefillTable() {
-    const [fuelRefillDetails, setFuelRefillDetails] = useState([]);
+export default function VehicleDetails() {
+    const [vehicleDetails, setVehicleDetails] = useState([]);
     const [sorting, setSorting] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [searchInput, setSearchInput] = useState("");
-    const [selectedFuelRefill, setSelectedFuelRefill] = useState(null);
+    const [selectedVehicle, setSelectedVehicle] = useState(null);
+    const cancelRef = useRef();
+    const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
     const itemsPerPage = 10;
-    const [error, setError] = useState(null);
+    const toast = useToast();
 
     useEffect(() => {
-        fetchFuelRefill();
+        fetchVehicleDetails();
     }, []);
 
-    const fetchFuelRefill = async () => {
+    const fetchVehicleDetails = async () => {
         try {
-            const response = await axios.get("https://localhost:7265/api/FuelRefill");
-            const responseData = response.data;
-            setFuelRefillDetails(responseData);
+            const response = await axios.get('https://localhost:7265/api/Vehicle');
+            setVehicleDetails(response.data);
+            console.log(response.data);
         } catch (error) {
-            console.error("Error fetching fuel refills:", error);
-            setError("Error fetching fuel refill. Please try again later.");
+            console.error("Error fetching vehicle details:", error);
+            toast({
+                title: "Error",
+                description: "Error fetching vehicle details",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
         }
     };
 
-    const onClickDelete = async (fuelRefill) => {
-        setSelectedFuelRefill(fuelRefill);
+    const onClickDelete = (vehicle) => {
+        setSelectedVehicle(vehicle);
         onDialogOpen();
     };
 
     const onConfirmDelete = async () => {
         try {
-            if (selectedFuelRefill.status) {
-                await axios.post(`https://localhost:7265/api/FuelRefill/deactivate/${selectedFuelRefill.fuelRefillId}`);
-            } else {
-                await axios.post(`https://localhost:7265/api/FuelRefill/activate/${selectedFuelRefill.fuelRefillId}`);
-            }
-            fetchFuelRefill();
+            const endpoint = `https://localhost:7265/api/Vehicle/${selectedVehicle.id}/${selectedVehicle.isActive ? 'deactivate' : 'activate'}`;
+            await axios.put(endpoint);
+            fetchVehicleDetails();
             onDialogClose();
         } catch (error) {
-            console.error("Error updating fuel refill status:", error);
+            if (error.response && error.response.status === 400 && error.response.data === "Vehicle is active and associated with vehicle records. Cannot deactivate.") {
+            } else {
+                console.error("Error updating vehicle status:", error);
+            }
         }
-    };
-
-    const formatDate = (fuelRefill) => {
-        if (!fuelRefill.date) return 'N/A';
-        const datetimeParts = fuelRefill.date.split("T");
-        return datetimeParts[0] || 'Invalid Date';
     };
 
     const columns = [
         {
-            accessorKey: 'nic',
-            header: 'User NIC',
+            accessorKey: 'registrationNo',
+            header: 'Reg No',
             meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: 'vehicleRegistrationNo',
-            header: 'Vehicle Registration No',
+            accessorKey: 'licenseNo',
+            header: 'License No',
             meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: 'literCount',
-            header: 'Liter Count',
-            meta: { isNumeric: true, filter: 'number' }
-        },
-        {
-            accessorKey: 'date',
-            header: 'Date',
-            cell: info => formatDate(info.row.original),
+            accessorKey: 'licenseExpireDate',
+            header: 'License Exp Date',
             meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: 'time',
-            header: 'Time',
+            accessorKey: 'manufacturerName',
+            header: 'Manufacturer',
+            meta: { isNumeric: false, filter: 'text' }
+        },
+        {
+            accessorKey: 'type',
+            header: 'Type',
             meta: { isNumeric: false, filter: 'text' }
         },
         {
             accessorKey: 'fType',
-            header: 'Refill Type',
+            header: 'Fuel Type',
             meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: 'cost',
-            header: 'Cost',
-            meta: { isNumeric: true, filter: 'number' }
+            accessorKey: 'color',
+            header: 'Color',
+            meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: 'status',
+            accessorKey: 'isActive',
             header: 'Status',
             cell: info => (info.getValue() ? "Active" : "Inactive"),
             meta: { isNumeric: false, filter: 'boolean' }
@@ -137,28 +144,32 @@ export default function FuelRefillTable() {
                     <MenuButton
                         color={theme.purple}
                         as={IconButton}
-                        aria-label="profile-options"
-                        fontSize="20px"
+                        aria-label='profile-options'
+                        fontSize='20px'
                         icon={<IoSettingsSharp />}
                     />
                     <MenuList>
+                        <Link to={`/app/EditVehicleDetails/${row.original.id}`}>
+                            <MenuItem>Edit</MenuItem>
+                        </Link>
                         <MenuItem>
-                            <Link to={`/app/EditFuelRefillDetails/${row.original.fuelRefillId}`}>
-                                Edit
+                            <Link to="/app/VehicleMaintenanceConfigurationTable">
+                                Vehicle Maintenance Configuration
                             </Link>
                         </MenuItem>
                         <MenuItem onClick={() => onClickDelete(row.original)}>
-                            {row.original.status ? "Deactivate" : "Activate"}
+                            {row.original.isActive ? "Deactivate" : "Activate"}
                         </MenuItem>
                     </MenuList>
                 </Menu>
             ),
-            meta: { isNumeric: false, filter: null }
+            meta: { isNumeric: false, filter: null },
+            enableSorting: false,
         }
     ];
 
     const table = useReactTable({
-        data: fuelRefillDetails,
+        data: vehicleDetails,
         columns,
         state: { sorting, globalFilter: searchInput },
         onSortingChange: setSorting,
@@ -171,8 +182,13 @@ export default function FuelRefillTable() {
         const inputValue = event.target.value.toLowerCase();
         setSearchInput(inputValue);
         table.setGlobalFilter(inputValue);
-        setCurrentPage(0); // Reset pagination when searching
+        setCurrentPage(0);
     };
+
+    const breadcrumbs = [
+        { label: 'Vehicle', link: '/app/VehicleDetails' },
+        { label: 'Vehicle Details', link: '/app/VehicleDetails' }
+    ];
 
     const handlePageClick = ({ selected }) => {
         setCurrentPage(selected);
@@ -185,19 +201,11 @@ export default function FuelRefillTable() {
     const pageCount = Math.ceil(table.getFilteredRowModel().rows.length / itemsPerPage);
     const isEmpty = currentData.length === 0;
     const iconStyle = { display: "inline-block", verticalAlign: "middle", marginLeft: "5px" };
-    const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
-    const cancelRef = useRef();
-
-    const breadcrumbs = [
-        { label: "Vehicle", link: "/app/VehicleDetailsTable" },
-        { label: "Fuel Refill Details", link: "/app/FuelRefillTable" },
-    ];
 
     return (
         <div className="main-content">
-            <PageHeader title="Fuel Refill Details" breadcrumbs={breadcrumbs} />
-
-            <Box mb="20px" mt="50px" display="flex" alignItems="center" gap="20px" marginTop="60px" marginBottom="10px">
+            <PageHeader title="Vehicle Details" breadcrumbs={breadcrumbs} />
+            <Box mb="20px" mt="50px" display="flex" alignItems="center" gap="20px">
                 <InputGroup>
                     <InputLeftElement pointerEvents="none">
                         <IoSearchOutline />
@@ -210,22 +218,22 @@ export default function FuelRefillTable() {
                         width="300px"
                     />
                 </InputGroup>
-                <Link to="/app/AddFuelRefillDetails">
+                <Link to="/app/AddVehicleDetails">
                     <Button
                         bg={theme.purple}
                         _hover={{ bg: theme.onHoverPurple }}
                         color="white"
                         variant="solid"
-                        w="230px"
-                        mr="45px"
+                        w="200px"
+                        mr="50"
                     >
-                        Add New Fuel Refill Details
+                        Add New Vehicle Details
                     </Button>
                 </Link>
             </Box>
 
             <Table className="custom-table">
-                <Thead className="sticky-header">
+                <Thead>
                     {table.getHeaderGroups().map(headerGroup => (
                         <Tr key={headerGroup.id}>
                             {headerGroup.headers.map(header => {
@@ -263,33 +271,38 @@ export default function FuelRefillTable() {
                             </Td>
                         </Tr>
                     ) : (
-                        currentData.map((fuelRefill, index) => (
+                        currentData.map((vehicle, index) => (
                             <Tr key={index}>
-                                <Td>{fuelRefill.nic}</Td>
-                                <Td>{fuelRefill.vehicleRegistrationNo}</Td>
-                                <Td>{fuelRefill.literCount}</Td>
-                                <Td>{formatDate(fuelRefill)}</Td>
-                                <Td>{fuelRefill.time}</Td>
-                                <Td>{fuelRefill.fType}</Td>
-                                <Td>{fuelRefill.cost}</Td>
-                                <Td>{fuelRefill.status ? "Active" : "Inactive"}</Td>
+                                <Td>{vehicle.vehicleRegistrationNo}</Td>
+                                <Td>{vehicle.licenseNo}</Td>
+                                <Td>{vehicle.licenseExpireDate}</Td>
+                                <Td>{vehicle.manufacturerName}</Td>
+                                <Td>{vehicle.typeOf}</Td>
+                                <Td>{vehicle.fType}</Td>
+                                <Td>{vehicle.color}</Td>
+                                <Td>{vehicle.isActive ? "Active" : "Inactive"}</Td>
                                 <Td>
                                     <Menu>
                                         <MenuButton
                                             color={theme.purple}
                                             as={IconButton}
-                                            aria-label="profile-options"
-                                            fontSize="20px"
+                                            aria-label='profile-options'
+                                            fontSize='20px'
                                             icon={<IoSettingsSharp />}
                                         />
                                         <MenuList>
                                             <MenuItem>
-                                                <Link to={`/app/EditFuelRefillDetails/${fuelRefill.fuelRefillId}`}>
+                                                <Link to={`/app/EditVehicleDetails/${vehicle.id}`}>
                                                     Edit
                                                 </Link>
                                             </MenuItem>
-                                            <MenuItem onClick={() => onClickDelete(fuelRefill)}>
-                                                {fuelRefill.status ? "Deactivate" : "Activate"}
+                                            <MenuItem>
+                                                <Link to="/app/VehicleMaintenanceConfigurationTable">
+                                                    Vehicle Maintenance Configuration
+                                                </Link>
+                                            </MenuItem>
+                                            <MenuItem onClick={() => onClickDelete(vehicle)}>
+                                                {vehicle.isActive ? "Deactivate" : "Activate"}
                                             </MenuItem>
                                         </MenuList>
                                     </Menu>
@@ -300,36 +313,27 @@ export default function FuelRefillTable() {
                 </Tbody>
             </Table>
             {!isEmpty && (
-                <ReactPaginate
-                    breakLabel="..."
-                    nextLabel=">"
-                    onPageChange={handlePageClick}
-                    pageRangeDisplayed={5}
+                <Pagination
                     pageCount={pageCount}
-                    previousLabel="<"
-                    marginPagesDisplayed={2}
-                    containerClassName={"pagination"}
-                    activeClassName={"active"}
+                    onPageChange={handlePageClick}
                 />
             )}
-            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom" leastDestructiveRef={cancelRef}>
-                <AlertDialogOverlay />
-                <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
-                    <AlertDialogHeader>{selectedFuelRefill?.status ? "Deactivate" : "Activate"} Fuel Refill Details</AlertDialogHeader>
-                    <AlertDialogBody>
-                        Are you sure you want to {selectedFuelRefill?.status ? "deactivate" : "activate"} {selectedFuelRefill?.typeName} Fuel Refill?
-                    </AlertDialogBody>
-                    <AlertDialogFooter>
-                        <div className="flex flex-row gap-8">
-                            <Button bg="gray.400" _hover={{ bg: "gray.500" }} color="#ffffff" variant="solid" onClick={onDialogClose} ref={cancelRef}>
-                                Cancel
+
+            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} leastDestructiveRef={cancelRef}>
+                <AlertDialogOverlay>
+                    <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
+                        <AlertDialogHeader>{selectedVehicle?.isActive ? "Deactivate" : "Activate"} Vehicle</AlertDialogHeader>
+                        <AlertDialogBody>
+                            Are you sure you want to {selectedVehicle?.isActive ? "deactivate" : "activate"} this vehicle?
+                        </AlertDialogBody>
+                        <AlertDialogFooter>
+                            <Button ref={cancelRef} onClick={onDialogClose}>Cancel</Button>
+                            <Button colorScheme="red" onClick={onConfirmDelete} ml={3}>
+                                {selectedVehicle?.isActive ? "Deactivate" : "Activate"}
                             </Button>
-                            <Button colorScheme="red" color="#FFFFFF" onClick={onConfirmDelete}>
-                                {selectedFuelRefill?.status ? "Deactivate" : "Activate"}
-                            </Button>
-                        </div>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
             </AlertDialog>
         </div>
     );

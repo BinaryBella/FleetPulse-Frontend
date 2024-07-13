@@ -43,60 +43,97 @@ import {
 } from '@tanstack/react-table';
 import { flexRender } from '@tanstack/react-table';
 
-export default function MaintenanceTypeTable() {
-    const [vehicleDetails, setVehicleDetails] = useState([]);
+export default function StaffDetails() {
+    const [staffDetails, setStaffDetails] = useState([]);
     const [sorting, setSorting] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [searchInput, setSearchInput] = useState("");
-    const [selectedType, setSelectedType] = useState(null);
+    const [selectedStaff, setSelectedStaff] = useState(null);
     const cancelRef = useRef();
     const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
     const itemsPerPage = 10;
     const toast = useToast();
 
     useEffect(() => {
-        fetchVehicleMaintenanceTypes();
+        fetchStaffDetails();
     }, []);
 
-    const onClickDelete = (maintenanceType) => {
-        setSelectedType(maintenanceType);
+    const onClickDelete = (staff) => {
+        setSelectedStaff(staff);
         onDialogOpen();
     };
 
     const onConfirmDelete = async () => {
         try {
-            const endpoint = `https://localhost:7265/api/VehicleMaintenanceType/${selectedType.id}/${selectedType.status ? 'deactivate' : 'activate'}`;
+            const endpoint = selectedStaff.status
+                ? `https://localhost:7265/api/Staff/${selectedStaff.userId}/deactivate`
+                : `https://localhost:7265/api/Staff/${selectedStaff.userId}/activate`;
             await axios.put(endpoint);
-            fetchVehicleMaintenanceTypes();
+            fetchStaffDetails();
             onDialogClose();
         } catch (error) {
-            if (error.response && error.response.status === 400 && error.response.data === "MaintenanceType is active and associated with maintenance records. Cannot deactivate.") {
+            if (error.response && error.response.status === 400 && error.response.data === "Staff is active and associated with staff records. Cannot deactivate.") {
                 toast({
                     title: "Error",
-                    description: "MaintenanceType is active and associated with maintenance records. Cannot deactivate.",
+                    description: "Staff is active and associated with staff records. Cannot deactivate.",
                     status: "error",
                     duration: 5000,
                     isClosable: true,
                 });
             } else {
-                console.error("Error updating vehicle maintenance type status:", error);
+                console.error("Error updating staff status:", error);
             }
         }
     };
 
-    const fetchVehicleMaintenanceTypes = async () => {
+    const fetchStaffDetails = async () => {
         try {
-            const response = await axios.get("https://localhost:7265/api/VehicleMaintenanceType");
-            setVehicleDetails(response.data);
+            const response = await axios.get("https://localhost:7265/api/Staff");
+            setStaffDetails(response.data);
         } catch (error) {
-            console.error("Error fetching vehicle maintenance types:", error);
+            console.error("Error fetching staff details:", error);
         }
     };
 
     const columns = [
         {
-            accessorKey: 'typeName',
-            header: 'Vehicle Maintenance Type',
+            accessorKey: 'firstName',
+            header: 'First Name',
+            meta: { isNumeric: false, filter: 'text' }
+        },
+        {
+            accessorKey: 'lastName',
+            header: 'Last Name',
+            meta: { isNumeric: false, filter: 'text' }
+        },
+        {
+            accessorKey: 'dateOfBirth',
+            header: 'DoB',
+            meta: { isNumeric: false, filter: 'text' }
+        },
+        {
+            accessorKey: 'nic',
+            header: 'NIC',
+            meta: { isNumeric: false, filter: 'text' }
+        },
+        {
+            accessorKey: 'emailAddress',
+            header: 'Email Address',
+            meta: { isNumeric: false, filter: 'text' }
+        },
+        {
+            accessorKey: 'phoneNo',
+            header: 'Phone No',
+            meta: { isNumeric: false, filter: 'text' }
+        },
+        {
+            accessorKey: 'emergencyContact',
+            header: 'Emergency Contact',
+            meta: { isNumeric: false, filter: 'text' }
+        },
+        {
+            accessorKey: 'jobTitle',
+            header: 'Job Title',
             meta: { isNumeric: false, filter: 'text' }
         },
         {
@@ -119,7 +156,7 @@ export default function MaintenanceTypeTable() {
                     />
                     <MenuList>
                         <MenuItem>
-                            <Link to={`/app/EditMaintenanceType/${row.original.id}`}>
+                            <Link to={`/app/EditStaffDetails/${row.original.userId}`}>
                                 Edit
                             </Link>
                         </MenuItem>
@@ -135,7 +172,7 @@ export default function MaintenanceTypeTable() {
     ];
 
     const table = useReactTable({
-        data: vehicleDetails,
+        data: staffDetails,
         columns,
         state: { sorting, globalFilter: searchInput },
         onSortingChange: setSorting,
@@ -152,8 +189,8 @@ export default function MaintenanceTypeTable() {
     };
 
     const breadcrumbs = [
-        { label: "Vehicle", link: "/app/VehicleDetailsTable" },
-        { label: "Vehicle Maintenance Type Details", link: "/app/MaintenanceTypeTable" }
+        { label: 'Staff', link: '/app/StaffDetails' },
+        { label: 'Staff Details', link: '/app/StaffDetails' }
     ];
 
     const handlePageClick = ({ selected }) => {
@@ -170,7 +207,7 @@ export default function MaintenanceTypeTable() {
 
     return (
         <div className="main-content">
-            <PageHeader title="Vehicle Maintenance Type Details" breadcrumbs={breadcrumbs} />
+            <PageHeader title="Staff Details" breadcrumbs={breadcrumbs} />
             <Box mb="20px" mt="50px" display="flex" alignItems="center" gap="20px" marginTop="60px" marginBottom="10px">
                 <InputGroup>
                     <InputLeftElement pointerEvents="none">
@@ -184,16 +221,16 @@ export default function MaintenanceTypeTable() {
                         width="300px"
                     />
                 </InputGroup>
-                <Link to="/app/AddMaintenanceType">
+                <Link to="/app/AddStaffDetails">
                     <Button
                         bg={theme.purple}
                         _hover={{ bg: theme.onHoverPurple }}
                         color="white"
                         variant="solid"
-                        w="300px"
-                        mr="50px"
+                        w="260px"
+                        mr="10px"
                     >
-                        Add New Vehicle Maintenance Type
+                        Add New Staff
                     </Button>
                 </Link>
             </Box>
@@ -237,10 +274,17 @@ export default function MaintenanceTypeTable() {
                             </Td>
                         </Tr>
                     ) : (
-                        currentData.map((maintenanceType, index) => (
+                        currentData.map((staff, index) => (
                             <Tr key={index}>
-                                <Td className="custom-table-td">{maintenanceType.typeName}</Td>
-                                <Td className="custom-table-td">{maintenanceType.status ? "Active" : "Inactive"}</Td>
+                                <Td className="custom-table-td">{staff.firstName}</Td>
+                                <Td className="custom-table-td">{staff.lastName}</Td>
+                                <Td className="custom-table-td">{staff.dateOfBirth}</Td>
+                                <Td className="custom-table-td">{staff.nic}</Td>
+                                <Td className="custom-table-td">{staff.emailAddress}</Td>
+                                <Td className="custom-table-td">{staff.phoneNo}</Td>
+                                <Td className="custom-table-td">{staff.emergencyContact}</Td>
+                                <Td className="custom-table-td">{staff.jobTitle}</Td>
+                                <Td className="custom-table-td">{staff.status ? "Active" : "Inactive"}</Td>
                                 <Td className="custom-table-td">
                                     <Menu>
                                         <MenuButton
@@ -252,12 +296,10 @@ export default function MaintenanceTypeTable() {
                                         />
                                         <MenuList>
                                             <MenuItem>
-                                                <Link to={`/app/EditMaintenanceType/${maintenanceType.id}`}>
-                                                    Edit
-                                                </Link>
+                                                <Link to={`/app/EditStaffDetails/${staff.userId}`}>Edit</Link>
                                             </MenuItem>
-                                            <MenuItem onClick={() => onClickDelete(maintenanceType)}>
-                                                {maintenanceType.status ? "Deactivate" : "Activate"}
+                                            <MenuItem onClick={() => onClickDelete(staff)}>
+                                                {staff.status ? "Deactivate" : "Activate"}
                                             </MenuItem>
                                         </MenuList>
                                     </Menu>
@@ -267,28 +309,35 @@ export default function MaintenanceTypeTable() {
                     )}
                 </Tbody>
             </Table>
-            {!isEmpty && (
-                <Pagination
-                    pageCount={pageCount}
-                    onPageChange={handlePageClick}
-                />
-            )}
 
-            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom" leastDestructiveRef={cancelRef}>
+            {!isEmpty && <Pagination pageCount={pageCount} onPageChange={handlePageClick} />}
+
+            <AlertDialog
+                isOpen={isDialogOpen}
+                onClose={onDialogClose}
+                motionPreset="slideInBottom"
+                leastDestructiveRef={cancelRef}
+            >
                 <AlertDialogOverlay />
-                <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
-                    <AlertDialogHeader>{selectedType?.status ? "Deactivate" : "Activate"} Maintenance Type</AlertDialogHeader>
+                <AlertDialogContent position="absolute" top="30%" left="50%" transform="translate(-50%, -50%)">
+                    <AlertDialogHeader>{selectedStaff?.status ? "Deactivate" : "Activate"} Staff</AlertDialogHeader>
                     <AlertDialogBody>
-                        Are you sure you want to {selectedType?.status ? "deactivate" : "activate"} {selectedType?.typeName} Maintenance Type?
+                        Are you sure you want to {selectedStaff?.status ? "deactivate" : "activate"} {selectedStaff?.firstName} {selectedStaff?.lastName}?
                     </AlertDialogBody>
                     <AlertDialogFooter>
-                        <div className="flex flex-row gap-8">
-                            <Button bg="gray.400" _hover={{bg: "gray.500"}} color="#ffffff" variant="solid"
-                                    onClick={onDialogClose} ref={cancelRef}>Cancel</Button>
-                            <Button colorScheme='red' color="#FFFFFF" onClick={onConfirmDelete}>
-                                {selectedType?.status ? "Deactivate" : "Activate"}
-                            </Button>
-                        </div>
+                        <Button
+                            bg="gray.400"
+                            _hover={{ bg: "gray.500" }}
+                            color="#ffffff"
+                            variant="solid"
+                            onClick={onDialogClose}
+                            ref={cancelRef}
+                        >
+                            Cancel
+                        </Button>
+                        <Button colorScheme="red" color="#FFFFFF" onClick={onConfirmDelete}>
+                            {selectedStaff?.status ? "Deactivate" : "Activate"}
+                        </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

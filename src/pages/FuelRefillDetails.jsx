@@ -28,113 +28,110 @@ import {
     AlertDialogFooter,
 } from "@chakra-ui/react";
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
-import { Link } from "react-router-dom";
 import { TiArrowUnsorted } from "react-icons/ti";
 import { IoSearchOutline, IoSettingsSharp } from "react-icons/io5";
+import { useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table';
+import { flexRender } from '@tanstack/react-table';
+import { Link } from "react-router-dom";
 import theme from "../config/ThemeConfig.jsx";
 import PageHeader from "../components/PageHeader.jsx";
-import Pagination from "../components/Pagination";
-import {
-    useReactTable,
-    getCoreRowModel,
-    getSortedRowModel,
-    getFilteredRowModel,
-} from "@tanstack/react-table";
-import { flexRender } from "@tanstack/react-table";
+import ReactPaginate from 'react-paginate';
 
-export default function MaintenanceTable() {
-    const [vehicleMaintenance, setVehicleMaintenance] = useState([]);
+export default function FuelRefillDetails() {
+    const [fuelRefillDetails, setFuelRefillDetails] = useState([]);
     const [sorting, setSorting] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [searchInput, setSearchInput] = useState("");
-    const [selectedMaintenance, setSelectedMaintenance] = useState(null);
+    const [selectedFuelRefill, setSelectedFuelRefill] = useState(null);
     const itemsPerPage = 10;
-    const cancelRef = useRef();
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchVehicleMaintenance();
+        fetchFuelRefill();
     }, []);
 
-    const fetchVehicleMaintenance = async () => {
+    const fetchFuelRefill = async () => {
         try {
-            const response = await axios.get("https://localhost:7265/api/VehicleMaintenance");
-            setVehicleMaintenance(response.data);
-            console.log(response.data);
+            const response = await axios.get("https://localhost:7265/api/FuelRefill");
+            const responseData = response.data;
+            setFuelRefillDetails(responseData);
         } catch (error) {
-            console.error("Error fetching vehicle maintenance:", error);
+            console.error("Error fetching fuel refills:", error);
+            setError("Error fetching fuel refill. Please try again later.");
         }
     };
 
-    const onClickDelete = (maintenance) => {
-        setSelectedMaintenance(maintenance);
+    const onClickDelete = async (fuelRefill) => {
+        setSelectedFuelRefill(fuelRefill);
         onDialogOpen();
     };
 
     const onConfirmDelete = async () => {
         try {
-            await axios.put(`https://localhost:7265/api/VehicleMaintenance/${selectedMaintenance.maintenanceId}`, {
-                ...selectedMaintenance,
-                status: !selectedMaintenance.status,
-            });
-            setVehicleMaintenance((prev) =>
-                prev.map((maintenance) =>
-                    maintenance.maintenanceId === selectedMaintenance.maintenanceId
-                        ? { ...maintenance, status: !maintenance.status }
-                        : maintenance
-                )
-            );
+            if (selectedFuelRefill.status) {
+                await axios.post(`https://localhost:7265/api/FuelRefill/deactivate/${selectedFuelRefill.fuelRefillId}`);
+            } else {
+                await axios.post(`https://localhost:7265/api/FuelRefill/activate/${selectedFuelRefill.fuelRefillId}`);
+            }
+            fetchFuelRefill();
             onDialogClose();
         } catch (error) {
-            console.error("Error updating maintenance status:", error);
+            console.error("Error updating fuel refill status:", error);
         }
+    };
+
+    const formatDate = (fuelRefill) => {
+        if (!fuelRefill.date) return 'N/A';
+        const datetimeParts = fuelRefill.date.split("T");
+        return datetimeParts[0] || 'Invalid Date';
     };
 
     const columns = [
         {
-            accessorKey: "vehicleRegistrationNo",
-            header: "Vehicle Registration No",
-            meta: { isNumeric: false, filter: "text" },
+            accessorKey: 'nic',
+            header: 'User NIC',
+            meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: "typeName",
-            header: "Maintenance Type",
-            meta: { isNumeric: false, filter: "text" },
+            accessorKey: 'vehicleRegistrationNo',
+            header: 'Vehicle Registration No',
+            meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: "maintenanceDate",
-            header: "Date",
-            cell: (info) => formatDate(info.row.original),
-            meta: { isNumeric: false, filter: "date" },
+            accessorKey: 'literCount',
+            header: 'Liter Count',
+            meta: { isNumeric: true, filter: 'number' }
         },
         {
-            accessorKey: "cost",
-            header: "Cost",
-            meta: { isNumeric: true, filter: "text" },
+            accessorKey: 'date',
+            header: 'Date',
+            cell: info => formatDate(info.row.original),
+            meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: "partsReplaced",
-            header: "Parts Replaced",
-            meta: { isNumeric: false, filter: "text" },
+            accessorKey: 'time',
+            header: 'Time',
+            meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: "serviceProvider",
-            header: "Service Provider",
-            meta: { isNumeric: false, filter: "text" },
+            accessorKey: 'fType',
+            header: 'Refill Type',
+            meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: "specialNotes",
-            header: "Special Notes",
-            meta: { isNumeric: false, filter: "text" },
+            accessorKey: 'cost',
+            header: 'Cost',
+            meta: { isNumeric: true, filter: 'number' }
         },
         {
-            accessorKey: "status",
-            header: "Status",
-            cell: (info) => (info.getValue() ? "Active" : "Inactive"),
-            meta: { isNumeric: false, filter: "boolean" },
+            accessorKey: 'status',
+            header: 'Status',
+            cell: info => (info.getValue() ? "Active" : "Inactive"),
+            meta: { isNumeric: false, filter: 'boolean' }
         },
         {
-            accessorKey: "actions",
-            header: "Actions",
+            id: 'actions',
+            header: 'Actions',
             cell: ({ row }) => (
                 <Menu>
                     <MenuButton
@@ -146,7 +143,7 @@ export default function MaintenanceTable() {
                     />
                     <MenuList>
                         <MenuItem>
-                            <Link to={`/app/EditMaintenance/${row.original.maintenanceId}`}>
+                            <Link to={`/app/EditFuelRefillDetails/${row.original.fuelRefillId}`}>
                                 Edit
                             </Link>
                         </MenuItem>
@@ -156,13 +153,12 @@ export default function MaintenanceTable() {
                     </MenuList>
                 </Menu>
             ),
-            meta: { isNumeric: false, filter: null },
-            enableSorting: false,
-        },
+            meta: { isNumeric: false, filter: null }
+        }
     ];
 
     const table = useReactTable({
-        data: vehicleMaintenance,
+        data: fuelRefillDetails,
         columns,
         state: { sorting, globalFilter: searchInput },
         onSortingChange: setSorting,
@@ -175,7 +171,7 @@ export default function MaintenanceTable() {
         const inputValue = event.target.value.toLowerCase();
         setSearchInput(inputValue);
         table.setGlobalFilter(inputValue);
-        setCurrentPage(0);
+        setCurrentPage(0); // Reset pagination when searching
     };
 
     const handlePageClick = ({ selected }) => {
@@ -184,27 +180,23 @@ export default function MaintenanceTable() {
 
     const startOffset = currentPage * itemsPerPage;
     const endOffset = startOffset + itemsPerPage;
-    const sortedData = table.getRowModel().rows.map((row) => row.original);
+    const sortedData = table.getRowModel().rows.map(row => row.original);
     const currentData = sortedData.slice(startOffset, endOffset);
     const pageCount = Math.ceil(table.getFilteredRowModel().rows.length / itemsPerPage);
     const isEmpty = currentData.length === 0;
     const iconStyle = { display: "inline-block", verticalAlign: "middle", marginLeft: "5px" };
     const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
-
-    const formatDate = (maintenance) => {
-        if (!maintenance.maintenanceDate) return "N/A";
-        const datetimeParts = maintenance.maintenanceDate.split("T");
-        return datetimeParts[0] || "Invalid Date";
-    };
+    const cancelRef = useRef();
 
     const breadcrumbs = [
-        { label: "Vehicle", link: "/app/VehicleDetailsTable" },
-        { label: "Vehicle Maintenance Details", link: "/app/MaintenanceTable" },
+        { label: "Vehicle details", link: "/app/VehicleDetails" },
+        { label: "Fuel Refill Details", link: "/app/FuelRefillDetails" },
     ];
 
     return (
         <div className="main-content">
-            <PageHeader title="Vehicle Maintenance Details" breadcrumbs={breadcrumbs} />
+            <PageHeader title="Fuel Refill Details" breadcrumbs={breadcrumbs} />
+
             <Box mb="20px" mt="50px" display="flex" alignItems="center" gap="20px" marginTop="60px" marginBottom="10px">
                 <InputGroup>
                     <InputLeftElement pointerEvents="none">
@@ -218,25 +210,25 @@ export default function MaintenanceTable() {
                         width="300px"
                     />
                 </InputGroup>
-                <Link to="/app/AddVehicleMaintenanceDetails">
+                <Link to="/app/AddFuelRefillDetails">
                     <Button
                         bg={theme.purple}
                         _hover={{ bg: theme.onHoverPurple }}
                         color="white"
                         variant="solid"
-                        w="300px"
-                        mr="50px"
+                        w="230px"
+                        mr="45px"
                     >
-                        Add New Vehicle Maintenance Details
+                        Add New Fuel Refill Details
                     </Button>
                 </Link>
             </Box>
 
             <Table className="custom-table">
-                <Thead>
-                    {table.getHeaderGroups().map((headerGroup) => (
+                <Thead className="sticky-header">
+                    {table.getHeaderGroups().map(headerGroup => (
                         <Tr key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => {
+                            {headerGroup.headers.map(header => {
                                 const meta = header.column.columnDef.meta;
                                 return (
                                     <Th
@@ -246,19 +238,17 @@ export default function MaintenanceTable() {
                                         className="custom-table-th"
                                     >
                                         {flexRender(header.column.columnDef.header, header.getContext())}
-                                        {header.column.getCanSort() && (
-                                            <chakra.span pl="4">
-                                                {header.column.getIsSorted() ? (
-                                                    header.column.getIsSorted() === "desc" ? (
-                                                        <TriangleDownIcon aria-label="sorted descending" style={iconStyle} />
-                                                    ) : (
-                                                        <TriangleUpIcon aria-label="sorted ascending" style={iconStyle} />
-                                                    )
+                                        <chakra.span pl="4">
+                                            {header.column.getIsSorted() ? (
+                                                header.column.getIsSorted() === "desc" ? (
+                                                    <TriangleDownIcon aria-label="sorted descending" style={iconStyle} />
                                                 ) : (
-                                                    <TiArrowUnsorted aria-label="unsorted" style={iconStyle} />
-                                                )}
-                                            </chakra.span>
-                                        )}
+                                                    <TriangleUpIcon aria-label="sorted ascending" style={iconStyle} />
+                                                )
+                                            ) : (
+                                                <TiArrowUnsorted aria-label="unsorted" style={iconStyle} />
+                                            )}
+                                        </chakra.span>
                                     </Th>
                                 );
                             })}
@@ -273,16 +263,16 @@ export default function MaintenanceTable() {
                             </Td>
                         </Tr>
                     ) : (
-                        currentData.map((maintenance, index) => (
+                        currentData.map((fuelRefill, index) => (
                             <Tr key={index}>
-                                <Td>{maintenance.vehicleRegistrationNo}</Td>
-                                <Td>{maintenance.typeName}</Td>
-                                <Td>{formatDate(maintenance)}</Td>
-                                <Td>{maintenance.cost}</Td>
-                                <Td>{maintenance.partsReplaced}</Td>
-                                <Td>{maintenance.serviceProvider}</Td>
-                                <Td>{maintenance.specialNotes}</Td>
-                                <Td>{maintenance.status ? "Active" : "Inactive"}</Td>
+                                <Td>{fuelRefill.nic}</Td>
+                                <Td>{fuelRefill.vehicleRegistrationNo}</Td>
+                                <Td>{fuelRefill.literCount}</Td>
+                                <Td>{formatDate(fuelRefill)}</Td>
+                                <Td>{fuelRefill.time}</Td>
+                                <Td>{fuelRefill.fType}</Td>
+                                <Td>{fuelRefill.cost}</Td>
+                                <Td>{fuelRefill.status ? "Active" : "Inactive"}</Td>
                                 <Td>
                                     <Menu>
                                         <MenuButton
@@ -294,12 +284,12 @@ export default function MaintenanceTable() {
                                         />
                                         <MenuList>
                                             <MenuItem>
-                                                <Link to={`/app/EditMaintenance/${maintenance.maintenanceId}`}>
+                                                <Link to={`/app/EditFuelRefillDetails/${fuelRefill.fuelRefillId}`}>
                                                     Edit
                                                 </Link>
                                             </MenuItem>
-                                            <MenuItem onClick={() => onClickDelete(maintenance)}>
-                                                {maintenance.status ? "Deactivate" : "Activate"}
+                                            <MenuItem onClick={() => onClickDelete(fuelRefill)}>
+                                                {fuelRefill.status ? "Deactivate" : "Activate"}
                                             </MenuItem>
                                         </MenuList>
                                     </Menu>
@@ -310,15 +300,24 @@ export default function MaintenanceTable() {
                 </Tbody>
             </Table>
             {!isEmpty && (
-                <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
+                <ReactPaginate
+                    breakLabel="..."
+                    nextLabel=">"
+                    onPageChange={handlePageClick}
+                    pageRangeDisplayed={5}
+                    pageCount={pageCount}
+                    previousLabel="<"
+                    marginPagesDisplayed={2}
+                    containerClassName={"pagination"}
+                    activeClassName={"active"}
+                />
             )}
-
             <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom" leastDestructiveRef={cancelRef}>
                 <AlertDialogOverlay />
                 <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
-                    <AlertDialogHeader>{selectedMaintenance?.status ? "Deactivate" : "Activate"} Maintenance Details</AlertDialogHeader>
+                    <AlertDialogHeader>{selectedFuelRefill?.status ? "Deactivate" : "Activate"} Fuel Refill Details</AlertDialogHeader>
                     <AlertDialogBody>
-                        Are you sure you want to {selectedMaintenance?.status ? "deactivate" : "activate"} {selectedMaintenance?.typeName} Maintenance?
+                        Are you sure you want to {selectedFuelRefill?.status ? "deactivate" : "activate"} {selectedFuelRefill?.typeName} Fuel Refill?
                     </AlertDialogBody>
                     <AlertDialogFooter>
                         <div className="flex flex-row gap-8">
@@ -326,7 +325,7 @@ export default function MaintenanceTable() {
                                 Cancel
                             </Button>
                             <Button colorScheme="red" color="#FFFFFF" onClick={onConfirmDelete}>
-                                {selectedMaintenance?.status ? "Deactivate" : "Activate"}
+                                {selectedFuelRefill?.status ? "Deactivate" : "Activate"}
                             </Button>
                         </div>
                     </AlertDialogFooter>

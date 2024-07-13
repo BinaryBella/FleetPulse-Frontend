@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Formik, Form, Field } from "formik";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
-import { Button, Checkbox, Input, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, useDisclosure } from "@chakra-ui/react";
+import { Button, Checkbox, Input, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, useDisclosure, Select } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
 import axios from 'axios';
 
@@ -12,75 +12,58 @@ export default function AddVehicleDetails() {
     const { isOpen: isSuccessDialogOpen, onOpen: onSuccessDialogOpen, onClose: onSuccessDialogClose } = useDisclosure();
     const [dialogMessage, setDialogMessage] = useState("");
     const [successDialogMessage, setSuccessDialogMessage] = useState("");
+    const [vehicleTypes, setVehicleTypes] = useState([]);
+    const [manufacturers, setManufacturers] = useState([]);
 
     const breadcrumbs = [
-        { label: "Vehicle", link: "/" },
-        { label: "Vehicle DetailsTable", link: "/app/VehicleDetailsTable" },
+        { label: "Vehicle", link: "/VehicleDetails" },
+        { label: "Vehicle Details", link: "/app/VehicleDetails" },
         { label: "Add Vehicle Details", link: "/app/AddvehicleDetails" },
     ];
 
-    const [Manufacture, setManufacture] = useState();
-    const [VehicleType, setVehicleType] = useState();
-    // const [FuelType, setFuelType] = useState();
-
-
     useEffect(() => {
-        axios.get('https://localhost:7265/api/Manufacture')
-            .then(response => {
-                console.log('Manufacture data fetched:', response.data);
-                setManufacture(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching manufacture data:', error);
-            });
-
+        // Fetch Vehicle Types
         axios.get('https://localhost:7265/api/VehicleType')
             .then(response => {
-                console.log('type  data fetched:', response.data);
-                setVehicleType(response.data);
+                console.log('Vehicle Types data fetched:', response.data);
+                setVehicleTypes(response.data); // Assuming data is an array of vehicle types
             })
             .catch(error => {
-                console.error('Error fetching manufacture data:', error);
+                console.error('Error fetching vehicle types:', error);
             });
 
-
+        // Fetch Manufacturers
+        axios.get('https://localhost:7265/api/Manufacture')
+            .then(response => {
+                console.log('Manufacturers data fetched:', response.data);
+                setManufacturers(response.data); // Assuming data is an array of manufacturers
+            })
+            .catch(error => {
+                console.error('Error fetching manufacturers:', error);
+            });
     }, []);
 
     const handleSubmit = async (values) => {
         try {
+            console.log(values);
 
-            console.log(values)
-
-            const vehicleTypeMap = {};
-            VehicleType.forEach(type => {
-                vehicleTypeMap[type.type] = type.vehicleTypeId;
-            });
-
-
-            const manufactureMap = {};
-            Manufacture.forEach(manufacture => {
-                manufactureMap[manufacture.manufacturer] = manufacture.manufactureId;
-            });
-
+            // Mapping for Vehicle Types and Manufacturers
+            const vehicleTypeId = vehicleTypes.find(type => type.type === values.vehicleType)?.vehicleTypeId;
+            const manufactureId = manufacturers.find(manufacture => manufacture.manufacturer === values.manufactureId)?.manufactureId;
 
             const fuelRefillMap = {
                 'Diesel': 1,
                 'Petrol': 2,
-
             };
 
-            values = {
-                vehicleRegistrationNo: values.vehicleRegistrationNo,
-                licenseNo: values.licenseNo,
-                licenseExpireDate: values.licenseExpireDate,
-                vehicleColor: values.vehicleColor,
-                vehicleTypeId: vehicleTypeMap[values.vehicleTypeId], // use map to convert to integer
-                manufactureId: manufactureMap[values.manufactureId], // use map to convert to integer
-                fuelRefillId: fuelRefillMap[values.fuelRefillId], // use map to convert to integer
-                isActive: values.isActive
+            const dataToSend = {
+                ...values,
+                vehicleTypeId: vehicleTypeId,
+                manufactureId: manufactureId,
+                fuelRefillId: fuelRefillMap[values.fuelType], // Changed to fuelType
             };
-            console.log('this is values whch sub',values)
-            axios.post('https://localhost:7265/api/Vehicle', values)
+
+            axios.post('https://localhost:7265/api/Vehicle', dataToSend)
                 .then(response => {
                     setSuccessDialogMessage('Vehicle details added successfully.');
                     onSuccessDialogOpen();
@@ -90,28 +73,21 @@ export default function AddVehicleDetails() {
                     console.error('There was an error adding the data!', error);
                 });
 
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error('Failed to add vehicle details.');
-            }
-
         } catch (error) {
-            setDialogMessage( 'Failed to add vehicle details.');
+            console.error('Failed to add vehicle details.', error);
+            setDialogMessage('Failed to add vehicle details.');
             onDialogOpen();
         }
     };
 
     const handleCancel = () => {
-        navigate('/app/VehicleDetailsTable');
+        navigate('/app/VehicleDetails');
     };
 
     const handleSuccessDialogClose = () => {
         onSuccessDialogClose();
-        navigate('/app/VehicleDetailsTable');
+        navigate('/app/VehicleDetails');
     };
-
 
     return (
         <>
@@ -122,24 +98,37 @@ export default function AddVehicleDetails() {
                     licenseNo: "",
                     licenseExpireDate: "",
                     vehicleColor: "",
-                    vehicleTypeId: "",
-                    manufactureId: "",
-                    fuelRefillId: "",
+                    vehicleType: "", // Changed from text input to select
+                    manufactureId: "", // Changed from text input to select
+                    fuelType: "", // Changed to fuelType
                     isActive: false,
                 }}
                 onSubmit={handleSubmit}
+                validate={(values) => {
+                    const errors = {};
+                    if (!values.vehicleRegistrationNo) {
+                        errors.vehicleRegistrationNo = "Vehicle registration number is required.";
+                    }
+                    if (!values.vehicleType) {
+                        errors.vehicleType = "Vehicle type is required.";
+                    }
+                    if (!values.manufactureId) {
+                        errors.manufactureId = "Manufacturer is required.";
+                    }
+                    if (!values.licenseNo) {
+                        errors.licenseNo = "License No is required.";
+                    }
+                    if (!values.licenseExpireDate) {
+                        errors.licenseExpireDate = "license Expire Date No is required.";
+                    }
+                    return errors;
+                }}
             >
                 {({ errors, touched }) => (
                     <Form className="grid grid-cols-2 gap-10 mt-8">
                         <div className="flex flex-col gap-3">
                             <p>Vehicle Registration No</p>
-                            <Field name="vehicleRegistrationNo" validate={(value) => {
-                                let error;
-                                if (!value) {
-                                    error = "Vehicle registration number is required.";
-                                }
-                                return error;
-                            }}>
+                            <Field name="vehicleRegistrationNo">
                                 {({ field }) => (
                                     <div>
                                         <Input
@@ -150,9 +139,9 @@ export default function AddVehicleDetails() {
                                             px={3}
                                             py={2}
                                             mt={1}
-                                            width="500px"
+                                            width="400px"
                                             id="vehicleRegistrationNo"
-                                            placeholder="Enter Vehicle Registration No"
+                                            placeholder="Vehicle Registration No"
                                         />
                                         {errors.vehicleRegistrationNo && touched.vehicleRegistrationNo && (
                                             <div className="text-red-500">{errors.vehicleRegistrationNo}</div>
@@ -174,15 +163,17 @@ export default function AddVehicleDetails() {
                                             px={3}
                                             py={2}
                                             mt={1}
-                                            width="500px"
+                                            width="400px"
                                             id="licenseNo"
-                                            placeholder="Enter License No"
+                                            placeholder="License No"
                                         />
+                                        {errors.licenseNo && touched.licenseNo && (
+                                            <div className="text-red-500">{errors.licenseNo}</div>
+                                        )}
                                     </div>
                                 )}
                             </Field>
                         </div>
-
                         <div className="flex flex-col gap-3">
                             <p>License Expire Date</p>
                             <Field name="licenseExpireDate">
@@ -196,14 +187,17 @@ export default function AddVehicleDetails() {
                                             px={3}
                                             py={2}
                                             mt={1}
-                                            width="500px"
+                                            width="400px"
+                                            min={new Date().toISOString().split('T')[0]}
                                             id="licenseExpireDate"
                                         />
+                                        {errors.licenseExpireDate && touched.licenseExpireDate && (
+                                            <div className="text-red-500">{errors.licenseExpireDate}</div>
+                                        )}
                                     </div>
                                 )}
                             </Field>
                         </div>
-
                         <div className="flex flex-col gap-3">
                             <p>Vehicle Color</p>
                             <Field name="vehicleColor">
@@ -217,9 +211,9 @@ export default function AddVehicleDetails() {
                                             px={3}
                                             py={2}
                                             mt={1}
-                                            width="500px"
+                                            width="400px"
                                             id="vehicleColor"
-                                            placeholder="Enter Vehicle Color"
+                                            placeholder="Vehicle Color"
                                         />
                                     </div>
                                 )}
@@ -227,70 +221,85 @@ export default function AddVehicleDetails() {
                         </div>
                         <div className="flex flex-col gap-3">
                             <p>Vehicle Type</p>
-                            <Field name="vehicleTypeId">
+                            <Field name="vehicleType">
                                 {({ field }) => (
-                                    <div>
-                                        <Input
-                                            {...field}
-                                            type="text"
-                                            variant="filled"
-                                            borderRadius="md"
-                                            px={3}
-                                            py={2}
-                                            mt={1}
-                                            width="500px"
-                                            id="vehicleTypeId"
-                                            placeholder="Enter Vehicle Type"
-                                        />
-                                    </div>
+                                    <Select
+                                        {...field}
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="vehicleType"
+                                        placeholder="Vehicle Type"
+                                    >
+                                        <option value="">Select Vehicle Type</option>
+                                        {vehicleTypes.map(type => (
+                                            <option key={type.vehicleTypeId} value={type.type}>
+                                                {type.type}
+                                            </option>
+                                        ))}
+                                    </Select>
                                 )}
                             </Field>
+                            {errors.vehicleType && touched.vehicleType && (
+                                <div className="text-red-500">{errors.vehicleType}</div>
+                            )}
                         </div>
-
                         <div className="flex flex-col gap-3">
                             <p>Manufacture</p>
                             <Field name="manufactureId">
                                 {({ field }) => (
-                                    <div>
-                                        <Input
-                                            {...field}
-                                            type="text"
-                                            variant="filled"
-                                            borderRadius="md"
-                                            px={3}
-                                            py={2}
-                                            mt={1}
-                                            width="500px"
-                                            id="manufactureId"
-                                            placeholder="Enter Manufacture"
-                                        />
-                                    </div>
+                                    <Select
+                                        {...field}
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="manufactureId"
+                                        placeholder="Manufacture"
+                                    >
+                                        <option value="">Select Manufacturer</option>
+                                        {manufacturers.map(manufacture => (
+                                            <option key={manufacture.manufactureId} value={manufacture.manufacturer}>
+                                                {manufacture.manufacturer}
+                                            </option>
+                                        ))}
+                                    </Select>
                                 )}
                             </Field>
+                            {errors.manufactureId && touched.manufactureId && (
+                                <div className="text-red-500">{errors.manufactureId}</div>
+                            )}
                         </div>
-
                         <div className="flex flex-col gap-3">
                             <p>Fuel Type</p>
-                            <Field name="fuelRefillId">
+                            <Field name="fuelType">
                                 {({ field }) => (
-                                    <div>
-                                        <Input
-                                            {...field}
-                                            type="text"
-                                            variant="filled"
-                                            borderRadius="md"
-                                            px={3}
-                                            py={2}
-                                            mt={1}
-                                            width="500px"
-                                            id="fuelRefillId"
-                                            placeholder="Enter Fuel Type"
-                                        />
-                                    </div>
+                                    <Select
+                                        {...field}
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="fuelType"
+                                        placeholder="Fuel Type"
+                                    >
+                                        <option value="">Fuel Type</option>
+                                        <option value="Petrol">Petrol</option>
+                                        <option value="Diesel">Diesel</option>
+                                    </Select>
                                 )}
                             </Field>
+                            {errors.fuelType && touched.fuelType && (
+                                <div className="text-red-500">{errors.fuelType}</div>
+                            )}
                         </div>
-
                         <Field name="isActive">
                             {({ field, form }) => (
                                 <div>
@@ -309,13 +318,14 @@ export default function AddVehicleDetails() {
                                 </div>
                             )}
                         </Field>
-                        <div className="flex w-5/6 justify-end gap-10">
+                        <div></div>
+                        <div className="flex w-5/6 justify-end gap-14">
                             <Button
                                 bg="gray.400"
                                 _hover={{ bg: "gray.500" }}
                                 color="#ffffff"
                                 variant="solid"
-                                w="230px"
+                                w="250px"
                                 marginTop="10"
                                 onClick={handleCancel}
                             >
@@ -326,7 +336,7 @@ export default function AddVehicleDetails() {
                                 _hover={{ bg: theme.onHoverPurple }}
                                 color="#ffffff"
                                 variant="solid"
-                                w="230px"
+                                w="250px"
                                 marginTop="10"
                                 type="submit"
                             >

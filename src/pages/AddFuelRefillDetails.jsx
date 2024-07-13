@@ -25,6 +25,34 @@ export default function AddFuelRefillDetails() {
     const [dialogMessage, setDialogMessage] = useState("");
     const [successDialogMessage, setSuccessDialogMessage] = useState("");
     const [vehicleRegNoDetails, setVehicleRegNoDetails] = useState([]);
+    const [currentTime, setCurrentTime] = useState(getCurrentTime());
+
+    function getCurrentTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        return `${hours}:${minutes}`;
+    }
+
+    const validateTime = (value) => {
+        let error;
+        if (!value) {
+            error = "Time is required.";
+        } else if (value > currentTime) {
+            error = "Please select a time not in the future.";
+        }
+        return error;
+    };
+
+    const handleTimeChange = (e, setFieldValue) => {
+        const selectedTime = e.target.value;
+        setFieldValue("time", selectedTime);
+
+        if (selectedTime > currentTime) {
+            setCurrentTime(selectedTime);
+        }
+    };
+
 
     const fetchVehicleRegNos = async () => {
         try {
@@ -57,17 +85,17 @@ export default function AddFuelRefillDetails() {
     }, []);
 
     const handleCancel = () => {
-        navigate('/app/FuelRefillTable');
+        navigate('/app/FuelRefillDetails');
     };
 
     const handleSuccessDialogClose = () => {
         onSuccessDialogClose();
-        navigate('/app/FuelRefillTable');
+        navigate('/app/FuelRefillDetails');
     };
 
     const breadcrumbs = [
-        { label: "Vehicle", link: "/app/Vehicle" },
-        { label: "Fuel Refill", link: "/app/FuelRefillTable" },
+        { label: "Vehicle", link: "/app/VehicleDetails" },
+        { label: "Fuel Refill Details", link: "/app/FuelRefillDetails" },
         { label: "Add Fuel Refill Details", link: "/app/AddFuelRefillDetails" },
     ];
 
@@ -170,7 +198,7 @@ export default function AddFuelRefillDetails() {
                                                 px={3}
                                                 py={2}
                                                 mt={1}
-                                                width="500px"
+                                                width="400px"
                                                 id="nic"
                                                 placeholder="NIC"
                                             />
@@ -201,7 +229,7 @@ export default function AddFuelRefillDetails() {
                                                 px={3}
                                                 py={2}
                                                 mt={1}
-                                                width="500px"
+                                                width="400px"
                                             >
                                                 {vehicleRegNoDetails.map((option, index) => (
                                                     <option key={index} value={option.id}>
@@ -235,7 +263,7 @@ export default function AddFuelRefillDetails() {
                                                 px={3}
                                                 py={2}
                                                 mt={1}
-                                                width="500px"
+                                                width="400px"
                                                 id="literCount"
                                                 placeholder="Liter Count"
                                             />
@@ -265,8 +293,9 @@ export default function AddFuelRefillDetails() {
                                                 px={3}
                                                 py={2}
                                                 mt={1}
-                                                width="500px"
+                                                width="400px"
                                                 id="date"
+                                                max={new Date().toISOString().split('T')[0]}
                                                 placeholder="Date"
                                             />
                                             {errors.date && touched.date && (
@@ -277,35 +306,35 @@ export default function AddFuelRefillDetails() {
                                 </Field>
                             </div>
                             <div className="flex flex-col gap-3">
-                                <p>Time</p>
-                                <Field name="time" validate={(value) => {
-                                    let error;
-                                    if (!value) {
-                                        error = "Time is required.";
-                                    }
-                                    return error;
-                                }}>
-                                    {({ field }) => (
-                                        <div>
-                                            <Input
-                                                {...field}
-                                                type="time"
-                                                variant="filled"
-                                                borderRadius="md"
-                                                px={3}
-                                                py={2}
-                                                mt={1}
-                                                width="500px"
-                                                id="time"
-                                                placeholder="Time"
-                                            />
-                                            {errors.time && touched.time && (
-                                                <div className="text-red-500">{errors.time}</div>
-                                            )}
-                                        </div>
+            <p>Time</p>
+            <Formik initialValues={{ time: "" }} onSubmit={(values) => console.log(values)}>
+                {({ errors, touched, setFieldValue }) => (
+                    <Form>
+                        <Field name="time" validate={validateTime}>
+                            {({ field }) => (
+                                <div>
+                                    <Input
+                                        {...field}
+                                        type="time"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="time"
+                                        onChange={(e) => handleTimeChange(e, setFieldValue)}
+                                    />
+                                    {errors.time && touched.time && (
+                                        <div className="text-red-500">{errors.time}</div>
                                     )}
-                                </Field>
-                            </div>
+                                </div>
+                            )}
+                        </Field>
+                    </Form>
+                )}
+            </Formik>
+        </div>
                             <div className="flex flex-col gap-3">
                                 <p>Refill Type</p>
                                 <Field name="fType" validate={(value) => {
@@ -326,7 +355,7 @@ export default function AddFuelRefillDetails() {
                                                 px={3}
                                                 py={2}
                                                 mt={1}
-                                                width="500px"
+                                                width="400px"
                                             >
                                                 <option value="In station">In station</option>
                                                 <option value="Out station">Out station</option>
@@ -357,7 +386,7 @@ export default function AddFuelRefillDetails() {
                                                 px={3}
                                                 py={2}
                                                 mt={1}
-                                                width="500px"
+                                                width="400px"
                                                 id="cost"
                                                 placeholder="Cost"
                                             />
@@ -384,13 +413,13 @@ export default function AddFuelRefillDetails() {
                                 </Field>
                             </div>
                             <div></div>
-                            <div className="flex gap-10">
+                            <div className="flex gap-14">
                                 <Button
                                     bg="gray.400"
                                     _hover={{ bg: "gray.500" }}
                                     color="#ffffff"
                                     variant="solid"
-                                    w="230px"
+                                    w="180px"
                                     marginTop="10"
                                     onClick={handleCancel}
                                     disabled={isSubmitting}
@@ -402,7 +431,7 @@ export default function AddFuelRefillDetails() {
                                     _hover={{ bg: theme.onHoverPurple }}
                                     color="#ffffff"
                                     variant="solid"
-                                    w="230px"
+                                    w="180px"
                                     marginTop="10"
                                     type="submit"
                                     disabled={isSubmitting}

@@ -7,9 +7,7 @@ const DynamicVehicleFuelRefillReport = React.lazy(() => import('./VehicleFuelRef
 const DynamicVehicleMaintenanceReport = React.lazy(() => import('./VehicleMaintenanceReport'));
 const DynamicVehicleMaintenanceTypeReport = React.lazy(() => import('./VehicleMaintenanceTypeReport'));
 const DynamicVehicleManufacturerReport = React.lazy(() => import('./VehicleManufacturerReport'));
-const DynamicVehicleModelReport = React.lazy(() => import('./VehicleModelReport'));
 const DynamicVehicleTypeReport = React.lazy(() => import('./VehicleTypeReport'));
-
 const DynamicDriverReport = React.lazy(() => import('./DriverReport'));
 const DynamicHelperReport = React.lazy(() => import('./HelperReport'));
 const DynamicStaffReport = React.lazy(() => import('./StaffReport'));
@@ -25,7 +23,6 @@ const Reports = () => {
                 <Route path="vehicle-maintenance" element={<DynamicVehicleMaintenanceReport />} />
                 <Route path="vehicle-maintenance-type" element={<DynamicVehicleMaintenanceTypeReport />} />
                 <Route path="vehicle-manufacturer" element={<DynamicVehicleManufacturerReport />} />
-                <Route path="vehicle-model" element={<DynamicVehicleModelReport />} />
                 <Route path="vehicle-type" element={<DynamicVehicleTypeReport />} />
                 <Route path="driver" element={<DynamicDriverReport />} />
                 <Route path="helper" element={<DynamicHelperReport />} />

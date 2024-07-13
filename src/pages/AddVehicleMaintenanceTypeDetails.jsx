@@ -5,8 +5,7 @@ import PageHeader from "../components/PageHeader.jsx";
 import { Button, Checkbox, Input, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, useDisclosure } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
 
-
-export default function AddManufactureTypeDetails() {
+export default function AddVehicleMaintenanceTypeDetails() {
     const navigate = useNavigate();
     const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
     const { isOpen: isSuccessDialogOpen, onOpen: onSuccessDialogOpen, onClose: onSuccessDialogClose } = useDisclosure();
@@ -14,61 +13,65 @@ export default function AddManufactureTypeDetails() {
     const [successDialogMessage, setSuccessDialogMessage] = useState("");
 
     const breadcrumbs = [
-        { label: 'Manufacturer', link: '/' },
-        { label: 'Add Manufacturer Type Details', link: '/app/AddManufacturerTypeDetails' }
+        {label: 'Vehicle', link: '/app/Vehicle'}, //yashmi
+        {label: 'Vehicle Maintenance type Details', link: '/app/VehicleMaintenanceTypeDetails'},
+        {label: 'Add Vehicle Maintenance Type Details', link: '/app/AddVehicleMaintenanceTypeDetails'}
     ];
 
     const handleSubmit = async (values) => {
         try {
             console.log(values.TypeName, values.isActive);
-            const status = values.isActive === false ? false : true;
+            const status = values.isActive || false; // Ensure it defaults to false if not set
 
-            const response = await fetch('https://localhost:7265/api/Manufacture', {
+            const response = await fetch('https://localhost:7265/api/VehicleMaintenanceType', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    Manufacturer: values.TypeName,
-                    Status: status
+                    TypeName: values.TypeName,
+                    status: status
                 })
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to add manufacturer type.');
+                throw new Error(data.message || 'Failed to add maintenance type.');
             }
 
             if (data.message && data.message.toLowerCase().includes('exist')) {
-                setDialogMessage('Manufacturer Type already exists');
+                setDialogMessage('Vehicle Maintenance Type already exists');
                 onDialogOpen();
             } else {
-                setSuccessDialogMessage('Manufacturer type added successfully.');
+                setSuccessDialogMessage('Maintenance type added successfully.');
                 onSuccessDialogOpen();
             }
         } catch (error) {
             if (error instanceof TypeError) {
                 setDialogMessage('Failed to connect to the server.');
             } else {
-                setDialogMessage(error.message || 'Failed to add manufacturer type.');
+                setDialogMessage(error.message || 'Failed to add maintenance type.');
             }
             onDialogOpen();
         }
     };
 
     const handleCancel = () => {
-        navigate('/app/Manufacturer');
+        // Redirect to the vehicle maintenance type table page
+        navigate('/app/MaintenanceTypeTable');
     };
 
     const handleSuccessDialogClose = () => {
+        // Close the success dialog
         onSuccessDialogClose();
-        navigate('/app/Manufacturer');
+        // Redirect to the vehicle maintenance type table page
+        navigate('/app/MaintenanceTypeTable');
     };
 
     return (
         <>
-            <PageHeader title="Add Manufacturer Type Details" breadcrumbs={breadcrumbs} />
+            <PageHeader title="Add Vehicle Maintenance Type Details" breadcrumbs={breadcrumbs}/>
             <Formik
                 initialValues={{
                     TypeName: "",
@@ -79,11 +82,11 @@ export default function AddManufactureTypeDetails() {
                 {({ errors, touched }) => (
                     <Form className="grid grid-cols-2 gap-10 mt-8">
                         <div className="flex flex-col gap-3">
-                            <p>Manufacturer Type</p>
+                            <p>Vehicle Maintenance Type</p>
                             <Field name="TypeName" validate={(value) => {
                                 let error;
                                 if (!value) {
-                                    error = "Manufacturer type is required.";
+                                    error = "Maintenance type is required.";
                                 }
                                 return error;
                             }}>
@@ -97,9 +100,9 @@ export default function AddManufactureTypeDetails() {
                                             px={3}
                                             py={2}
                                             mt={1}
-                                            width="500px"
+                                            width="400px"
                                             id="TypeName"
-                                            placeholder="Enter Manufacturer Type"
+                                            placeholder="Vehicle Maintenance Type"
                                         />
                                         {errors.TypeName && touched.TypeName && (
                                             <div className="text-red-500">{errors.TypeName}</div>
@@ -131,7 +134,7 @@ export default function AddManufactureTypeDetails() {
                                     _hover={{ bg: "gray.500" }}
                                     color="#ffffff"
                                     variant="solid"
-                                    w="230px"
+                                    w="180px"
                                     marginTop="10"
                                     onClick={handleCancel}
                                 >
@@ -142,7 +145,7 @@ export default function AddManufactureTypeDetails() {
                                     _hover={{ bg: theme.onHoverPurple }}
                                     color="#ffffff"
                                     variant="solid"
-                                    w="230px"
+                                    w="180px"
                                     marginTop="10"
                                     type="submit"
                                 >

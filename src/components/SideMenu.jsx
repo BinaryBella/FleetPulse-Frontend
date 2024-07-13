@@ -76,7 +76,7 @@ export default function SideMenu({isAdmin}) {
                             </h2>
                             <AccordionPanel pb={4}>
                                 <div>
-                                    <Link className="flex items-center pl-3 " to="/app/VehicleDetailsTable">
+                                    <Link className="flex items-center pl-3 " to="/app/VehicleDetails">
                                         <Text
                                             color={theme.orange}
                                             fontSize="sm"
@@ -87,7 +87,7 @@ export default function SideMenu({isAdmin}) {
                                             Vehicle Details
                                         </Text>
                                     </Link>
-                                    <Link className="flex items-center pl-3 " to="/app/VehicleType">
+                                    <Link className="flex items-center pl-3 " to="/app/VehicleTypeDetails">
                                         <Text
                                             color={theme.orange}
                                             fontSize="sm"
@@ -98,7 +98,7 @@ export default function SideMenu({isAdmin}) {
                                             Type
                                         </Text>
                                     </Link>
-                                    <Link className="flex items-center pl-3 " to="/app/Manufacturer">
+                                    <Link className="flex items-center pl-3 " to="/app/ManufacturerDetails">
                                         <Text
                                             color={theme.orange}
                                             fontSize="sm"
@@ -109,7 +109,7 @@ export default function SideMenu({isAdmin}) {
                                             Manufacturer
                                         </Text>
                                     </Link>
-                                    <Link className="flex items-center pl-3 " to="/app/MaintenanceTable">
+                                    <Link className="flex items-center pl-3 " to="/app/VehicleMaintenanceDetails">
                                         <Text
                                             color={theme.orange}
                                             fontSize="sm"
@@ -120,7 +120,7 @@ export default function SideMenu({isAdmin}) {
                                             Maintenance
                                         </Text>
                                     </Link>
-                                    <Link className="flex items-center pl-3 " to="/app/MaintenanceTypeTable">
+                                    <Link className="flex items-center pl-3 " to="/app/VehicleMaintenanceTypeDetails">
                                         <Text
                                             color={theme.orange}
                                             fontSize="sm"
@@ -131,7 +131,7 @@ export default function SideMenu({isAdmin}) {
                                             Maintenance Type
                                         </Text>
                                     </Link>
-                                    <Link className="flex items-center pl-3" to="/app/FuelRefillTable">
+                                    <Link className="flex items-center pl-3" to="/app/FuelRefillDetails">
                                     <Text
                                         color={theme.orange}
                                         fontSize="sm"

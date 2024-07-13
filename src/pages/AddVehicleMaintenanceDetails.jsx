@@ -100,7 +100,7 @@ export default function AddVehicleMaintenanceDetails() {
 
     const breadcrumbs = [
         { label: "Vehicle", link: "/app/Vehicle" },
-        { label: "Vehicle Maintenance", link: "/app/MaintenanceTable" },
+        { label: "Vehicle Maintenance Details", link: "/app/VehicleMaintenanceDetails" },
         { label: id ? "Edit Vehicle Maintenance Details" : "Add Vehicle Maintenance Details", link: id ? `/app/EditVehicleMaintenanceDetails/${id}` : "/app/AddVehicleMaintenanceDetails" },
     ];
 
@@ -134,7 +134,7 @@ export default function AddVehicleMaintenanceDetails() {
             } else {
                 setSuccessDialogMessage(id ? 'Maintenance updated successfully' : 'Maintenance added successfully');
                 onSuccessDialogOpen();
-                navigate('/app/MaintenanceTable');
+                navigate('/app/VehicleMaintenanceDetails');
             }
         } catch (error) {
             console.error("Error submitting vehicle maintenance details:", error);
@@ -151,12 +151,12 @@ export default function AddVehicleMaintenanceDetails() {
     };
 
     const handleCancel = () => {
-        navigate('/app/MaintenanceTable');
+        navigate('/app/VehicleMaintenanceDetails');
     };
 
     const handleSuccessDialogClose = () => {
         onSuccessDialogClose();
-        navigate('/app/MaintenanceTable');
+        navigate('/app/VehicleMaintenanceDetails');
     };
 
     return (
@@ -189,7 +189,7 @@ export default function AddVehicleMaintenanceDetails() {
                                             px={3}
                                             py={2}
                                             mt={1}
-                                            width="500px"
+                                            width="400px"
                                         >
                                             {vehicleRegNoDetails.map((option, index) => (
                                                 <option key={index} value={option.id}>
@@ -224,7 +224,7 @@ export default function AddVehicleMaintenanceDetails() {
                                             px={3}
                                             py={2}
                                             mt={1}
-                                            width="500px"
+                                            width="400px"
                                         >
                                             {maintenanceTypeDetails.map((option, index) => (
                                                 <option key={index} value={option.id}>
@@ -259,8 +259,9 @@ export default function AddVehicleMaintenanceDetails() {
                                             px={3}
                                             py={2}
                                             mt={1}
-                                            width="500px"
+                                            width="400px"
                                             name="maintenanceDate"
+                                            max={new Date().toISOString().split('T')[0]}
                                             placeholder="Maintenance Date"
                                         />
                                         {errors.maintenanceDate && touched.maintenanceDate && (
@@ -291,7 +292,7 @@ export default function AddVehicleMaintenanceDetails() {
                                             px={3}
                                             py={2}
                                             mt={1}
-                                            width="500px"
+                                            width="400px"
                                             name="cost"
                                             placeholder="Cost"
                                         />
@@ -321,7 +322,7 @@ export default function AddVehicleMaintenanceDetails() {
                                             px={3}
                                             py={2}
                                             mt={1}
-                                            width="500px"
+                                            width="400px"
                                             name="serviceProvider"
                                             placeholder="Service Provider"
                                         />
@@ -344,7 +345,7 @@ export default function AddVehicleMaintenanceDetails() {
                                         px={3}
                                         py={2}
                                         mt={1}
-                                        width="500px"
+                                        width="400px"
                                         name="replacedParts"
                                         placeholder="Parts Replaced"
                                     />
@@ -362,7 +363,7 @@ export default function AddVehicleMaintenanceDetails() {
                                         px={3}
                                         py={2}
                                         mt={1}
-                                        width="500px"
+                                        width="400px"
                                         name="specialNotes"
                                         placeholder="Special Notes"
                                     />
@@ -385,13 +386,13 @@ export default function AddVehicleMaintenanceDetails() {
                             </Field>
                         </div>
                         <div></div>
-                        <div className="flex flex-row gap-14">
+                        <div className="flex flex-row gap-10">
                             <Button
                                 bg="gray.400"
                                 _hover={{ bg: "gray.500" }}
                                 color="#ffffff"
                                 variant="solid"
-                                w="230px"
+                                w="180px"
                                 marginTop="10"
                                 onClick={handleCancel}
                             >
@@ -402,7 +403,7 @@ export default function AddVehicleMaintenanceDetails() {
                                 _hover={{ bg: theme.onHoverPurple }}
                                 color="#ffffff"
                                 variant="solid"
-                                w="230px"
+                                w="180px"
                                 marginTop="10"
                                 type="submit"
                             >
