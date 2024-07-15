@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Formik, Form, Field } from "formik";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
@@ -7,147 +7,135 @@ import {
   Checkbox,
   Input,
   IconButton,
+  Select,
   AlertDialog,
   AlertDialogOverlay,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogBody,
   AlertDialogFooter,
-  Box,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
   useDisclosure,
+  Box,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
 } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import PasswordStrengthBar from 'react-password-strength-bar';
 import $ from "jquery";
 
-export default function AddStaffDetails() {
+export default function AddDriverDetails() {
   const navigate = useNavigate();
-  const {
-    isOpen: isDialogOpen,
-    onOpen: onDialogOpen,
-    onClose: onDialogClose,
-  } = useDisclosure();
+  const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
   const [dialogMessage, setDialogMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [initialValues, setInitialValues] = useState({
-    UserName: "",
     FirstName: "",
     LastName: "",
-    NIC: "",
     DateOfBirth: "",
-    PhoneNo: "",
+    NIC: "",
+    DriverLicenseNo: "",
+    LicenseExpiryDate: "",
     EmailAddress: "",
-    ProfilePicture: "",
+    PhoneNo: "",
     EmergencyContact: "",
-    JobTitle: "",
-    Status: true,
+    BloodGroup: "",
+    UserName: "",
     Password: "",
     confirmPassword: "",
+    Status: true,
   });
 
   const breadcrumbs = [
-    { label: "Staff", link: "/app/StaffDetails" },
-    { label: "Staff Details", link: "/app/StaffDetails" },
-    { label: "Add Staff Details", link: "/app/AddStaffDetails" },
+    { label: "Driver", link: "/DriverDetails" },
+    { label: "Driver Details", link: "/app/DriverDetails" },
+    { label: "Add Driver Details", link: "/app/AddDriverDetails" },
   ];
 
+  const passwordStrengthRef = useRef(null);
+
   useEffect(() => {
-    const fetchStaffData = async () => {
+    // Simulated fetch function; replace with actual API call
+    const fetchDriverData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch("https://localhost:7265/api/Staff");
+        // Replace with your API endpoint
+        const response = await fetch("https://localhost:7265/api/Driver");
         if (!response.ok) {
           throw new Error("Failed to fetch data");
         }
         const data = await response.json();
+
+        // Set initial form values from fetched data
         setInitialValues({
           FirstName: data.firstName,
           LastName: data.lastName,
-          NIC: data.nic,
-          DateOfBirth: data.dateOfBirth,
-          PhoneNo: data.phoneNo,
-          EmailAddress: data.emailAddress,
-          UserName: data.userName,
-          EmergencyContact: data.emergencyContact,
-          JobTitle: data.jobTitle,
-          Status: data.status,
-          Password: "",
-          confirmPassword: "",
+          DateOfBirth: data.dob,
+          NIC: data.nationalId,
+          DriverLicenseNo: data.driverLicenseNo,
+          LicenseExpiryDate: data.licenseExpiryDate,
+          EmailAddress: data.email,
+          PhoneNo: data.contactNo,
+          EmergencyContact: data.emergencyContactNo,
+          BloodGroup: data.bloodGroup,
+          UserName: data.username,
+          Password: data.password,
+          confirmPassword: data.confirmPassword,
+          Status: data.isActive,
         });
       } catch (error) {
         console.error("Error fetching data:", error);
+        // Handle error state or show an error message
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchStaffData();
+    // Call fetch function when component mounts
+    fetchDriverData();
   }, []);
 
   const handleSubmit = async (values, actions) => {
-    let errors = {};
+    try {
+      console.log(values);
 
-    if (!values.FirstName) errors.FirstName = "First Name is required";
-    if (!values.LastName) errors.LastName = "Last Name is required";
-    if (!values.NIC) errors.NIC = "National Identity Card No is required";
-    if (!values.DateOfBirth) errors.DateOfBirth = "Date of Birth is required";
-    if (!values.PhoneNo) errors.PhoneNo = "Contact Number is required";
-    if (!values.EmailAddress) {
-      errors.EmailAddress = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(values.EmailAddress)) {
-      errors.EmailAddress = "Invalid email address";
-    }
-    if (!values.UserName) errors.UserName = "Username is required";
-    if (!values.EmergencyContact) errors.EmergencyContact = "Emergency Contact No is required";
-    if (!values.JobTitle) errors.JobTitle = "Job Title is required";
-    if (!values.Password) errors.Password = "Password is required";
-    if (!values.confirmPassword) {
-      errors.confirmPassword = "Confirm Password is required";
-    } else if (values.confirmPassword !== values.Password) {
-      errors.confirmPassword = "Passwords must match";
-    }
+      const response = await fetch("https://localhost:7265/api/Driver", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
 
-    if (Object.keys(errors).length === 0) {
-      try {
-        const response = await fetch("https://localhost:7265/api/Staff", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        });
-        if (response.ok) {
-          setDialogMessage("Staff details saved successfully.");
-          onDialogOpen();
-          actions.resetForm();
-        } else {
-          setDialogMessage("Failed to save staff details.");
-          onDialogOpen();
-        }
-      } catch (error) {
-        setDialogMessage("Failed to save staff details.");
+      if (response.ok) {
+        const data = await response.json();
+        setDialogMessage("Driver details saved successfully.");
+        onDialogOpen();
+
+        // Reset form after successful submission
+        actions.resetForm();
+      } else {
+        setDialogMessage("Failed to save driver details.");
         onDialogOpen();
       }
-    } else {
-      setDialogMessage("Please fill in all required fields.");
+    } catch (error) {
+      // Handle errors (simulated with dialog for demo)
+      setDialogMessage("Failed to save driver details.");
       onDialogOpen();
     }
   };
 
   const handleCancel = () => {
-    navigate("/app/StaffDetails");
+    navigate("/app/DriverDetails");
   };
 
   const handleSuccessDialogClose = () => {
     onDialogClose();
-    navigate("/app/StaffDetails");
+    navigate("/app/DriverDetails");
   };
 
   const stylePasswordStrengthBar = () => {
@@ -159,21 +147,22 @@ export default function AddStaffDetails() {
 
   return (
     <>
-      <PageHeader title="Add Staff Details" breadcrumbs={breadcrumbs} />
+      <PageHeader title="Add Driver Details" breadcrumbs={breadcrumbs} />
       {isLoading ? (
         <p>Loading...</p>
       ) : (
-        <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-          {({ values, errors, touched }) => (
-            <Form className="grid gap-10 mt-8">
-              <Tabs>
-                <TabList>
-                  <Tab>Contact Info</Tab>
-                  <Tab>Account Info</Tab>
-                </TabList>
-                <TabPanels>
-                  <TabPanel>
-                    <div className="grid grid-cols-2 gap-10">
+        <Box className="mr-14">
+          <Tabs>
+            <TabList>
+              <Tab>Contact Info</Tab>
+              <Tab>Account Info</Tab>
+            </TabList>
+
+            <TabPanels>
+              <TabPanel>
+                <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+                  {({ errors, touched }) => (
+                    <Form className="grid grid-cols-2 gap-x-12 gap-y-10 mt-8">
                       <div className="flex flex-col gap-3">
                         <p>First Name</p>
                         <Field name="FirstName">
@@ -187,6 +176,7 @@ export default function AddStaffDetails() {
                               py={2}
                               mt={1}
                               width="400px"
+                              id="FirstName"
                               placeholder="First Name"
                             />
                           )}
@@ -208,12 +198,103 @@ export default function AddStaffDetails() {
                               py={2}
                               mt={1}
                               width="400px"
+                              id="LastName"
                               placeholder="Last Name"
                             />
                           )}
                         </Field>
                         {errors.LastName && touched.LastName && (
                           <div className="text-red-500">{errors.LastName}</div>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-3">
+                        <p>Date of Birth</p>
+                        <Field name="DateOfBirth">
+                          {({ field }) => (
+                            <Input
+                              {...field}
+                              type="date"
+                              variant="filled"
+                              borderRadius="md"
+                              px={3}
+                              py={2}
+                              mt={1}
+                              width="400px"
+                              id="DateOfBirth"
+                              max={new Date().toISOString().split('T')[0]}
+                              placeholder="Date of Birth"
+                            />
+                          )}
+                        </Field>
+                        {errors.DateOfBirth && touched.DateOfBirth && (
+                          <div className="text-red-500">{errors.DateOfBirth}</div>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-3">
+                        <p>National Identity Card No</p>
+                        <Field name="NIC">
+                          {({ field }) => (
+                            <Input
+                              {...field}
+                              type="text"
+                              variant="filled"
+                              borderRadius="md"
+                              px={3}
+                              py={2}
+                              mt={1}
+                              width="400px"
+                              id="NIC"
+                              placeholder="NIC No"
+                            />
+                          )}
+                        </Field>
+                        {errors.NIC && touched.NIC && (
+                          <div className="text-red-500">{errors.NIC}</div>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-3">
+                        <p>Driver License No</p>
+                        <Field name="DriverLicenseNo">
+                          {({ field }) => (
+                            <Input
+                              {...field}
+                              type="text"
+                              variant="filled"
+                              borderRadius="md"
+                              px={3}
+                              py={2}
+                              mt={1}
+                              width="400px"
+                              id="DriverLicenseNo"
+                              placeholder="Driver License No"
+                            />
+                          )}
+                        </Field>
+                        {errors.DriverLicenseNo && touched.DriverLicenseNo && (
+                          <div className="text-red-500">{errors.DriverLicenseNo}</div>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-3">
+                        <p>License Expiry Date</p>
+                        <Field name="LicenseExpiryDate">
+                          {({ field }) => (
+                            <Input
+                              {...field}
+                              type="date"
+                              variant="filled"
+                              borderRadius="md"
+                              px={3}
+                              py={2}
+                              mt={1}
+                              width="400px"
+                              id="LicenseExpiryDate"
+                              min={new Date().toISOString().split('T')[0]}
+                              placeholder="License Expiry Date"
+                            />
+                          )}
+                        </Field>
+                        {errors.LicenseExpiryDate && touched.LicenseExpiryDate && (
+                          <div className="text-red-500">{errors.LicenseExpiryDate}</div>
                         )}
                       </div>
                       <div className="flex flex-col gap-3">
@@ -229,6 +310,7 @@ export default function AddStaffDetails() {
                               py={2}
                               mt={1}
                               width="400px"
+                              id="EmailAddress"
                               placeholder="Email Address"
                             />
                           )}
@@ -238,7 +320,7 @@ export default function AddStaffDetails() {
                         )}
                       </div>
                       <div className="flex flex-col gap-3">
-                        <p>Phone Number</p>
+                        <p>Contact Number</p>
                         <Field name="PhoneNo">
                           {({ field }) => (
                             <Input
@@ -250,6 +332,7 @@ export default function AddStaffDetails() {
                               py={2}
                               mt={1}
                               width="400px"
+                              id="PhoneNo"
                               placeholder="Contact Number"
                             />
                           )}
@@ -259,7 +342,7 @@ export default function AddStaffDetails() {
                         )}
                       </div>
                       <div className="flex flex-col gap-3">
-                        <p>Emergency Contact</p>
+                        <p>Emergency Contact Number</p>
                         <Field name="EmergencyContact">
                           {({ field }) => (
                             <Input
@@ -271,7 +354,8 @@ export default function AddStaffDetails() {
                               py={2}
                               mt={1}
                               width="400px"
-                              placeholder="Emergency Contact No"
+                              id="EmergencyContact"
+                              placeholder="Emergency Contact Number"
                             />
                           )}
                         </Field>
@@ -279,10 +363,44 @@ export default function AddStaffDetails() {
                           <div className="text-red-500">{errors.EmergencyContact}</div>
                         )}
                       </div>
-                    </div>
-                  </TabPanel>
-                  <TabPanel>
-                    <div className="grid grid-cols-2 gap-10">
+                      <div className="flex flex-col gap-3">
+                        <p>Blood Group</p>
+                        <Field name="BloodGroup">
+                          {({ field }) => (
+                            <Select
+                              {...field}
+                              variant="filled"
+                              borderRadius="md"
+                              px={3}
+                              py={2}
+                              mt={1}
+                              width="400px"
+                              id="BloodGroup"
+                              placeholder="Select Blood Group"
+                            >
+                              <option value="A+">A+</option>
+                              <option value="A-">A-</option>
+                              <option value="B+">B+</option>
+                              <option value="B-">B-</option>
+                              <option value="O+">O+</option>
+                              <option value="O-">O-</option>
+                              <option value="AB+">AB+</option>
+                              <option value="AB-">AB-</option>
+                            </Select>
+                          )}
+                        </Field>
+                        {errors.BloodGroup && touched.BloodGroup && (
+                          <div className="text-red-500">{errors.BloodGroup}</div>
+                        )}
+                      </div>
+                    </Form>
+                  )}
+                </Formik>
+              </TabPanel>
+              <TabPanel>
+                <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+                  {({ errors, touched }) => (
+                    <Form className="grid grid-cols-2 gap-x-12 gap-y-10 mt-8">
                       <div className="flex flex-col gap-3">
                         <p>Username</p>
                         <Field name="UserName">
@@ -296,6 +414,7 @@ export default function AddStaffDetails() {
                               py={2}
                               mt={1}
                               width="400px"
+                              id="UserName"
                               placeholder="Username"
                             />
                           )}
@@ -306,7 +425,7 @@ export default function AddStaffDetails() {
                       </div>
                       <div className="flex flex-col gap-3">
                         <p>Password</p>
-                        <Field name="Password">
+                        <Field name="password">
                           {({ field }) => (
                             <div className="relative">
                               <Input
@@ -318,26 +437,26 @@ export default function AddStaffDetails() {
                                 py={2}
                                 mt={1}
                                 width="400px"
-                                id="Password"
+                                id="password"
                                 placeholder="Password"
                                 pr="4.5rem"
                               />
-                              <div className="css-1e7f4z6" style={{ marginRight: '50px', marginTop: '3px' }}>
+                              <div className="css-1e7f4z6" style={{ marginRight: '30px', marginTop: '3px' }}>
                               <IconButton
                                 aria-label={showPassword ? "Hide password" : "Show password"}
                                 icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
                                 onClick={() => setShowPassword(!showPassword)}
                                 position="absolute"
-                                right="8px"
+                                right="5px"
                                 top="50%"
                                 transform="translateY(-50%)"
                                 size="sm"
                               />
-                            </div>
+                              </div>
                             </div>
                           )}
                         </Field>
-                        <PasswordStrengthBar password={values.Password} />
+                        <PasswordStrengthBar password={initialValues.Password} />
                         {errors.Password && touched.Password && (
                           <div className="text-red-500">{errors.Password}</div>
                         )}
@@ -360,7 +479,7 @@ export default function AddStaffDetails() {
                                 placeholder="Confirm Password"
                                 pr="4.5rem"
                               />
-                              <div className="css-1e7f4z6" style={{ marginRight: '50px', marginTop: '3px' }}>
+                             <div className="css-1e7f4z6" style={{ marginRight: '30px', marginTop: '3px' }}>
                               <IconButton
                                 aria-label={showPassword ? "Hide password" : "Show password"}
                                 icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
@@ -371,7 +490,7 @@ export default function AddStaffDetails() {
                                 transform="translateY(-50%)"
                                 size="sm"
                               />
-                            </div>
+                              </div>
                             </div>
                           )}
                         </Field>
@@ -388,7 +507,7 @@ export default function AddStaffDetails() {
                               colorScheme="purple"
                               size="lg"
                               id="Status"
-                              isChecked={values.Status}
+                              defaultChecked={initialValues.Status}
                             >
                               Status
                             </Checkbox>
@@ -398,39 +517,41 @@ export default function AddStaffDetails() {
                           <div className="text-red-500">{errors.Status}</div>
                         )}
                       </div>
-                    </div>
-                  </TabPanel>
-                </TabPanels>
-              </Tabs>
+                    </Form>
+                  )}
+                </Formik>
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
 
-              <div className="flex justify-end gap-10 mr-10">
-                <Button
-                  bg="gray.400"
-                  _hover={{ bg: "gray.500" }}
-                  color="#ffffff"
-                  variant="solid"
-                  w="180px"
-                  marginTop="10"
-                  onClick={handleCancel}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  bg={theme.purple}
-                  _hover={{ bg: theme.onHoverPurple }}
-                  color="#ffffff"
-                  variant="solid"
-                  w="180px"
-                  marginTop="10"
-                  type="submit"
-                >
-                  Save
-                </Button>
-              </div>
-            </Form>
-          )}
-        </Formik>
+          <div className="flex justify-end gap-10 mr-10">
+            <Button
+              bg="gray.400"
+              _hover={{ bg: "gray.500" }}
+              color="#ffffff"
+              variant="solid"
+              w="180px"
+              marginTop="10"
+              onClick={handleCancel}
+            >
+              Cancel
+            </Button>
+            <Button
+              bg={theme.purple}
+              _hover={{ bg: theme.onHoverPurple }}
+              color="#ffffff"
+              variant="solid"
+              w="180px"
+              marginTop="10"
+              type="submit"
+            >
+              Save
+            </Button>
+          </div>
+        </Box>
       )}
+
+      {/* Dialog for showing error message */}
       <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
         <AlertDialogOverlay />
         <AlertDialogContent position="absolute" top="30%" left="50%" transform="translate(-50%, -50%)">

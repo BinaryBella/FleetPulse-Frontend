@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Formik, Form, Field } from "formik";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
@@ -22,9 +22,10 @@ import {
   TabPanels,
   Tabs,
 } from "@chakra-ui/react";
-import { MdArrowDropDown } from "react-icons/md";
 import theme from "../config/ThemeConfig.jsx";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import PasswordStrengthBar from 'react-password-strength-bar';
+import $ from "jquery";
 
 export default function AddDriverDetails() {
   const navigate = useNavigate();
@@ -50,10 +51,12 @@ export default function AddDriverDetails() {
   });
 
   const breadcrumbs = [
-    { label: "Driver", link: "/DriverDetails" },
+    { label: "Driver", link: "/app/DriverDetails" },
     { label: "Driver Details", link: "/app/DriverDetails" },
     { label: "Add Driver Details", link: "/app/AddDriverDetails" },
   ];
+
+  const passwordStrengthRef = useRef(null);
 
   useEffect(() => {
     // Simulated fetch function; replace with actual API call
@@ -133,6 +136,13 @@ export default function AddDriverDetails() {
   const handleSuccessDialogClose = () => {
     onDialogClose();
     navigate("/app/DriverDetails");
+  };
+
+  const stylePasswordStrengthBar = () => {
+    // Example of styling children of .pwd-meter
+    $(".pwd-meter > div").children().each(function () {
+      $(this).css({ "height": "3px", "border-radius": "5px" });
+    });
   };
 
   return (
@@ -366,7 +376,7 @@ export default function AddDriverDetails() {
                               mt={1}
                               width="400px"
                               id="BloodGroup"
-                              placeholder="Select Blood Group"
+                              placeholder="Blood Group"
                             >
                               <option value="A+">A+</option>
                               <option value="A-">A-</option>
@@ -431,6 +441,7 @@ export default function AddDriverDetails() {
                                 placeholder="Password"
                                 pr="4.5rem"
                               />
+                              <div className="css-1e7f4z6" style={{ marginRight: '30px', marginTop: '3px' }}>
                               <IconButton
                                 aria-label={showPassword ? "Hide password" : "Show password"}
                                 icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
@@ -441,9 +452,11 @@ export default function AddDriverDetails() {
                                 transform="translateY(-50%)"
                                 size="sm"
                               />
+                              </div>
                             </div>
                           )}
                         </Field>
+                        <PasswordStrengthBar password={initialValues.Password} />
                         {errors.Password && touched.Password && (
                           <div className="text-red-500">{errors.Password}</div>
                         )}
@@ -466,6 +479,7 @@ export default function AddDriverDetails() {
                                 placeholder="Confirm Password"
                                 pr="4.5rem"
                               />
+                             <div className="css-1e7f4z6" style={{ marginRight: '30px', marginTop: '3px' }}>
                               <IconButton
                                 aria-label={showPassword ? "Hide password" : "Show password"}
                                 icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
@@ -476,6 +490,7 @@ export default function AddDriverDetails() {
                                 transform="translateY(-50%)"
                                 size="sm"
                               />
+                              </div>
                             </div>
                           )}
                         </Field>

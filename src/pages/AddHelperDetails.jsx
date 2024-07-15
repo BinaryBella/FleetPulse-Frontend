@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Formik, Form, Field } from "formik";
 import { useNavigate } from "react-router-dom";
-import PageHeader from "../components/PageHeader.jsx";
 import {
   Button,
   Checkbox,
   Input,
+  IconButton,
   Select,
   AlertDialog,
   AlertDialogOverlay,
@@ -13,7 +13,6 @@ import {
   AlertDialogHeader,
   AlertDialogBody,
   AlertDialogFooter,
-  useDisclosure,
   Tabs,
   TabList,
   TabPanels,
@@ -21,14 +20,20 @@ import {
   TabPanel,
 } from "@chakra-ui/react";
 import { MdArrowDropDown } from "react-icons/md";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import PasswordStrengthBar from 'react-password-strength-bar';
+import $ from "jquery";
+
+import PageHeader from "../components/PageHeader.jsx";
 import theme from "../config/ThemeConfig.jsx";
 
 export default function AddHelperDetails() {
   const navigate = useNavigate();
-  const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
-  const { isOpen: isSuccessDialogOpen, onOpen: onSuccessDialogOpen, onClose: onSuccessDialogClose } = useDisclosure();
+  const [showPassword, setShowPassword] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const [successDialogMessage, setSuccessDialogMessage] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
 
   const breadcrumbs = [
     { label: 'Helper', link: '/app/HelperDetails' },
@@ -135,10 +140,10 @@ export default function AddHelperDetails() {
 
       if (data.message && data.message.toLowerCase().includes('exist')) {
         setDialogMessage('Helper already exists');
-        onDialogOpen();
+        setIsDialogOpen(true);
       } else {
         setSuccessDialogMessage('Helper added successfully.');
-        onSuccessDialogOpen();
+        setIsSuccessDialogOpen(true);
       }
     } catch (error) {
       if (error instanceof TypeError) {
@@ -146,7 +151,7 @@ export default function AddHelperDetails() {
       } else {
         setDialogMessage(error.message || 'Failed to add helper.');
       }
-      onDialogOpen();
+      setIsDialogOpen(true);
     }
   };
 
@@ -155,8 +160,15 @@ export default function AddHelperDetails() {
   };
 
   const handleSuccessDialogClose = () => {
-    onSuccessDialogClose();
+    setIsSuccessDialogOpen(false);
     navigate('/app/HelperDetails');
+  };
+
+  const stylePasswordStrengthBar = () => {
+    // Example of styling children of .pwd-meter
+    $(".pwd-meter > div").children().each(function () {
+      $(this).css({ "height": "3px", "border-radius": "5px" });
+    });
   };
 
   return (
@@ -179,7 +191,7 @@ export default function AddHelperDetails() {
         }}
         onSubmit={handleSubmit}
       >
-        {({ errors, touched }) => (
+        {({ errors, touched, values }) => (
           <Form>
             <Tabs>
               <TabList>
@@ -372,7 +384,7 @@ export default function AddHelperDetails() {
                               mt={1}
                               width="400px"
                               id="bloodGroup"
-                              placeholder="Select Blood Group"
+                              placeholder="Blood Group"
                             >
                               <option value="A+">A+</option>
                               <option value="A-">A-</option>
@@ -422,10 +434,10 @@ export default function AddHelperDetails() {
                       <p>Password</p>
                       <Field name="password">
                         {({ field }) => (
-                          <div>
+                          <div className="relative">
                             <Input
                               {...field}
-                              type="password"
+                              type={showPassword ? "text" : "password"}
                               variant="filled"
                               borderRadius="md"
                               px={3}
@@ -434,22 +446,36 @@ export default function AddHelperDetails() {
                               width="400px"
                               id="password"
                               placeholder="Password"
+                              pr="4.5rem"
                             />
-                            {errors.password && touched.password ? (
-                              <div className="text-red-500">{errors.password}</div>
-                            ) : null}
+                            <div className="css-1e7f4z6" style={{ marginRight: '60px', marginTop: '3px' }}>
+                            <IconButton
+                              aria-label={showPassword ? "Hide password" : "Show password"}
+                              icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                              onClick={() => setShowPassword(!showPassword)}
+                              position="absolute"
+                              right="5px"
+                              top="50%"
+                              transform="translateY(-50%)"
+                              size="sm"
+                            />
+                            </div>
                           </div>
                         )}
                       </Field>
+                      <PasswordStrengthBar password={values.password} />
+                      {errors.password && touched.password && (
+                        <div className="text-red-500">{errors.password}</div>
+                      )}
                     </div>
                     <div className="flex flex-col gap-3">
                       <p>Confirm Password</p>
                       <Field name="confirmPassword">
                         {({ field }) => (
-                          <div>
+                          <div className="relative">
                             <Input
                               {...field}
-                              type="password"
+                              type={showPassword ? "text" : "password"}
                               variant="filled"
                               borderRadius="md"
                               px={3}
@@ -458,13 +484,26 @@ export default function AddHelperDetails() {
                               width="400px"
                               id="confirmPassword"
                               placeholder="Confirm Password"
+                              pr="4.5rem"
                             />
-                            {errors.confirmPassword && touched.confirmPassword ? (
-                              <div className="text-red-500">{errors.confirmPassword}</div>
-                            ) : null}
+                            <div className="css-1e7f4z6" style={{ marginRight: '60px', marginTop: '3px' }}>
+                            <IconButton
+                              aria-label={showPassword ? "Hide password" : "Show password"}
+                              icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                              onClick={() => setShowPassword(!showPassword)}
+                              position="absolute"
+                              right="5px"
+                              top="50%"
+                              transform="translateY(-50%)"
+                              size="sm"
+                            />
+                          </div>
                           </div>
                         )}
                       </Field>
+                      {errors.confirmPassword && touched.confirmPassword && (
+                        <div className="text-red-500">{errors.confirmPassword}</div>
+                      )}
                     </div>
                     <div className="flex flex-col gap-3">
                       <p>Status</p>
@@ -489,41 +528,39 @@ export default function AddHelperDetails() {
                 </TabPanel>
               </TabPanels>
             </Tabs>
-            <div className="flex justify-end gap-10 mr-16">
-            <Button
-              bg="gray.400"
-              _hover={{ bg: "gray.500" }}
-              color="#ffffff"
-              variant="solid"
-              w="180px"
-              marginTop="10"
-              onClick={handleCancel}
-            >
-              Cancel
-            </Button>
-            <Button
-              bg={theme.purple}
-              _hover={{ bg: theme.onHoverPurple }}
-              color="#ffffff"
-              variant="solid"
-              w="180px"
-              marginTop="10"
-              type="submit"
-            >
-              Save
-            </Button>
-          </div>
+            <div className="flex justify-end gap-10 mr-16 mt-8">
+              <Button
+                bg="gray.400"
+                _hover={{ bg: "gray.500" }}
+                color="#ffffff"
+                variant="solid"
+                w="180px"
+                onClick={handleCancel}
+              >
+                Cancel
+              </Button>
+              <Button
+                bg={theme.purple}
+                _hover={{ bg: theme.onHoverPurple }}
+                color="#ffffff"
+                variant="solid"
+                w="180px"
+                type="submit"
+              >
+                Save
+              </Button>
+            </div>
           </Form>
         )}
       </Formik>
 
-      <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose}>
+      <AlertDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader>Error</AlertDialogHeader>
             <AlertDialogBody>{dialogMessage}</AlertDialogBody>
             <AlertDialogFooter>
-              <Button onClick={onDialogClose}>Close</Button>
+              <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialogOverlay>

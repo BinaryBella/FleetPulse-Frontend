@@ -95,7 +95,7 @@ export default function SideMenu({isAdmin}) {
                                                 color: '#FFA500', // Change this to your desired hover color
                                             }}
                                         >
-                                            Type
+                                            Vehicle Type
                                         </Text>
                                     </Link>
                                     <Link className="flex items-center pl-3 " to="/app/ManufacturerDetails">

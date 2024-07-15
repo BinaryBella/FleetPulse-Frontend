@@ -82,6 +82,11 @@ export default function TopMenu() {
                                 fontSize='25px'
                                 mt={5}
                                 variant='outline'
+                                sx={{
+                                    _hover: {
+                                        bg: 'transparent',
+                                    },
+                                }}
                             >
                                 {image ? (
                                     <img

@@ -59,14 +59,14 @@ export default function AddVehicleMaintenanceTypeDetails() {
 
     const handleCancel = () => {
         // Redirect to the vehicle maintenance type table page
-        navigate('/app/MaintenanceTypeTable');
+        navigate('/app/VehicleMaintenanceTypeDetails');
     };
 
     const handleSuccessDialogClose = () => {
         // Close the success dialog
         onSuccessDialogClose();
         // Redirect to the vehicle maintenance type table page
-        navigate('/app/MaintenanceTypeTable');
+        navigate('/app/VehicleMaintenanceTypeDetails');
     };
 
     return (

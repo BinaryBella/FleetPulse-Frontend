@@ -189,7 +189,7 @@ export default function FuelRefillDetails() {
     const cancelRef = useRef();
 
     const breadcrumbs = [
-        { label: "Vehicle details", link: "/app/VehicleDetails" },
+        { label: "Vehicle", link: "/app/VehicleDetails" },
         { label: "Fuel Refill Details", link: "/app/FuelRefillDetails" },
     ];
 
