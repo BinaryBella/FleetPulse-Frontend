@@ -51,7 +51,7 @@ export default function AddDriverDetails() {
   });
 
   const breadcrumbs = [
-    { label: "Driver", link: "/app/DriverDetails" },
+    { label: "Driver", link: "/DriverDetails" },
     { label: "Driver Details", link: "/app/DriverDetails" },
     { label: "Add Driver Details", link: "/app/AddDriverDetails" },
   ];
@@ -376,7 +376,7 @@ export default function AddDriverDetails() {
                               mt={1}
                               width="400px"
                               id="BloodGroup"
-                              placeholder="Blood Group"
+                              placeholder="Select Blood Group"
                             >
                               <option value="A+">A+</option>
                               <option value="A-">A-</option>

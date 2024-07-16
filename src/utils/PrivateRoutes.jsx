@@ -1,33 +1,31 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { jwtDecode } from "jwt-decode";
 
-const PrivateRoutes = ({ roles }) => {
-
+const PrivateRoutes = ({ roles, children }) => {
     const token = localStorage.getItem('Token');
-    const isAuthenticated = !!token;
-    let userRole = null;
+    const userRole = sessionStorage.getItem('UserRole');
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
-    if (token) {
-        try {
-            const decodedToken = jwtDecode(token);
-            userRole = decodedToken.role;
-        } catch (error) {
-            console.error('Error decoding token:', error);
-        }
-    }
-
-    if (!isAuthenticated) {
+    if (!token) {
         return <Navigate to="/auth/Login" />;
-    } else if (roles && !roles.includes(userRole)) {
-        return <Navigate to="/unauthorized" />;
-    } else {
-        return <Outlet />;
     }
+
+    if (roles && roles.length > 0) {
+        if (roles.includes('Admin') && isAdmin) {
+            return children;
+        }
+        if (roles.includes(userRole)) {
+            return children;
+        }
+        return <Navigate to="/UnauthorizedPage" />;
+    }
+
+    return children;
 };
 
 PrivateRoutes.propTypes = {
-    roles: PropTypes.arrayOf(PropTypes.string).isRequired,
+    roles: PropTypes.arrayOf(PropTypes.string), // roles should be an array of strings
+    children: PropTypes.node.isRequired, // children is a required node (React element)
 };
 
 export default PrivateRoutes;

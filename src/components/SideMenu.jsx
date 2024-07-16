@@ -132,16 +132,16 @@ export default function SideMenu({isAdmin}) {
                                         </Text>
                                     </Link>
                                     <Link className="flex items-center pl-3" to="/app/FuelRefillDetails">
-                                    <Text
-                                        color={theme.orange}
-                                        fontSize="sm"
-                                        _hover={{
-                                            color: '#FFA500', // Change this to your desired hover color
-                                        }}
-                                    >
-                                        Fuel Refill
-                                    </Text>
-                                </Link>
+                                        <Text
+                                            color={theme.orange}
+                                            fontSize="sm"
+                                            _hover={{
+                                                color: '#FFA500', // Change this to your desired hover color
+                                            }}
+                                        >
+                                            Fuel Refill
+                                        </Text>
+                                    </Link>
                                 </div>
                             </AccordionPanel>
                         </AccordionItem>

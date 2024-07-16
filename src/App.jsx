@@ -67,18 +67,17 @@ export default function App() {
     useEffect(() => {
         const currentUser = localStorage.getItem('Token');
         const userRole = sessionStorage.getItem('UserRole');
+        console.log('currentUser:', currentUser);
+        console.log('userRole:', userRole);
 
         if (currentUser && userRole === 'Admin') {
             setIsAdmin(true);
+            localStorage.setItem('isAdmin', true); // Ensure localStorage is updated here
         } else {
             setIsAdmin(false);
+            localStorage.setItem('isAdmin', false); // Ensure localStorage is updated here
         }
     }, []);
-
-    // Update isAdmin in localStorage whenever it changes
-    useEffect(() => {
-        localStorage.setItem('isAdmin', isAdmin);
-    }, [isAdmin]);
 
     return (
         <ChakraProvider>
