@@ -8,6 +8,7 @@ import { Box } from "@chakra-ui/react";
 import VerificationInput from "react-verification-input";
 import './ResetPasswordConfirmation.css';
 import { useLocation } from "react-router-dom";
+import {axiosApi} from "../interceptor.js";
 
 export default function ResetPasswordConfirmation() {
     const navigate = useNavigate();
@@ -44,29 +45,26 @@ export default function ResetPasswordConfirmation() {
                     }
                     return errors;
                 }}
-                onSubmit={() => {
+                onSubmit={async () => { // Mark onSubmit function as async
                     try {
                         setLoading(true); // Set loading to true when submitting form
+
                         if (verificationCode.toString().length === 6) {
-                            fetch('https://localhost:7265/api/Auth/validate-verification-code', {
-                                method: 'POST',
-                                body: JSON.stringify({
-                                    email: email,
-                                    code: verificationCode
-                                }),
+                            const response = await axiosApi.post('https://localhost:7265/api/Auth/validate-verification-code', {
+                                email: email,
+                                code: verificationCode
+                            }, {
                                 headers: {
-                                    'Content-type': 'application/json; charset=UTF-8',
+                                    'Content-Type': 'application/json; charset=UTF-8',
                                 }
-                            }).then(response => {
-                                return response.json();
-                            }).then(data => {
-                                console.log(data);
-                                if (data.status === true) {
-                                    navigate(`/auth/ResetPassword`, { state: { email: email } });
-                                } else {
-                                    setIsAlertOpen(true);
-                                }
-                            })
+                            });
+                            console.log(response.data);
+
+                            if (response.data.status === true) {
+                                navigate(`/auth/ResetPassword`, { state: { email: email } });
+                            } else {
+                                setIsAlertOpen(true);
+                            }
                         } else {
                             alert("Please enter a valid 6-digit PIN.");
                         }

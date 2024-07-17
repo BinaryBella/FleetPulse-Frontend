@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import {axiosApi} from "../interceptor.js";
 import {
   Table,
   Thead,
@@ -59,7 +59,7 @@ export default function HelperDetails() {
 
   const fetchHelperDetails = async () => {
     try {
-      const response = await axios.get('https://localhost:7265/api/Helper');
+      const response = await axiosApi.get('https://localhost:7265/api/Helper');
       setHelperDetails(response.data);
     } catch (error) {
       console.error('Error fetching helper details:', error);
@@ -69,7 +69,7 @@ export default function HelperDetails() {
   const handleSearchInputChange = (event) => {
     const inputValue = event.target.value.toLowerCase();
     setSearchInput(inputValue);
-    setCurrentPage(0); 
+    setCurrentPage(0);
   };
 
   const onClickInactive = (helper) => {
@@ -83,7 +83,7 @@ export default function HelperDetails() {
         ? `https://localhost:7265/api/Helper/${selectedHelper.userId}/deactivate`
         : `https://localhost:7265/api/Helper/${selectedHelper.userId}/activate`;
 
-      await axios.put(endpoint);
+      await axiosApi.put(endpoint);
       fetchHelperDetails();
       onDialogClose();
       toast({

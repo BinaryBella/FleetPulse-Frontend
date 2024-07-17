@@ -26,7 +26,7 @@ import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
 import PasswordStrengthBar from 'react-password-strength-bar';
 import {useNavigate} from "react-router-dom";
 import $ from "jquery";
-import axios from "axios";
+import {axiosApi} from "../interceptor.js";
 
 const PasswordField = ({ fieldId, label, showPassword, handleShowPassword, placeholder, error }) => (
     <FormControl isInvalid={!!error}>
@@ -83,7 +83,7 @@ export default function ChangePassword() {
                 return;
             }
 
-            const response = await axios.post('https://localhost:7265/api/Auth/change-password', {
+            const response = await axiosApi.post('https://localhost:7265/api/Auth/change-password', {
                 username: storedUsername,
                 oldPassword: values.oldPassword,
                 newPassword: values.newPassword,

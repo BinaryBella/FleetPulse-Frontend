@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import {axiosApi} from "../interceptor.js";
 import {
     Table,
     Thead,
@@ -68,7 +68,7 @@ export default function StaffDetails() {
             const endpoint = selectedStaff.status
                 ? `https://localhost:7265/api/Staff/${selectedStaff.userId}/deactivate`
                 : `https://localhost:7265/api/Staff/${selectedStaff.userId}/activate`;
-            await axios.put(endpoint);
+            await axiosApi.put(endpoint);
             fetchStaffDetails();
             onDialogClose();
         } catch (error) {
@@ -88,7 +88,7 @@ export default function StaffDetails() {
 
     const fetchStaffDetails = async () => {
         try {
-            const response = await axios.get("https://localhost:7265/api/Staff");
+            const response = await axiosApi.get("https://localhost:7265/api/Staff");
             setStaffDetails(response.data);
         } catch (error) {
             console.error("Error fetching staff details:", error);

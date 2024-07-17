@@ -26,6 +26,7 @@ import theme from "../config/ThemeConfig.jsx";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import PasswordStrengthBar from 'react-password-strength-bar';
 import $ from "jquery";
+import {axiosApi} from "../interceptor.js";
 
 export default function AddDriverDetails() {
   const navigate = useNavigate();
@@ -64,11 +65,11 @@ export default function AddDriverDetails() {
       setIsLoading(true);
       try {
         // Replace with your API endpoint
-        const response = await fetch("https://localhost:7265/api/Driver");
-        if (!response.ok) {
+        const response = await axiosApi.get("https://localhost:7265/api/Driver");
+        if (response.status !== 200) {
           throw new Error("Failed to fetch data");
         }
-        const data = await response.json();
+        const data = response.data;
 
         // Set initial form values from fetched data
         setInitialValues({
@@ -103,12 +104,10 @@ export default function AddDriverDetails() {
     try {
       console.log(values);
 
-      const response = await fetch("https://localhost:7265/api/Driver", {
-        method: "POST",
+      const response = await axiosApi.post("https://localhost:7265/api/Driver", values, {
         headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
+          "Content-Type": "application/json"
+        }
       });
 
       if (response.ok) {

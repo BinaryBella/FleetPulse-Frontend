@@ -2,7 +2,6 @@
 import {useField, useFormikContext} from "formik";
 import VerificationInput from "react-verification-input";
 
-
 export const VerificationCodeInput = ({ label, ...props }) => {
     const { setFieldValue } = useFormikContext();
     const [ meta] = useField(props);

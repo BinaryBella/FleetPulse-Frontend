@@ -12,7 +12,7 @@ import {
     AlertDialogFooter,
     Checkbox
 } from '@chakra-ui/react';
-import axios from 'axios';
+import {axiosApi} from "../interceptor.js";
 import { useNavigate, useParams } from 'react-router-dom';
 import PageHeader from '../components/PageHeader.jsx';
 import theme from '../config/ThemeConfig.jsx';
@@ -36,7 +36,7 @@ const EditVehicleMaintenanceConfiguration = () => {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axios.get('https://localhost:7265/api/Vehicle');
+            const response = await axiosApi.get('https://localhost:7265/api/Vehicle');
             setVehicleRegNoDetails(response.data);
             console.log(response.data);
         } catch (error) {
@@ -47,7 +47,7 @@ const EditVehicleMaintenanceConfiguration = () => {
 
     const fetchVehicleMaintenanceTypes = async () => {
         try {
-            const response = await axios.get('https://localhost:7265/api/VehicleMaintenanceType');
+            const response = await axiosApi.get('https://localhost:7265/api/VehicleMaintenanceType');
             setMaintenanceTypeDetails(response.data);
         } catch (error) {
             console.error('Error fetching vehicle maintenance types:', error);
@@ -56,7 +56,7 @@ const EditVehicleMaintenanceConfiguration = () => {
 
     const fetchMaintenanceConfiguration = async () => {
         try {
-            const response = await axios.get(`https://localhost:7265/api/VehicleMaintenanceConfiguration/${id}`);
+            const response = await axiosApi.get(`https://localhost:7265/api/VehicleMaintenanceConfiguration/${id}`);
             const data = response.data;
             setInitialValues({
                 vehicleRegistrationNo: data.vehicleId.toString(),
@@ -96,12 +96,10 @@ const EditVehicleMaintenanceConfiguration = () => {
                 status: values.isActive
             };
 
-            const response = await fetch(`https://localhost:7265/api/VehicleMaintenanceConfiguration/${id}`, {
-                method: 'PUT',
+            const response = await axiosApi.put(`https://localhost:7265/api/VehicleMaintenanceConfiguration/${id}`, payload, {
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
+                }
             });
 
             if (!response.ok) {

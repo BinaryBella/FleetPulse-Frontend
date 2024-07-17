@@ -7,6 +7,7 @@ import ResetPass2 from "../assets/images/ResetPass2.png";
 import theme from "../config/ThemeConfig.jsx";
 import PasswordStrengthBar from 'react-password-strength-bar';
 import $ from 'jquery';
+import {axiosApi} from "../interceptor.js";
 
 export default function ResetPassword() {
     const [newPasswordVisibility, setNewPasswordVisibility] = useState(false);
@@ -41,19 +42,17 @@ export default function ResetPassword() {
     const handleSubmit = async (values) => {
         try {
             setLoading(true); // Set loading to true when submitting form
-            console.log(email);
-            const response = await fetch('https://localhost:7265/api/Auth/reset-password', {
-                method: 'POST',
+
+            const response = await axiosApi.post('https://localhost:7265/api/Auth/reset-password', {
+                email: location.state.email, // Assuming location.state.email is defined elsewhere
+                newPassword: values.newpassword
+            }, {
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: location.state.email,
-                    newPassword: values.newpassword
-                })
+                }
             });
 
-            if (response.ok) {
+            if (response.status === 200) {
                 navigate("/auth/ResetPassSuccess");
             } else {
                 setError("Failed to reset password. Please try again.");
@@ -65,6 +64,7 @@ export default function ResetPassword() {
             setLoading(false); // Set loading to false when request is completed
         }
     };
+
 
     return (
         <>

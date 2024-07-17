@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import { useState, useEffect, useRef } from 'react';
+import {axiosApi} from "../interceptor.js";
 import {
     Table,
     Thead,
@@ -60,7 +60,7 @@ export default function TripDetails() {
 
     const fetchTripDetails = async () => {
         try {
-            const response = await axios.get("https://localhost:7265/api/Trip");
+            const response = await axiosApi.get("https://localhost:7265/api/Trip");
             setTripDetails(response.data);
             console.log(response.data);
         } catch (error) {
@@ -146,7 +146,7 @@ export default function TripDetails() {
     const onConfirmDelete = async () => {
         try {
             const endpoint = `https://localhost:7265/api/TripDetails/${selectedTrip.id}/${selectedTrip.status ? 'deactivate' : 'activate'}`;
-            await axios.put(endpoint);
+            await axiosApi.put(endpoint);
             fetchTripDetails();
             onDialogClose();
         } catch (error) {

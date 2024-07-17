@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
 import { Button, Checkbox, Input, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, useDisclosure, Select } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
-import axios from 'axios';
+import {axiosApi} from "../interceptor.js";
 
 export default function AddVehicleDetails() {
     const navigate = useNavigate();
@@ -23,7 +23,7 @@ export default function AddVehicleDetails() {
 
     useEffect(() => {
         // Fetch Vehicle Types
-        axios.get('https://localhost:7265/api/VehicleType')
+        axiosApi.get('https://localhost:7265/api/VehicleType')
             .then(response => {
                 console.log('Vehicle Types data fetched:', response.data);
                 setVehicleTypes(response.data); // Assuming data is an array of vehicle types
@@ -33,7 +33,7 @@ export default function AddVehicleDetails() {
             });
 
         // Fetch Manufacturers
-        axios.get('https://localhost:7265/api/Manufacture')
+        axiosApi.get('https://localhost:7265/api/Manufacture')
             .then(response => {
                 console.log('Manufacturers data fetched:', response.data);
                 setManufacturers(response.data); // Assuming data is an array of manufacturers
@@ -63,7 +63,7 @@ export default function AddVehicleDetails() {
                 fuelRefillId: fuelRefillMap[values.fuelType], // Changed to fuelType
             };
 
-            axios.post('https://localhost:7265/api/Vehicle', dataToSend)
+            axiosApi.post('https://localhost:7265/api/Vehicle', dataToSend)
                 .then(response => {
                     setSuccessDialogMessage('Vehicle details added successfully.');
                     onSuccessDialogOpen();

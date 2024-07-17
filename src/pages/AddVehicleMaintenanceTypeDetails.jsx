@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
 import { Button, Checkbox, Input, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, useDisclosure } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
+import {axiosApi} from "../interceptor.js";
 
 export default function AddVehicleMaintenanceTypeDetails() {
     const navigate = useNavigate();
@@ -13,7 +14,7 @@ export default function AddVehicleMaintenanceTypeDetails() {
     const [successDialogMessage, setSuccessDialogMessage] = useState("");
 
     const breadcrumbs = [
-        {label: 'Vehicle', link: '/app/Vehicle'}, //yashmi
+        {label: 'Vehicle', link: '/app/Vehicle'},
         {label: 'Vehicle Maintenance type Details', link: '/app/VehicleMaintenanceTypeDetails'},
         {label: 'Add Vehicle Maintenance Type Details', link: '/app/AddVehicleMaintenanceTypeDetails'}
     ];
@@ -23,15 +24,13 @@ export default function AddVehicleMaintenanceTypeDetails() {
             console.log(values.TypeName, values.isActive);
             const status = values.isActive || false; // Ensure it defaults to false if not set
 
-            const response = await fetch('https://localhost:7265/api/VehicleMaintenanceType', {
-                method: 'POST',
+            const response = await axiosApi.post('https://localhost:7265/api/VehicleMaintenanceType', {
+                TypeName: values.TypeName,
+                status: status
+            }, {
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    TypeName: values.TypeName,
-                    status: status
-                })
+                }
             });
 
             const data = await response.json();

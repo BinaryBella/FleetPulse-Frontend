@@ -15,6 +15,7 @@ import {
     useDisclosure
 } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
+import {axiosApi} from "../interceptor.js";
 
 export default function EditMaintenanceType() {
     const navigate = useNavigate();
@@ -31,10 +32,10 @@ export default function EditMaintenanceType() {
 
     const fetchMaintenanceTypeData = async (id) => {
         try {
-            const response = await fetch(`https://localhost:7265/api/VehicleMaintenanceType/${id}`);
-            const data = await response.json();
+            const response = await axiosApi.get(`https://localhost:7265/api/VehicleMaintenanceType/${id}`);
+            const data = response.data;
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(data.message || 'Failed to fetch maintenance type data.');
             }
 
@@ -52,16 +53,14 @@ export default function EditMaintenanceType() {
         try {
             const status = values.isActive ? true : false;
 
-            const response = await fetch(`https://localhost:7265/api/VehicleMaintenanceType/UpdateVehicleMaintenanceType`, {
-                method: 'PUT',
+            const response = await axiosApi.put(`https://localhost:7265/api/VehicleMaintenanceType/UpdateVehicleMaintenanceType`, {
+                Id: id,
+                TypeName: values.TypeName,
+                Status: status
+            }, {
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    Id: id,
-                    TypeName: values.TypeName,
-                    Status: status
-                })
+                }
             });
 
             if (!response.ok) {

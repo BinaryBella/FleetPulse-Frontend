@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import {axiosApi} from "../interceptor.js";
 import {
     Table,
     Thead,
@@ -66,7 +66,7 @@ export default function VehicleMaintenanceConfigurationTable() {
     const onConfirmDelete = async () => {
         try {
             const endpoint = `https://localhost:7265/api/VehicleMaintenanceConfiguration/${selectedType.id}`;
-            await axios.delete(endpoint);
+            await axiosApi.delete(endpoint);
             fetchVehicleMaintenanceTypes();
             onDialogClose();
         } catch (error) {
@@ -86,7 +86,7 @@ export default function VehicleMaintenanceConfigurationTable() {
 
     const fetchVehicleMaintenanceTypes = async () => {
         try {
-            const response = await axios.get("https://localhost:7265/api/VehicleMaintenanceConfiguration");
+            const response = await axiosApi.get("https://localhost:7265/api/VehicleMaintenanceConfiguration");
             setVehicleDetails(response.data);
             console.log(response.data);
         } catch (error) {

@@ -461,6 +461,7 @@ import {
     AlertDialogFooter
 } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
+import {axiosApi} from "../interceptor.js";
 
 export default function AddTripDetails() {
     const navigate = useNavigate();
@@ -560,22 +561,20 @@ export default function AddTripDetails() {
         }
 
         try {
-            const response = await fetch('https://localhost:7265/api/Trip', {
-                method: 'POST',
+            const response = await axiosApi.post('https://localhost:7265/api/Trip', {
+                VehicleRegNo: values.VehicleRegNo,
+                DriverNIC: values.DriverNIC,
+                HelperNIC: values.HelperNIC,
+                Date: values.Date,
+                StartTime: values.StartTime,
+                EndTime: values.EndTime,
+                StartMeterValue: values.StartMeterValue,
+                EndMeterValue: values.EndMeterValue,
+                IsActive: values.IsActive
+            }, {
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    VehicleRegNo: values.VehicleRegNo,
-                    DriverNIC: values.DriverNIC,
-                    HelperNIC: values.HelperNIC,
-                    Date: values.Date,
-                    StartTime: values.StartTime,
-                    EndTime: values.EndTime,
-                    StartMeterValue: values.StartMeterValue,
-                    EndMeterValue: values.EndMeterValue,
-                    IsActive: values.IsActive
-                })
+                }
             });
 
             const data = await response.json();

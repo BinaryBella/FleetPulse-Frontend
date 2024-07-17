@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Table,
   Thead,
@@ -41,7 +41,7 @@ import {
   getFilteredRowModel
 } from "@tanstack/react-table";
 import { flexRender } from "@tanstack/react-table";
-import axios from "axios";
+import {axiosApi} from "../interceptor.js";
 
 export default function AccidentDetails() {
   const [accidentDetails, setAccidentDetails] = useState([]);
@@ -60,7 +60,7 @@ export default function AccidentDetails() {
 
   const fetchAccidentDetails = async () => {
     try {
-      const response = await axios.get("https://localhost:7265/api/AccidentDetails");
+      const response = await axiosApi.get("https://localhost:7265/api/AccidentDetails");
       setAccidentDetails(response.data);
     } catch (error) {
       console.error("Error fetching accident details:", error);
@@ -126,7 +126,7 @@ export default function AccidentDetails() {
         <a href={row.original.photos} target="_blank" rel="noopener noreferrer">View Photos</a>
       ),
     },
-    
+
     {
       id: "actions",
       header: "Actions",
@@ -202,7 +202,7 @@ export default function AccidentDetails() {
   const onConfirmDelete = async () => {
     try {
       const endpoint = `https://localhost:7265/api/AccidentDetails/${selectedAccident.id}/${selectedAccident.isActive ? 'deactivate' : 'activate'}`;
-      await axios.put(endpoint);
+      await axiosApi.put(endpoint);
       fetchAccidentDetails();
       onDialogClose();
     } catch (error) {

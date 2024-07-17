@@ -14,9 +14,9 @@ import {
     Select
 } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
+import {axiosApi} from "../interceptor.js";
 
 export default function AddFuelRefillDetails() {
     const navigate = useNavigate();
@@ -56,7 +56,7 @@ export default function AddFuelRefillDetails() {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axios.get("https://localhost:7265/api/Vehicle");
+            const response = await axiosApi.get("https://localhost:7265/api/Vehicle");
             setVehicleRegNoDetails(response.data);
             console.log(response.data); // Log fetched data for debugging
         } catch (error) {
@@ -68,7 +68,7 @@ export default function AddFuelRefillDetails() {
         try {
             const username = sessionStorage.getItem("Username");
             if (username) {
-                const response = await axios.get(`https://localhost:7265/api/Auth/userProfile?username=${username}`);
+                const response = await axiosApi.get(`https://localhost:7265/api/Auth/userProfile?username=${username}`);
                 const responseData = response.data;
                 setFieldValue("nic", responseData.nic);
                 setFieldValue("userId", responseData.userId); // Assuming the user profile response contains userId
@@ -127,23 +127,23 @@ export default function AddFuelRefillDetails() {
                     }
 
                     try {
-                        const response = await fetch('https://localhost:7265/api/FuelRefill', {
-                            method: 'POST',
+                        const payload = {
+                            id: selectedVehicle.id,
+                            vehicleRegistrationNo: selectedVehicle.vehicleRegistrationNo,
+                            UserId: values.userId,
+                            NIC: values.nic,
+                            Cost: values.cost,
+                            LiterCount: values.literCount,
+                            Date: values.date,
+                            Time: values.time,
+                            FType: values.fType,
+                            Status: values.IsActive
+                        };
+
+                        const response = await axiosApi.post('https://localhost:7265/api/FuelRefill', payload, {
                             headers: {
                                 'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                id: selectedVehicle.id,
-                                vehicleRegistrationNo: selectedVehicle.vehicleRegistrationNo,
-                                UserId: values.userId,
-                                NIC: values.nic,
-                                Cost: values.cost,
-                                LiterCount: values.literCount,
-                                Date: values.date,
-                                Time: values.time,
-                                FType: values.fType,
-                                Status: values.IsActive
-                            })
+                            }
                         });
 
                         const data = await response.json();

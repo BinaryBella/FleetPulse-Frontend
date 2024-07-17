@@ -15,7 +15,7 @@ import {
     Select,
 } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
-import axios from "axios";
+import {axiosApi} from "../interceptor.js";
 import { useNavigate, useParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
 
@@ -44,16 +44,16 @@ export default function EditMaintenance() {
         const fetchData = async () => {
             try {
                 // Fetch vehicle registration numbers first
-                const vehicleResponse = await axios.get("https://localhost:7265/api/Vehicle");
+                const vehicleResponse = await axiosApi.get("https://localhost:7265/api/Vehicle");
                 setVehicleRegNoDetails(vehicleResponse.data);
 
                 // Fetch maintenance types
-                const maintenanceTypeResponse = await axios.get("https://localhost:7265/api/VehicleMaintenanceType");
+                const maintenanceTypeResponse = await axiosApi.get("https://localhost:7265/api/VehicleMaintenanceType");
                 setMaintenanceTypeDetails(maintenanceTypeResponse.data);
 
                 // If we're editing, fetch the maintenance details
                 if (id) {
-                    const maintenanceResponse = await axios.get(`https://localhost:7265/api/VehicleMaintenance/${id}`);
+                    const maintenanceResponse = await axiosApi.get(`https://localhost:7265/api/VehicleMaintenance/${id}`);
                     const maintenance = maintenanceResponse.data;
 
                     // Find the matching vehicle registration number
@@ -105,9 +105,9 @@ export default function EditMaintenance() {
 
             let response;
             if (id) {
-                response = await axios.put(`https://localhost:7265/api/VehicleMaintenance/${id}`, payload);
+                response = await axiosApi.put(`https://localhost:7265/api/VehicleMaintenance/${id}`, payload);
             } else {
-                response = await axios.post('https://localhost:7265/api/VehicleMaintenance', payload);
+                response = await axiosApi.post('https://localhost:7265/api/VehicleMaintenance', payload);
             }
 
             const data = response.data;

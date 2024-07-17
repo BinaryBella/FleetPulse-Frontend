@@ -24,7 +24,7 @@ import Password from "../assets/images/Password.png";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import PasswordStrengthBar from 'react-password-strength-bar';
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import {axiosApi} from "../interceptor.js";
 import { useNotifications } from '../context/NotificationContext';
 import PropTypes from 'prop-types';
 
@@ -89,7 +89,7 @@ export default function ResetPasswordDriverHelper() {
     const handleSubmit = async (values, { setSubmitting }) => {
         setSubmitting(true);
         try {
-            const response = await axios.post('https://localhost:7265/api/Auth/reset-password-driver', {
+            const response = await axiosApi.post('https://localhost:7265/api/Auth/reset-password-driver', {
                 emailAddress: values.emailAddress,
                 newPassword: values.newPassword
             }, {

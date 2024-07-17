@@ -6,6 +6,7 @@ import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { Link, useNavigate } from "react-router-dom";
 import theme from "../config/ThemeConfig.jsx";
 import first from "../assets/images/login.png";
+import {axiosApi} from "../interceptor.js";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -22,59 +23,6 @@ export default function Login() {
         setResetClicked(true);
     };
 
-    // const saveNotification = (notification) => {
-    //     if (localStorage.getItem('Token')) {
-    //         const userId = sessionStorage.getItem('UserId');
-    //         const username = sessionStorage.getItem('Username');
-    //
-    //         if (!userId || !username) {
-    //             console.error('User ID or Username not found in session storage');
-    //             return;
-    //         }
-    //
-    //         const timestamp = new Date(notification.timestamp);
-    //         if (isNaN(timestamp.getTime())) {
-    //             console.error('Invalid timestamp value');
-    //             return;
-    //         }
-    //
-    //         const fcmNotification = {
-    //             UserId: parseInt(userId),
-    //             UserName: username,
-    //             Title: "User Login",  // You can adjust this as needed
-    //             Message: notification.message,
-    //             Date: timestamp.toISOString().split('T')[0],
-    //             Time: timestamp.toTimeString().split(' ')[0],
-    //             Status: false  // Assuming new notifications are unread
-    //         };
-    //
-    //         console.log('Sending notification:', fcmNotification);
-    //
-    //         fetch('https://localhost:7265/api/Notification/save-notification', {
-    //             method: 'POST',
-    //             body: JSON.stringify(fcmNotification),
-    //             headers: {
-    //                 'Content-type': 'application/json; charset=UTF-8',
-    //                 'Authorization': `Bearer ${localStorage.getItem('Token')}`
-    //             }
-    //         }).then(response => {
-    //             if (!response.ok) {
-    //                 return response.text().then(text => { throw new Error(text) });
-    //             }
-    //             return response.json();
-    //         }).then(data => {
-    //             console.log('Notification saved:', data);
-    //         }).catch(error => {
-    //             console.error('Error saving notification:', error);
-    //         });
-    //     } else {
-    //         // If user is not logged in, save to local storage as before
-    //         let notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-    //         notifications.push(notification);
-    //         localStorage.setItem('notifications', JSON.stringify(notifications));
-    //     }
-    // };
-
     return (
         <>
             <p className="font-sans text-3xl text-[#393970]">Login</p>
@@ -85,18 +33,18 @@ export default function Login() {
                     password: ""
                 }}
                 onSubmit={(values) => {
-                    setLoading(true);
-                    fetch('https://localhost:7265/api/Auth/login', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            username: values.username,
-                            password: values.password
-                        }),
+                    setLoading(true); // Set loading to true when submitting form
+
+                    axiosApi.post('https://localhost:7265/api/Auth/login', {
+                        username: values.username,
+                        password: values.password
+                    }, {
                         headers: {
-                            'Content-type': 'application/json; charset=UTF-8',
+                            'Content-Type': 'application/json; charset=UTF-8'
                         }
-                    }).then(response => response.json())
-                        .then(data => {
+                    })
+                        .then(response => {
+                            const data = response.data;
                             if (!data.status) {
                                 if (data.message === "Unauthorized: Only Admin or Staff can login") {
                                     navigate("/unauthorized");
@@ -123,22 +71,11 @@ export default function Login() {
                                         console.log('UserId set in session storage:', userId);
                                     }
                                     localStorage.setItem('Token', accessToken);
-                                    // Also update localStorage with the isAdmin status
-                                    if (jobTitle === "Admin") {
-                                        localStorage.setItem('isAdmin', true);
-                                    } else {
-                                        localStorage.setItem('isAdmin', false);
-                                    }
 
-                                    sessionStorage.setItem('UserRole', jobTitle);
-                                    localStorage.setItem('Token', accessToken);
+                                    // Set isAdmin status in localStorage
+                                    localStorage.setItem('isAdmin', jobTitle === "Admin");
 
                                     console.log('Session storage after login:', sessionStorage);
-
-                                    // saveNotification({
-                                    //     message: `User ${values.username} logged in`,
-                                    //     timestamp: new Date().toISOString()
-                                    // });
 
                                     let storedNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
                                     storedNotifications.forEach(notification => {
@@ -151,12 +88,14 @@ export default function Login() {
                                     navigate("/unauthorized");
                                 }
                             }
-                        }).catch((error) => {
-                        console.error('Login error:', error);
-                        setBackendError('Login failed. Please try again.');
-                    }).finally(() => {
-                        setLoading(false);
-                    });
+                        })
+                        .catch(error => {
+                            console.error('Login error:', error);
+                            setBackendError('Login failed. Please try again.');
+                        })
+                        .finally(() => {
+                            setLoading(false); // Set loading to false when request is completed
+                        });
                 }}
             >
                 {({ handleSubmit, errors, touched }) => (
@@ -211,7 +150,7 @@ export default function Login() {
                                             onClick={handleShowPassword}
                                             icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
                                             aria-label="password-icon"
-                                            margin-top="5px"
+                                            marginTop="5px"
                                         />
                                     </InputRightElement>
                                 </InputGroup>

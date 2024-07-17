@@ -25,6 +25,7 @@ import theme from "../config/ThemeConfig.jsx";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import PasswordStrengthBar from 'react-password-strength-bar';
 import $ from "jquery";
+import {axiosApi} from "../interceptor.js";
 
 export default function AddStaffDetails() {
   const navigate = useNavigate();
@@ -62,11 +63,9 @@ export default function AddStaffDetails() {
     const fetchStaffData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch("https://localhost:7265/api/Staff");
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        const data = await response.json();
+        const response = await axiosApi.get("https://localhost:7265/api/Staff");
+        const data = response.data;
+
         setInitialValues({
           FirstName: data.firstName,
           LastName: data.lastName,
@@ -116,12 +115,10 @@ export default function AddStaffDetails() {
 
     if (Object.keys(errors).length === 0) {
       try {
-        const response = await fetch("https://localhost:7265/api/Staff", {
-          method: "POST",
+        const response = await axiosApi.post("https://localhost:7265/api/Staff", values, {
           headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
+            "Content-Type": "application/json"
+          }
         });
         if (response.ok) {
           setDialogMessage("Staff details saved successfully.");

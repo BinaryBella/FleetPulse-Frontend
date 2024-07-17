@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import {axiosApi} from "../interceptor.js";
 import {
     Table,
     Thead,
@@ -66,7 +66,7 @@ export default function VehicleMaintenanceTypeDetails() {
     const onConfirmDelete = async () => {
         try {
             const endpoint = `https://localhost:7265/api/VehicleMaintenanceType/${selectedType.id}/${selectedType.status ? 'deactivate' : 'activate'}`;
-            await axios.put(endpoint);
+            await axiosApi.put(endpoint);
             fetchVehicleMaintenanceTypes();
             onDialogClose();
         } catch (error) {
@@ -86,7 +86,7 @@ export default function VehicleMaintenanceTypeDetails() {
 
     const fetchVehicleMaintenanceTypes = async () => {
         try {
-            const response = await axios.get("https://localhost:7265/api/VehicleMaintenanceType");
+            const response = await axiosApi.get("https://localhost:7265/api/VehicleMaintenanceType");
             setVehicleDetails(response.data);
         } catch (error) {
             console.error("Error fetching vehicle maintenance types:", error);

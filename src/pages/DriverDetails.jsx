@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import {axiosApi} from "../interceptor.js";
 import {
     Table,
     Thead,
@@ -66,7 +66,7 @@ export default function DriverDetails() {
     const onConfirmDelete = async () => {
         try {
             const endpoint = `https://localhost:7265/api/Driver/${selectedDriver.userId}/${selectedDriver.status ? 'deactivate' : 'activate'}`;
-            await axios.put(endpoint);
+            await axiosApi.put(endpoint);
             fetchDriverDetails();
             onDialogClose();
         } catch (error) {
@@ -86,7 +86,7 @@ export default function DriverDetails() {
 
     const fetchDriverDetails = async () => {
         try {
-            const response = await axios.get("https://localhost:7265/api/Driver");
+            const response = await axiosApi.get("https://localhost:7265/api/Driver");
             setDriverDetails(response.data);
         } catch (error) {
             console.error("Error fetching driver details:", error);

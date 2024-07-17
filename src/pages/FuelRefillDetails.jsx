@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import {axiosApi} from "../interceptor.js";
 import {
     Table,
     Thead,
@@ -52,7 +52,7 @@ export default function FuelRefillDetails() {
 
     const fetchFuelRefill = async () => {
         try {
-            const response = await axios.get("https://localhost:7265/api/FuelRefill");
+            const response = await axiosApi.get("https://localhost:7265/api/FuelRefill");
             const responseData = response.data;
             setFuelRefillDetails(responseData);
         } catch (error) {
@@ -69,9 +69,9 @@ export default function FuelRefillDetails() {
     const onConfirmDelete = async () => {
         try {
             if (selectedFuelRefill.status) {
-                await axios.post(`https://localhost:7265/api/FuelRefill/deactivate/${selectedFuelRefill.fuelRefillId}`);
+                await axiosApi.post(`https://localhost:7265/api/FuelRefill/deactivate/${selectedFuelRefill.fuelRefillId}`);
             } else {
-                await axios.post(`https://localhost:7265/api/FuelRefill/activate/${selectedFuelRefill.fuelRefillId}`);
+                await axiosApi.post(`https://localhost:7265/api/FuelRefill/activate/${selectedFuelRefill.fuelRefillId}`);
             }
             fetchFuelRefill();
             onDialogClose();

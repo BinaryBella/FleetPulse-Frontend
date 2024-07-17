@@ -26,7 +26,8 @@ import {
 } from "@chakra-ui/react";
 import { FaImage } from "react-icons/fa6";
 import theme from "../config/ThemeConfig.jsx";
-import axios from "axios";
+import {axiosApi} from "../interceptor.js";
+
 
 export default function AddAccidentDetails() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ export default function AddAccidentDetails() {
 
   useEffect(() => {
     // Fetch vehicle registration numbers
-    axios.get('https://localhost:7265/api/VehicleRegistrationNumbers')
+    axiosApi.get('https://localhost:7265/api/VehicleRegistrationNumbers')
       .then(response => {
         console.log('Vehicle Registration Numbers data fetched:', response.data);
         setVehicleRegistrationNos(response.data); // Assuming data is an array of vehicle registration numbers
@@ -78,7 +79,7 @@ export default function AddAccidentDetails() {
 
   const handleSubmit = async (values) => {
     try {
-      const response = await axios.post('https://localhost:7265/api/Accidents', values);
+      const response = await axiosApi.post('https://localhost:7265/api/Accidents', values);
 
       if (!response.data.ok) {
         throw new Error(response.data.message || 'Failed to add accident details.');

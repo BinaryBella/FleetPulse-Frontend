@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import {axiosApi} from "../interceptor.js";
 import {
     Table,
     Thead,
@@ -66,7 +66,7 @@ export default function ManufacturerDetails() {
     const onConfirmDelete = async () => {
         try {
             const endpoint = `https://localhost:7265/api/Manufacture${selectedManufacturer.ManufactureId}/${selectedManufacturer.status ? 'deactivate' : 'activate'}`;
-            await axios.put(endpoint);
+            await axiosApi.put(endpoint);
             fetchManufacturers();
             onDialogClose();
         } catch (error) {
@@ -76,7 +76,7 @@ export default function ManufacturerDetails() {
 
     const fetchManufacturers = async () => {
         try {
-            const response = await axios.get("https://localhost:7265/api/Manufacture");
+            const response = await axiosApi.get("https://localhost:7265/api/Manufacture");
             setManufacturerDetails(response.data);
         } catch (error) {
             console.error("Error fetching manufacturers:", error);

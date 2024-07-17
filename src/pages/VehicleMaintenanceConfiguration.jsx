@@ -12,7 +12,7 @@ import {
     AlertDialogFooter,
     Checkbox
 } from '@chakra-ui/react';
-import axios from 'axios';
+import {axiosApi} from "../interceptor.js";
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/PageHeader.jsx';
 import theme from '../config/ThemeConfig.jsx';
@@ -29,7 +29,7 @@ const VehicleMaintenanceConfiguration = () => {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axios.get('https://localhost:7265/api/Vehicle');
+            const response = await axiosApi.get('https://localhost:7265/api/Vehicle');
             setVehicleRegNoDetails(response.data);
             console.log(response.data);
         } catch (error) {
@@ -40,7 +40,7 @@ const VehicleMaintenanceConfiguration = () => {
 
     const fetchVehicleMaintenanceTypes = async () => {
         try {
-            const response = await axios.get('https://localhost:7265/api/VehicleMaintenanceType');
+            const response = await axiosApi.get('https://localhost:7265/api/VehicleMaintenanceType');
             setMaintenanceTypeDetails(response.data);
         } catch (error) {
             console.error('Error fetching vehicle maintenance types:', error);
@@ -81,14 +81,7 @@ const VehicleMaintenanceConfiguration = () => {
             // Log the payload for debugging
             console.log('Payload:', payload);
 
-            // Make the API request
-            const response = await fetch('https://localhost:7265/api/VehicleMaintenanceConfiguration', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
+            const response = await axiosApi.post('https://localhost:7265/api/VehicleMaintenanceConfiguration', payload);
 
             const data = await response.json();
 

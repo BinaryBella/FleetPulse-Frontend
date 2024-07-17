@@ -1,11 +1,10 @@
-
-
 import { Input, Button, FormControl, FormLabel, Stack, FormErrorMessage, Box } from "@chakra-ui/react";
 import { Field, Formik} from "formik";
 import forgotPassword from "../assets/images/forgotPassword.png";
 import theme from "../config/ThemeConfig.jsx";
 import { useState } from 'react';
 import {Link, useNavigate} from 'react-router-dom';
+import {axiosApi} from "../interceptor.js";
 
 export default function ResetEmail() {
     const navigate = useNavigate();
@@ -33,12 +32,12 @@ export default function ResetEmail() {
                     try {
                         console.log("Submitting form with values:", values);
                         setLoading(true);
-                        const response = await fetch('https://localhost:7265/api/Auth/forgot-password', {
-                            method: 'POST',
+                        const response = await axiosApi.post('https://localhost:7265/api/Auth/forgot-password', {
+                            email: values.email
+                        }, {
                             headers: {
                                 'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({email: values.email})
+                            }
                         });
 
                         if (!response.ok) {

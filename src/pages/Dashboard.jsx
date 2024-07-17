@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import {axiosApi} from "../interceptor.js";
 import PageHeader from "../components/PageHeader.jsx";
 import DashboardCard from "../components/DashboardCard.jsx";
 import testc from "../assets/images/testc.png";
@@ -18,7 +19,7 @@ export default function Dashboard() {
         { label: 'Home', link: '/app/Dashboard' },
         { label: 'Dashboard', link: '/app/Dashboard' },
     ];
-    
+
     const headers = { 'Authorization': `Bearer ${localStorage.getItem("Token")}` };
 
     useEffect(() => {
@@ -28,24 +29,20 @@ export default function Dashboard() {
             window.location.reload();
         }
 
-        fetch('https://localhost:7265/api/Driver/count', { headers: headers })
-            .then(response => response.json())
-            .then(data => setDriverCount(data))
+        axiosApi.get('https://localhost:7265/api/Driver/count', { headers: headers })
+            .then(response => setDriverCount(response.data))
             .catch(error => console.error('Error fetching driver count:', error));
 
-        fetch('https://localhost:7265/api/Vehicle/count', { headers: headers })
-            .then(response => response.json())
-            .then(data => setVehicleCount(data))
+        axiosApi.get('https://localhost:7265/api/Vehicle/count', { headers: headers })
+            .then(response => setVehicleCount(response.data))
             .catch(error => console.error('Error fetching vehicle count:', error));
 
-        fetch('https://localhost:7265/api/Auth/count', { headers: headers })
-            .then(response => response.json())
-            .then(data => setUserCount(data))
+        axiosApi.get('https://localhost:7265/api/Auth/count', { headers: headers })
+            .then(response => setUserCount(response.data))
             .catch(error => console.error('Error fetching user count:', error));
 
-        fetch('https://localhost:7265/api/Trip/dailycount', { headers: headers })
-            .then(response => response.json())
-            .then(data => setDailyTripCount(data))
+        axiosApi.get('https://localhost:7265/api/Trip/dailycount', { headers: headers })
+            .then(response => setDailyTripCount(response.data))
             .catch(error => console.error('Error fetching daily trip count:', error));
     }, []);
 

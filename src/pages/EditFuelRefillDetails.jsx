@@ -14,7 +14,7 @@ import {
     Select
 } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
-import axios from "axios";
+import {axiosApi} from "../interceptor.js";
 import { useNavigate, useParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
 
@@ -30,7 +30,7 @@ export default function EditFuelRefillDetails() {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axios.get("https://localhost:7265/api/Vehicle");
+            const response = await axiosApi.get("https://localhost:7265/api/Vehicle");
             setVehicleRegNoDetails(response.data);
             console.log(response.data);
         } catch (error) {
@@ -42,7 +42,7 @@ export default function EditFuelRefillDetails() {
 
     const fetchFuelRefillDetails = async () => {
         try {
-            const response = await axios.get(`https://localhost:7265/api/FuelRefill/${id}`);
+            const response = await axiosApi.get(`https://localhost:7265/api/FuelRefill/${id}`);
             const data = response.data;
             console.log(data);
             setInitialValues({
@@ -67,12 +67,12 @@ export default function EditFuelRefillDetails() {
         try {
             const username = sessionStorage.getItem("Username");
             if (username) {
-                const response = await axios.get(`https://localhost:7265/api/Auth/userProfile?username=${username}`);
+                const response = await axiosApi.get(`https://localhost:7265/api/Auth/userProfile?username=${username}`);
                 const responseData = response.data;
                 setFieldValue("nic", responseData.nic);
                 setFieldValue("userId", responseData.userId);
                 if (!responseData.userId) {
-                    const userIdResponse = await axios.get(`https://localhost:7265/api/Auth/GetUserIdByNIC?nic=${responseData.nic}`);
+                    const userIdResponse = await axiosApi.get(`https://localhost:7265/api/Auth/GetUserIdByNIC?nic=${responseData.nic}`);
                     const userIdData = userIdResponse.data;
                     setFieldValue("userId", userIdData.userId);
                 }
@@ -123,23 +123,21 @@ export default function EditFuelRefillDetails() {
                         }
 
                         try {
-                            const response = await fetch(`https://localhost:7265/api/FuelRefill/${id}`, {
-                                method: 'PUT',
+                            const response = await axiosApi.put(`https://localhost:7265/api/FuelRefill/${id}`, {
+                                vehicleId: selectedVehicle.id,
+                                vehicleRegistrationNo: selectedVehicle.vehicleRegistrationNo,
+                                userId: values.userId,
+                                nic: values.nic,
+                                cost: values.cost,
+                                literCount: values.literCount,
+                                date: values.date,
+                                time: values.time,
+                                fType: values.fType,
+                                status: values.IsActive
+                            }, {
                                 headers: {
                                     'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    vehicleId: selectedVehicle.id,
-                                    vehicleRegistrationNo: selectedVehicle.vehicleRegistrationNo,
-                                    userId: values.userId,
-                                    nic: values.nic,
-                                    cost: values.cost,
-                                    literCount: values.literCount,
-                                    date: values.date,
-                                    time: values.time,
-                                    fType: values.fType,
-                                    status: values.IsActive
-                                })
+                                }
                             });
 
                             const data = await response.json();

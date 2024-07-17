@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Formik, Form, Field } from "formik";
 import { useNavigate } from "react-router-dom";
 import {
@@ -23,9 +23,9 @@ import { MdArrowDropDown } from "react-icons/md";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import PasswordStrengthBar from 'react-password-strength-bar';
 import $ from "jquery";
-
 import PageHeader from "../components/PageHeader.jsx";
 import theme from "../config/ThemeConfig.jsx";
+import {axiosApi} from "../interceptor.js";
 
 export default function AddHelperDetails() {
   const navigate = useNavigate();
@@ -112,24 +112,22 @@ export default function AddHelperDetails() {
 
       const status = values.isActive ? true : false;
 
-      const response = await fetch('https://localhost:7265/api/Helper', {
-        method: 'POST',
+      const response = await axiosApi.post('https://localhost:7265/api/Helper', {
+        FirstName: values.firstName,
+        LastName: values.lastName,
+        DateOfBirth: values.dob,
+        NIC: values.nic,
+        EmailAddress: values.emailAddress,
+        PhoneNo: values.phoneNo,
+        EmergencyContact: values.emergencyContact,
+        BloodGroup: values.bloodGroup,
+        UserName: values.userName,
+        Password: values.password,
+        Status: values.isActive,
+      }, {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          FirstName: values.firstName,
-          LastName: values.lastName,
-          DateOfBirth: values.dob,
-          NIC: values.nic,
-          EmailAddress: values.emailAddress,
-          PhoneNo: values.phoneNo,
-          EmergencyContact: values.emergencyContact,
-          BloodGroup: values.bloodGroup,
-          UserName: values.userName,
-          Password: values.password,
-          Status: values.isActive,
-        }),
       });
 
       const data = await response.json();
