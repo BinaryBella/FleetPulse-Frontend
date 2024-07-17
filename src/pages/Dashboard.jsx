@@ -18,6 +18,8 @@ export default function Dashboard() {
         { label: 'Home', link: '/app/Dashboard' },
         { label: 'Dashboard', link: '/app/Dashboard' },
     ];
+    
+    const headers = { 'Authorization': `Bearer ${localStorage.getItem("Token")}` };
 
     useEffect(() => {
         const hasRefreshed = sessionStorage.getItem('hasRefreshed');
@@ -26,22 +28,22 @@ export default function Dashboard() {
             window.location.reload();
         }
 
-        fetch('https://localhost:7265/api/Driver/count')
+        fetch('https://localhost:7265/api/Driver/count', { headers: headers })
             .then(response => response.json())
             .then(data => setDriverCount(data))
             .catch(error => console.error('Error fetching driver count:', error));
 
-        fetch('https://localhost:7265/api/Vehicle/count')
+        fetch('https://localhost:7265/api/Vehicle/count', { headers: headers })
             .then(response => response.json())
             .then(data => setVehicleCount(data))
             .catch(error => console.error('Error fetching vehicle count:', error));
 
-        fetch('https://localhost:7265/api/Auth/count')
+        fetch('https://localhost:7265/api/Auth/count', { headers: headers })
             .then(response => response.json())
             .then(data => setUserCount(data))
             .catch(error => console.error('Error fetching user count:', error));
 
-        fetch('https://localhost:7265/api/Trip/dailycount')
+        fetch('https://localhost:7265/api/Trip/dailycount', { headers: headers })
             .then(response => response.json())
             .then(data => setDailyTripCount(data))
             .catch(error => console.error('Error fetching daily trip count:', error));

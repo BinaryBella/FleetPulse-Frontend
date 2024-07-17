@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import {Navigate, Outlet} from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 const PrivateRoutes = ({ roles, children }) => {
@@ -12,10 +12,10 @@ const PrivateRoutes = ({ roles, children }) => {
 
     if (roles && roles.length > 0) {
         if (roles.includes('Admin') && isAdmin) {
-            return children;
+            return children ? children : <Outlet />;
         }
         if (roles.includes(userRole)) {
-            return children;
+            return children ? children : <Outlet />;
         }
         return <Navigate to="/UnauthorizedPage" />;
     }
@@ -25,7 +25,7 @@ const PrivateRoutes = ({ roles, children }) => {
 
 PrivateRoutes.propTypes = {
     roles: PropTypes.arrayOf(PropTypes.string), // roles should be an array of strings
-    children: PropTypes.node.isRequired, // children is a required node (React element)
+    children: PropTypes.node, // children is a required node (React element)
 };
 
 export default PrivateRoutes;
