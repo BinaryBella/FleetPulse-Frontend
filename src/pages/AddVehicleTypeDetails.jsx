@@ -33,24 +33,33 @@ export default function AddVehicleType() {
                 }
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to add vehicle type.');
-            }
-
-            if (data.message && data.message.toLowerCase().includes('exist')) {
-                setDialogMessage('Vehicle Type already exists');
-                onDialogOpen();
+            // Check for response status indicating success
+            if (response.status === 200) {
+                const responseData = response.data;
+                // Check if there's a specific message indicating the type already exists
+                if (responseData.message && responseData.message.toLowerCase().includes('exists')) {
+                    setDialogMessage('Vehicle Type already exists');
+                    onDialogOpen();
+                } else {
+                    setSuccessDialogMessage('Vehicle type added successfully.');
+                    onSuccessDialogOpen();
+                }
             } else {
-                setSuccessDialogMessage('Vehicle type added successfully.');
-                onSuccessDialogOpen();
+                throw new Error('Failed to add vehicle type.');
             }
         } catch (error) {
-            if (error instanceof TypeError) {
+            console.error('Error adding vehicle type:', error);
+            if (error.response && error.response.data && error.response.data.message) {
+                const errorMessage = error.response.data.message;
+                if (errorMessage.toLowerCase().includes('exist')) {
+                    setDialogMessage('Vehicle Type already exists');
+                } else {
+                    setDialogMessage(errorMessage);
+                }
+            } else if (error instanceof TypeError) {
                 setDialogMessage('Failed to connect to the server.');
             } else {
-                setDialogMessage(error.message || 'Failed to add vehicle type.');
+                setDialogMessage('Failed to add vehicle type.');
             }
             onDialogOpen();
         }

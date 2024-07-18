@@ -42,6 +42,7 @@ import {
     getFilteredRowModel
 } from '@tanstack/react-table';
 import { flexRender } from '@tanstack/react-table';
+import AddManufactureDetails from "./AddManufactureDetails.jsx";
 
 export default function ManufacturerDetails() {
     const [manufacturerDetails, setManufacturerDetails] = useState([]);
@@ -174,7 +175,7 @@ export default function ManufacturerDetails() {
                         width="300px"
                     />
                 </InputGroup>
-                <Link to="/app/AddManufacturerDetails">
+                <Link to="/app/AddManufactureDetails">
                     <Button
                         bg={theme.purple}
                         _hover={{ bg: theme.onHoverPurple }}

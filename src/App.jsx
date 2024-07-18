@@ -7,8 +7,6 @@ import MainLayout from './layouts/MainLayout';
 import AnonymousLayout from './layouts/AnonymousLayout';
 import NotificationHandler from './components/NotificationHandler';
 import PrivateRoutes from './utils/PrivateRoutes';
-
-// Page imports
 import Login from "./pages/Login.jsx";
 import Dashboard from './pages/Dashboard';
 import UserProfile from './pages/UserProfile';
@@ -44,19 +42,6 @@ import EditMaintenanceType from './pages/EditMaintenanceType';
 import EditMaintenance from "./pages/EditMaintenance.jsx";
 import EditFuelRefillDetails from "./pages/EditFuelRefillDetails.jsx";
 import EditVehicleMaintenanceConfiguration from "./pages/EditVehicleMaintenanceConfiguration.jsx";
-import Reports from "./pages/Reports.jsx";
-import VehicleReports from "./pages/VehicleReports.jsx";
-import VehicleDetailsReport from "./pages/VehicleDetailsReport.jsx";
-import VehicleTypeReport from "./pages/VehicleTypeReport.jsx";
-import VehicleManufacturerReport from "./pages/VehicleManufacturerReport.jsx";
-import VehicleMaintenanceReport from "./pages/VehicleMaintenanceReport.jsx";
-import VehicleMaintenanceTypeReport from "./pages/VehicleMaintenanceTypeReport.jsx";
-import VehicleFuelRefillReport from "./pages/VehicleFuelRefillReport.jsx";
-import DriverReport from "./pages/DriverReport.jsx";
-import HelperReport from "./pages/HelperReport.jsx";
-import StaffReport from "./pages/StaffReport.jsx";
-import TripReport from "./pages/TripReport.jsx";
-import AccidentReport from "./pages/AccidentReport.jsx";
 import ResetPasswordDriverHelper from "./pages/ResetPasswordDriverHelper.jsx";
 import VehicleMaintenanceConfiguration from "./pages/VehicleMaintenanceConfiguration.jsx";
 import VehicleMaintenanceConfigurationTable from "./pages/VehicleMaintenanceConfigurationTable.jsx";
@@ -126,19 +111,6 @@ export default function App() {
                         <Route path="/app/EditMaintenance/:id" element={<EditMaintenance />} />
                         <Route path="/app/EditFuelRefillDetails/:id" element={<EditFuelRefillDetails />} />
                         <Route path="/app/EditVehicleMaintenanceConfiguration/:id" element={<EditVehicleMaintenanceConfiguration />} />
-                        <Route path="/app/Reports/*" element={<Reports />} />
-                        <Route path="/app/VehicleReports" element={<VehicleReports />} />
-                        <Route path="/app/VehicleDetailsReport" element={<VehicleDetailsReport />} />
-                        <Route path="/app/VehicleTypeReport" element={<VehicleTypeReport />} />
-                        <Route path="/app/VehicleManufacturerReport" element={<VehicleManufacturerReport />} />
-                        <Route path="/app/VehicleMaintenanceReport" element={<VehicleMaintenanceReport />} />
-                        <Route path="/app/VehicleMaintenanceTypeReport" element={<VehicleMaintenanceTypeReport />} />
-                        <Route path="/app/VehicleFuelRefillReport" element={<VehicleFuelRefillReport />} />
-                        <Route path="/app/DriverReport" element={<DriverReport />} />
-                        <Route path="/app/HelperReport" element={<HelperReport />} />
-                        <Route path="/app/StaffReport" element={<StaffReport />} />
-                        <Route path="/app/TripReport" element={<TripReport />} />
-                        <Route path="/app/AccidentReport" element={<AccidentReport />} />
                         <Route path="/app/VehicleMaintenanceConfiguration" element={<VehicleMaintenanceConfiguration />} />
                         <Route path="/app/VehicleMaintenanceConfigurationTable" element={<VehicleMaintenanceConfigurationTable />} />
                         <Route path="/app/AddDriverDetails" element={<AddDriverDetails />} />

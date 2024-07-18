@@ -16,7 +16,7 @@ import {
 import theme from "../config/ThemeConfig.jsx";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
-import {axiosApi} from "../interceptor.js";
+import { axiosApi } from "../interceptor.js";
 
 export default function AddFuelRefillDetails() {
     const navigate = useNavigate();
@@ -53,10 +53,9 @@ export default function AddFuelRefillDetails() {
         }
     };
 
-
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axiosApi.get("https://localhost:7265/api/Vehicle");
+            const response = await axiosApi.get("https://localhost:7265/api/Vehicles");
             setVehicleRegNoDetails(response.data);
             console.log(response.data); // Log fetched data for debugging
         } catch (error) {
@@ -306,35 +305,35 @@ export default function AddFuelRefillDetails() {
                                 </Field>
                             </div>
                             <div className="flex flex-col gap-3">
-            <p>Time</p>
-            <Formik initialValues={{ time: "" }} onSubmit={(values) => console.log(values)}>
-                {({ errors, touched, setFieldValue }) => (
-                    <Form>
-                        <Field name="time" validate={validateTime}>
-                            {({ field }) => (
-                                <div>
-                                    <Input
-                                        {...field}
-                                        type="time"
-                                        variant="filled"
-                                        borderRadius="md"
-                                        px={3}
-                                        py={2}
-                                        mt={1}
-                                        width="400px"
-                                        id="time"
-                                        onChange={(e) => handleTimeChange(e, setFieldValue)}
-                                    />
-                                    {errors.time && touched.time && (
-                                        <div className="text-red-500">{errors.time}</div>
+                                <p>Time</p>
+                                <Formik initialValues={{ time: "" }} onSubmit={(values) => console.log(values)}>
+                                    {({ errors, touched, setFieldValue }) => (
+                                        <Form>
+                                            <Field name="time" validate={validateTime}>
+                                                {({ field }) => (
+                                                    <div>
+                                                        <Input
+                                                            {...field}
+                                                            type="time"
+                                                            variant="filled"
+                                                            borderRadius="md"
+                                                            px={3}
+                                                            py={2}
+                                                            mt={1}
+                                                            width="400px"
+                                                            id="time"
+                                                            onChange={(e) => handleTimeChange(e, setFieldValue)}
+                                                        />
+                                                        {errors.time && touched.time && (
+                                                            <div className="text-red-500">{errors.time}</div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </Field>
+                                        </Form>
                                     )}
-                                </div>
-                            )}
-                        </Field>
-                    </Form>
-                )}
-            </Formik>
-        </div>
+                                </Formik>
+                            </div>
                             <div className="flex flex-col gap-3">
                                 <p>Refill Type</p>
                                 <Field name="fType" validate={(value) => {

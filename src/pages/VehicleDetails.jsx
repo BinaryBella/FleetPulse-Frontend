@@ -60,7 +60,7 @@ export default function VehicleDetails() {
 
     const fetchVehicleDetails = async () => {
         try {
-            const response = await axiosApi.get('https://localhost:7265/api/Vehicle');
+            const response = await axiosApi.get('https://localhost:7265/api/Vehicles');
             setVehicleDetails(response.data);
             console.log(response.data);
         } catch (error) {
@@ -96,7 +96,7 @@ export default function VehicleDetails() {
 
     const columns = [
         {
-            accessorKey: 'registrationNo',
+            accessorKey: 'vehicleRegistrationNo',
             header: 'Reg No',
             meta: { isNumeric: false, filter: 'text' }
         },
@@ -111,27 +111,27 @@ export default function VehicleDetails() {
             meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: 'manufacturerName',
+            accessorKey: 'manufacturer',
             header: 'Manufacturer',
             meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: 'type',
+            accessorKey: 'vehicleType',
             header: 'Type',
             meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: 'fType',
+            accessorKey: 'fuelType',
             header: 'Fuel Type',
             meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: 'color',
+            accessorKey: 'vehicleColor',
             header: 'Color',
             meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: 'isActive',
+            accessorKey: 'status',
             header: 'Status',
             cell: info => (info.getValue() ? "Active" : "Inactive"),
             meta: { isNumeric: false, filter: 'boolean' }
@@ -149,7 +149,7 @@ export default function VehicleDetails() {
                         icon={<IoSettingsSharp />}
                     />
                     <MenuList>
-                        <Link to={`/app/EditVehicleDetails/${row.original.id}`}>
+                        <Link to={`/app/EditVehicleDetails/${row.original.vehicleId}`}>
                             <MenuItem>Edit</MenuItem>
                         </Link>
                         <MenuItem>
@@ -158,7 +158,7 @@ export default function VehicleDetails() {
                             </Link>
                         </MenuItem>
                         <MenuItem onClick={() => onClickDelete(row.original)}>
-                            {row.original.isActive ? "Deactivate" : "Activate"}
+                            {row.original.status ? "Deactivate" : "Activate"}
                         </MenuItem>
                     </MenuList>
                 </Menu>
@@ -276,11 +276,11 @@ export default function VehicleDetails() {
                                 <Td>{vehicle.vehicleRegistrationNo}</Td>
                                 <Td>{vehicle.licenseNo}</Td>
                                 <Td>{vehicle.licenseExpireDate}</Td>
-                                <Td>{vehicle.manufacturerName}</Td>
-                                <Td>{vehicle.typeOf}</Td>
-                                <Td>{vehicle.fType}</Td>
-                                <Td>{vehicle.color}</Td>
-                                <Td>{vehicle.isActive ? "Active" : "Inactive"}</Td>
+                                <Td>{vehicle.manufacturer}</Td>
+                                <Td>{vehicle.vehicleType}</Td>
+                                <Td>{vehicle.fuelType}</Td>
+                                <Td>{vehicle.vehicleColor}</Td>
+                                <Td>{vehicle.status ? "Active" : "Inactive"}</Td>
                                 <Td>
                                     <Menu>
                                         <MenuButton
@@ -292,7 +292,7 @@ export default function VehicleDetails() {
                                         />
                                         <MenuList>
                                             <MenuItem>
-                                                <Link to={`/app/EditVehicleDetails/${vehicle.id}`}>
+                                                <Link to={`/app/EditVehicleDetails/${vehicle.vehicleId}`}>
                                                     Edit
                                                 </Link>
                                             </MenuItem>
@@ -302,7 +302,7 @@ export default function VehicleDetails() {
                                                 </Link>
                                             </MenuItem>
                                             <MenuItem onClick={() => onClickDelete(vehicle)}>
-                                                {vehicle.isActive ? "Deactivate" : "Activate"}
+                                                {vehicle.status ? "Deactivate" : "Activate"}
                                             </MenuItem>
                                         </MenuList>
                                     </Menu>

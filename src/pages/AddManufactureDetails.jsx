@@ -32,24 +32,31 @@ export default function AddManufactureDetails() {
                 }
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to add manufacturer type.');
-            }
-
-            if (data.message && data.message.toLowerCase().includes('exist')) {
-                setDialogMessage('Manufacturer Type already exists');
-                onDialogOpen();
+            if (response.status === 200) {
+                const responseData = response.data;
+                if (responseData.message && responseData.message.toLowerCase().includes('exist')) {
+                    setDialogMessage('Manufacturer Type already exists');
+                    onDialogOpen();
+                } else {
+                    setSuccessDialogMessage('Manufacturer type added successfully.');
+                    onSuccessDialogOpen();
+                }
             } else {
-                setSuccessDialogMessage('Manufacturer type added successfully.');
-                onSuccessDialogOpen();
+                throw new Error('Failed to add manufacturer type.');
             }
         } catch (error) {
-            if (error instanceof TypeError) {
-                setDialogMessage('Failed to connect to the server.');
+            console.error('Error adding manufacturer type:', error);
+            if (error.response && error.response.data && error.response.data.message) {
+                const errorMessage = error.response.data.message;
+                if (errorMessage.toLowerCase().includes('exist')) {
+                    setDialogMessage('Manufacturer Type already exists');
+                } else if (error instanceof TypeError) {
+                    setDialogMessage('Failed to connect to the server.');
+                } else {
+                    setDialogMessage(errorMessage);
+                }
             } else {
-                setDialogMessage(error.message || 'Failed to add manufacturer type.');
+                setDialogMessage('Failed to add manufacturer type.');
             }
             onDialogOpen();
         }

@@ -15,7 +15,7 @@ import {
     Select
 } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
-import {axiosApi} from "../interceptor.js";
+import { axiosApi } from "../interceptor.js";
 import { useNavigate, useParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
 
@@ -31,7 +31,7 @@ export default function AddVehicleMaintenanceDetails() {
     const [initialValues, setInitialValues] = useState({
         vehicleRegistrationNo: "",
         maintenanceDate: "",
-        VehicleMaintenanceTypeId: 0,
+        VehicleMaintenanceTypeId: "",
         cost: "",
         serviceProvider: "",
         replacedParts: "",
@@ -41,7 +41,7 @@ export default function AddVehicleMaintenanceDetails() {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axiosApi.get("https://localhost:7265/api/Vehicle");
+            const response = await axiosApi.get("https://localhost:7265/api/Vehicles");
             setVehicleRegNoDetails(response.data);
             console.log("Vehicle registration numbers fetched:", response.data); // Detailed logging
         } catch (error) {
@@ -60,28 +60,27 @@ export default function AddVehicleMaintenanceDetails() {
         }
     };
 
-
     const fetchVehicleMaintenanceDetails = async () => {
         if (id) {
             try {
                 const response = await axiosApi.get(`https://localhost:7265/api/VehicleMaintenance/${id}`);
                 const maintenance = response.data;
                 setInitialValues({
-                    vehicleRegistrationNo: maintenance.id?.toString() || "", // Convert to string if not null
-                    maintenanceDate: maintenance.MaintenanceDate,
-                    VehicleMaintenanceTypeId: maintenance.VehicleMaintenanceTypeId,
-                    cost: maintenance.Cost.toString(), // Convert to string if needed
-                    serviceProvider: maintenance.ServiceProvider,
-                    replacedParts: maintenance.PartsReplaced,
-                    specialNotes: maintenance.SpecialNotes,
-                    isActive: maintenance.Status,
+                    ...initialValues,
+                    vehicleRegistrationNo: maintenance.vehicleRegistrationNo || "",
+                    maintenanceDate: maintenance.maintenanceDate || "",
+                    VehicleMaintenanceTypeId: maintenance.vehicleMaintenanceTypeId || "",
+                    cost: maintenance.cost || "",
+                    serviceProvider: maintenance.serviceProvider || "",
+                    replacedParts: maintenance.partsReplaced || "",
+                    specialNotes: maintenance.specialNotes || "",
+                    isActive: maintenance.isActive || false,
                 });
             } catch (error) {
                 console.error("Error fetching vehicle maintenance details:", error);
             }
         }
     };
-
 
     const fetchVehicleMaintenanceTypes = async () => {
         try {
@@ -106,45 +105,36 @@ export default function AddVehicleMaintenanceDetails() {
 
     const handleSubmit = async (values) => {
         try {
-            const payload = {
-                id: parseInt(values.vehicleRegistrationNo),  // Assuming this is vehicleId
-                vehicleRegistrationNo: values.vehicleRegistrationNo,
+            const response = await axiosApi.post('https://localhost:7265/api/VehicleMaintenance', {
+                Cost: values.cost,
                 MaintenanceDate: values.maintenanceDate,
-                VehicleMaintenanceTypeId: parseInt(values.VehicleMaintenanceTypeId),
-                Cost: parseFloat(values.cost),
                 PartsReplaced: values.replacedParts,
                 ServiceProvider: values.serviceProvider,
                 SpecialNotes: values.specialNotes,
                 Status: values.isActive,
-                vehicleId: parseInt(values.vehicleRegistrationNo) // Assuming vehicleId is the same as vehicleRegistrationNo for now
-            };
+                VehicleMaintenanceTypeId: values.VehicleMaintenanceTypeId,
+                vehicleRegistrationNo: values.vehicleRegistrationNo,
+                vehicleId: values.vehicleId // Ensure vehicleId is provided correctly
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
-            let response;
-            if (id) {
-                response = await axiosApi.put(`https://localhost:7265/api/VehicleMaintenance/${id}`, payload);
-            } else {
-                response = await axiosApi.post('https://localhost:7265/api/VehicleMaintenance', payload);
-            }
-
-            const data = response.data;
-
-            if (data.message && data.message.toLowerCase().includes('exist')) {
-                setDialogMessage('Vehicle Maintenance already exists');
-                onDialogOpen();
-            } else {
-                setSuccessDialogMessage(id ? 'Maintenance updated successfully' : 'Maintenance added successfully');
+            if (response.status === 200) {
+                setSuccessDialogMessage('Vehicle maintenance record added successfully.');
                 onSuccessDialogOpen();
-                navigate('/app/VehicleMaintenanceDetails');
+            } else {
+                throw new Error('Failed to add vehicle maintenance record.');
             }
         } catch (error) {
-            console.error("Error submitting vehicle maintenance details:", error);
-
-            if (error.response) {
-                setDialogMessage(`Server Error: ${error.response.data.message || error.response.statusText}`);
-            } else if (error.request) {
-                setDialogMessage("Network Error: Failed to connect to the server");
+            console.error('Error adding vehicle maintenance record:', error);
+            if (error.response && error.response.data && error.response.data.errors && error.response.data.errors.vehicleId) {
+                setDialogMessage(error.response.data.errors.vehicleId[0]);
+            } else if (error instanceof TypeError) {
+                setDialogMessage('Failed to connect to the server.');
             } else {
-                setDialogMessage(`Error: ${error.message}`);
+                setDialogMessage(error.message || 'Failed to add vehicle maintenance record.');
             }
             onDialogOpen();
         }

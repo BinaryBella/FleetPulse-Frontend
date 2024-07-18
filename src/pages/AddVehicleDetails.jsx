@@ -8,17 +8,17 @@ import {axiosApi} from "../interceptor.js";
 
 export default function AddVehicleDetails() {
     const navigate = useNavigate();
-    const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
-    const { isOpen: isSuccessDialogOpen, onOpen: onSuccessDialogOpen, onClose: onSuccessDialogClose } = useDisclosure();
+    const {isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose} = useDisclosure();
+    const {isOpen: isSuccessDialogOpen, onOpen: onSuccessDialogOpen, onClose: onSuccessDialogClose} = useDisclosure();
     const [dialogMessage, setDialogMessage] = useState("");
     const [successDialogMessage, setSuccessDialogMessage] = useState("");
     const [vehicleTypes, setVehicleTypes] = useState([]);
     const [manufacturers, setManufacturers] = useState([]);
 
     const breadcrumbs = [
-        { label: "Vehicle", link: "/VehicleDetails" },
-        { label: "Vehicle Details", link: "/app/VehicleDetails" },
-        { label: "Add Vehicle Details", link: "/app/AddvehicleDetails" },
+        {label: "Vehicle", link: "/VehicleDetails"},
+        {label: "Vehicle Details", link: "/app/VehicleDetails"},
+        {label: "Add Vehicle Details", link: "/app/AddvehicleDetails"},
     ];
 
     useEffect(() => {
@@ -43,40 +43,43 @@ export default function AddVehicleDetails() {
             });
     }, []);
 
-    const handleSubmit = async (values) => {
+    const handleSubmit = async (values, { setFieldError }) => {
         try {
             console.log(values);
 
-            // Mapping for Vehicle Types and Manufacturers
-            const vehicleTypeId = vehicleTypes.find(type => type.type === values.vehicleType)?.vehicleTypeId;
-            const manufactureId = manufacturers.find(manufacture => manufacture.manufacturer === values.manufactureId)?.manufactureId;
-
-            const fuelRefillMap = {
-                'Diesel': 1,
-                'Petrol': 2,
-            };
-
             const dataToSend = {
-                ...values,
-                vehicleTypeId: vehicleTypeId,
-                manufactureId: manufactureId,
-                fuelRefillId: fuelRefillMap[values.fuelType], // Changed to fuelType
+                vehicleRegistrationNo: values.vehicleRegistrationNo,
+                licenseNo: values.licenseNo,
+                licenseExpireDate: values.licenseExpireDate,
+                vehicleColor: values.vehicleColor,
+                vehicleType: values.vehicleType,
+                manufacturer: values.manufacturer,
+                fuelType: values.fuelType,
+                status: values.status
             };
 
-            axiosApi.post('https://localhost:7265/api/Vehicle', dataToSend)
-                .then(response => {
-                    setSuccessDialogMessage('Vehicle details added successfully.');
-                    onSuccessDialogOpen();
-                    console.log('Data added', response.data);
-                })
-                .catch(error => {
-                    console.error('There was an error adding the data!', error);
-                });
+            await axiosApi.post('https://localhost:7265/api/Vehicles', dataToSend);
+
+            setSuccessDialogMessage('Vehicle details added successfully.');
+            onSuccessDialogOpen();
+            console.log('Data added');
 
         } catch (error) {
-            console.error('Failed to add vehicle details.', error);
-            setDialogMessage('Failed to add vehicle details.');
-            onDialogOpen();
+            console.error('There was an error adding the data!', error);
+            if (error.response && error.response.data && error.response.data.message) {
+                const errorMessage = error.response.data.message;
+                if (errorMessage.includes('registration number')) {
+                    setFieldError('vehicleRegistrationNo', 'Vehicle registration number must be unique.');
+                } else if (errorMessage.includes('license number')) {
+                    setFieldError('licenseNo', 'License number must be unique.');
+                } else {
+                    setDialogMessage('Failed to add vehicle details.');
+                    onDialogOpen();
+                }
+            } else {
+                setDialogMessage('Failed to add vehicle details.');
+                onDialogOpen();
+            }
         }
     };
 
@@ -91,17 +94,17 @@ export default function AddVehicleDetails() {
 
     return (
         <>
-            <PageHeader title="Add Vehicle Details" breadcrumbs={breadcrumbs} />
+            <PageHeader title="Add Vehicle Details" breadcrumbs={breadcrumbs}/>
             <Formik
                 initialValues={{
                     vehicleRegistrationNo: "",
                     licenseNo: "",
                     licenseExpireDate: "",
                     vehicleColor: "",
-                    vehicleType: "", // Changed from text input to select
-                    manufactureId: "", // Changed from text input to select
-                    fuelType: "", // Changed to fuelType
-                    isActive: false,
+                    vehicleType: "",
+                    manufacturer: "",
+                    fuelType: "",
+                    status: false,
                 }}
                 onSubmit={handleSubmit}
                 validate={(values) => {
@@ -112,14 +115,14 @@ export default function AddVehicleDetails() {
                     if (!values.vehicleType) {
                         errors.vehicleType = "Vehicle type is required.";
                     }
-                    if (!values.manufactureId) {
-                        errors.manufactureId = "Manufacturer is required.";
+                    if (!values.manufacturer) {
+                        errors.manufacturer = "Manufacturer is required.";
                     }
                     if (!values.licenseNo) {
                         errors.licenseNo = "License No is required.";
                     }
                     if (!values.licenseExpireDate) {
-                        errors.licenseExpireDate = "license Expire Date No is required.";
+                        errors.licenseExpireDate = "License Expire Date is required.";
                     }
                     return errors;
                 }}
@@ -248,8 +251,8 @@ export default function AddVehicleDetails() {
                             )}
                         </div>
                         <div className="flex flex-col gap-3">
-                            <p>Manufacture</p>
-                            <Field name="manufactureId">
+                            <p>Manufacturer</p>
+                            <Field name="manufacturer">
                                 {({ field }) => (
                                     <Select
                                         {...field}
@@ -259,8 +262,8 @@ export default function AddVehicleDetails() {
                                         py={2}
                                         mt={1}
                                         width="400px"
-                                        id="manufactureId"
-                                        placeholder="Manufacture"
+                                        id="manufacturer"
+                                        placeholder="Manufacturer"
                                     >
                                         <option value="">Select Manufacturer</option>
                                         {manufacturers.map(manufacture => (
@@ -271,8 +274,8 @@ export default function AddVehicleDetails() {
                                     </Select>
                                 )}
                             </Field>
-                            {errors.manufactureId && touched.manufactureId && (
-                                <div className="text-red-500">{errors.manufactureId}</div>
+                            {errors.manufacturer && touched.manufacturer && (
+                                <div className="text-red-500">{errors.manufacturer}</div>
                             )}
                         </div>
                         <div className="flex flex-col gap-3">
@@ -300,7 +303,7 @@ export default function AddVehicleDetails() {
                                 <div className="text-red-500">{errors.fuelType}</div>
                             )}
                         </div>
-                        <Field name="isActive">
+                        <Field name="status">
                             {({ field, form }) => (
                                 <div>
                                     <Checkbox
@@ -312,8 +315,8 @@ export default function AddVehicleDetails() {
                                     >
                                         Is Active
                                     </Checkbox>
-                                    {form.errors.isActive && form.touched.isActive && (
-                                        <div className="text-red-500">{form.errors.isActive}</div>
+                                    {form.errors.status && form.touched.status && (
+                                        <div className="text-red-500">{form.errors.status}</div>
                                     )}
                                 </div>
                             )}
@@ -333,7 +336,7 @@ export default function AddVehicleDetails() {
                             </Button>
                             <Button
                                 bg={theme.purple}
-                                _hover={{ bg: theme.onHoverPurple }}
+                                _hover={{ bg: "blue.500" }}
                                 color="#ffffff"
                                 variant="solid"
                                 w="250px"
@@ -348,7 +351,7 @@ export default function AddVehicleDetails() {
             </Formik>
 
             <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay />
+                <AlertDialogOverlay/>
                 <AlertDialogContent
                     position="absolute"
                     top="30%"
@@ -365,7 +368,7 @@ export default function AddVehicleDetails() {
             </AlertDialog>
 
             <AlertDialog isOpen={isSuccessDialogOpen} onClose={onSuccessDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay />
+                <AlertDialogOverlay/>
                 <AlertDialogContent
                     position="absolute"
                     top="30%"

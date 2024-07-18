@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { IoIosNotifications } from "react-icons/io";
 import { FaUser } from "react-icons/fa";
 import theme from "../config/ThemeConfig.jsx";
-import axios from "axios";
+import {axiosApi} from "../interceptor.js";
 import './TopMenu.css';
 import { useNotifications } from '../context/NotificationContext';
 

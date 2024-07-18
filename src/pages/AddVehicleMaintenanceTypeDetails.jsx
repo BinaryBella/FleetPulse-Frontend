@@ -21,37 +21,29 @@ export default function AddVehicleMaintenanceTypeDetails() {
 
     const handleSubmit = async (values) => {
         try {
-            console.log(values.TypeName, values.isActive);
-            const status = values.isActive || false; // Ensure it defaults to false if not set
+            const status = values.isActive || false;
 
             const response = await axiosApi.post('https://localhost:7265/api/VehicleMaintenanceType', {
                 TypeName: values.TypeName,
-                status: status
+                Status: status
             }, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
 
-            const data = await response.json();
+            const data = response.data;
 
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to add maintenance type.');
-            }
-
-            if (data.message && data.message.toLowerCase().includes('exist')) {
-                setDialogMessage('Vehicle Maintenance Type already exists');
-                onDialogOpen();
-            } else {
-                setSuccessDialogMessage('Maintenance type added successfully.');
+            if (response.status === 200 && data.status === true) {
+                setSuccessDialogMessage(data.message || 'Maintenance type added successfully.');
                 onSuccessDialogOpen();
+            } else {
+                setDialogMessage(data.message || 'Failed to add maintenance type.');
+                onDialogOpen();
             }
         } catch (error) {
-            if (error instanceof TypeError) {
-                setDialogMessage('Failed to connect to the server.');
-            } else {
-                setDialogMessage(error.message || 'Failed to add maintenance type.');
-            }
+            console.error('Error adding maintenance type:', error);
+            setDialogMessage('Failed to connect to the server.');
             onDialogOpen();
         }
     };
