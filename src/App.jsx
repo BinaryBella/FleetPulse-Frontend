@@ -47,6 +47,7 @@ import VehicleMaintenanceConfiguration from "./pages/VehicleMaintenanceConfigura
 import VehicleMaintenanceConfigurationTable from "./pages/VehicleMaintenanceConfigurationTable.jsx";
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import NotFound from './pages/NotFound';
+import EditVehicleDetails from "./pages/EditVehicleDetails.jsx";
 
 export default function App() {
     const [isAdmin, setIsAdmin] = useState(false);
@@ -109,6 +110,7 @@ export default function App() {
                         <Route path="/app/AccidentDetails" element={<AccidentDetails />} />
                         <Route path="/app/EditMaintenanceType/:id" element={<EditMaintenanceType />} />
                         <Route path="/app/EditMaintenance/:id" element={<EditMaintenance />} />
+                        <Route path="/app/EditVehicleDetails/:id" element={<EditVehicleDetails />} />
                         <Route path="/app/EditFuelRefillDetails/:id" element={<EditFuelRefillDetails />} />
                         <Route path="/app/EditVehicleMaintenanceConfiguration/:id" element={<EditVehicleMaintenanceConfiguration />} />
                         <Route path="/app/VehicleMaintenanceConfiguration" element={<VehicleMaintenanceConfiguration />} />

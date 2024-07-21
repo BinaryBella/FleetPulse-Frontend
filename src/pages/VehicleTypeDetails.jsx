@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {axiosApi} from "../interceptor.js";
+import { axiosApi } from "../interceptor.js";
 import {
     Table,
     Thead,
@@ -65,7 +65,7 @@ export default function VehicleTypeDetails() {
 
     const onConfirmDelete = async () => {
         try {
-            const endpoint = `https://localhost:7265/api/VehicleType/${selectedType.id}/${selectedType.status ? 'deactivate' : 'activate'}`;
+            const endpoint = `https://localhost:7265/api/VehicleType/${selectedType.vehicleTypeId}/${selectedType.status ? 'deactivate' : 'activate'}`;
             await axiosApi.put(endpoint);
             fetchVehicleTypes();
             onDialogClose();
@@ -89,7 +89,6 @@ export default function VehicleTypeDetails() {
             const response = await axiosApi.get("https://localhost:7265/api/VehicleType");
             console.log(response.data);
             setVehicleDetails(response.data);
-
         } catch (error) {
             console.error("Error fetching vehicle types:", error);
         }
@@ -97,7 +96,7 @@ export default function VehicleTypeDetails() {
 
     const columns = [
         {
-            accessorKey: 'typeName',
+            accessorKey: 'type',
             header: 'Vehicle Type',
             meta: { isNumeric: false, filter: 'text' }
         },
@@ -121,7 +120,7 @@ export default function VehicleTypeDetails() {
                     />
                     <MenuList>
                         <MenuItem>
-                            <Link to={`/app/EditVehicleType/${row.original.id}`}>
+                            <Link to={`/app/EditVehicleType/${row.original.vehicleTypeId}`}>
                                 Edit
                             </Link>
                         </MenuItem>
@@ -255,7 +254,7 @@ export default function VehicleTypeDetails() {
                                         />
                                         <MenuList>
                                             <MenuItem>
-                                                <Link to='{/app/EditVehicleType/${vehicleType.vehicleTypeId}}'>
+                                                <Link to={`/app/EditVehicleType/${vehicleType.vehicleTypeId}`}>
                                                     Edit
                                                 </Link>
                                             </MenuItem>
@@ -270,31 +269,39 @@ export default function VehicleTypeDetails() {
                     )}
                 </Tbody>
             </Table>
-            {!isEmpty && (
-                <Pagination
-                    pageCount={pageCount}
-                    onPageChange={handlePageClick}
-                />
-            )}
-
-            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom" leastDestructiveRef={cancelRef}>
-                <AlertDialogOverlay />
-                <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
-                    <AlertDialogHeader>{selectedType?.status ? "Deactivate" : "Activate"} Vehicle Type</AlertDialogHeader>
-                    <AlertDialogBody>
-                        Are you sure you want to {selectedType?.status ? "deactivate" : "activate"} {selectedType?.typeName} Vehicle Type?
-                    </AlertDialogBody>
-                    <AlertDialogFooter>
-                        <div className="flex flex-row gap-8">
-                            <Button bg="gray.400" _hover={{ bg: "gray.500" }} color="#ffffff" variant="solid" onClick={onDialogClose} ref={cancelRef}>
+            <Pagination
+                pageCount={pageCount}
+                currentPage={currentPage}
+                onPageChange={handlePageClick}
+            />
+            <AlertDialog
+                isOpen={isDialogOpen}
+                leastDestructiveRef={cancelRef}
+                onClose={onDialogClose}
+                isCentered
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                            {selectedType?.status ? "Deactivate" : "Activate"} Vehicle Type
+                        </AlertDialogHeader>
+                        <AlertDialogBody>
+                            Are you sure you want to {selectedType?.status ? "deactivate" : "activate"} this vehicle type?
+                        </AlertDialogBody>
+                        <AlertDialogFooter>
+                            <Button ref={cancelRef} onClick={onDialogClose}>
                                 Cancel
                             </Button>
-                            <Button colorScheme='red' color="#FFFFFF" onClick={onConfirmDelete}>
+                            <Button
+                                colorScheme="red"
+                                onClick={onConfirmDelete}
+                                ml={3}
+                            >
                                 {selectedType?.status ? "Deactivate" : "Activate"}
                             </Button>
-                        </div>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
             </AlertDialog>
         </div>
     );

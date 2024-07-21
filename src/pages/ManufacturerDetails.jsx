@@ -66,10 +66,16 @@ export default function ManufacturerDetails() {
 
     const onConfirmDelete = async () => {
         try {
-            const endpoint = `https://localhost:7265/api/Manufacture${selectedManufacturer.ManufactureId}/${selectedManufacturer.status ? 'deactivate' : 'activate'}`;
+            const endpoint = `https://localhost:7265/api/Manufacture/${selectedManufacturer.ManufactureId}/${selectedManufacturer.status ? 'deactivate' : 'activate'}`;
             await axiosApi.put(endpoint);
             fetchManufacturers();
             onDialogClose();
+            toast({
+                title: `${selectedManufacturer.status ? "Deactivated" : "Activated"} Manufacturer`,
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
         } catch (error) {
             console.error("Error updating manufacturer status:", error);
         }

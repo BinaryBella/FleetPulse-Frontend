@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import {axiosApi} from "../interceptor.js";
+import { axiosApi } from "../interceptor.js";
 import {
     Table,
     Thead,
@@ -26,7 +26,6 @@ import {
     AlertDialogFooter,
     AlertDialog,
     useDisclosure,
-    useToast
 } from "@chakra-ui/react";
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
@@ -52,7 +51,6 @@ export default function VehicleDetails() {
     const cancelRef = useRef();
     const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
     const itemsPerPage = 10;
-    const toast = useToast();
 
     useEffect(() => {
         fetchVehicleDetails();
@@ -65,32 +63,38 @@ export default function VehicleDetails() {
             console.log(response.data);
         } catch (error) {
             console.error("Error fetching vehicle details:", error);
-            toast({
-                title: "Error",
-                description: "Error fetching vehicle details",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
         }
     };
 
     const onClickDelete = (vehicle) => {
-        setSelectedVehicle(vehicle);
+        setSelectedVehicle(vehicle); // Ensure vehicle object is correctly set here
         onDialogOpen();
     };
 
     const onConfirmDelete = async () => {
         try {
-            const endpoint = `https://localhost:7265/api/Vehicle/${selectedVehicle.id}/${selectedVehicle.isActive ? 'deactivate' : 'activate'}`;
-            await axiosApi.put(endpoint);
-            fetchVehicleDetails();
-            onDialogClose();
-        } catch (error) {
-            if (error.response && error.response.status === 400 && error.response.data === "Vehicle is active and associated with vehicle records. Cannot deactivate.") {
-            } else {
-                console.error("Error updating vehicle status:", error);
+            if (!selectedVehicle || !selectedVehicle.vehicleId) {
+                console.error('Selected vehicle or its ID is undefined.');
+                return;
             }
+
+            const endpoint = `https://localhost:7265/api/Vehicles/${selectedVehicle.vehicleId}/${selectedVehicle.status ? 'deactivate' : 'activate'}`;
+
+            const response = await axiosApi.put(endpoint, null, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Handle successful response
+            if (response.status === 200 || response.status === 204) {
+                fetchVehicleDetails(); // Refresh vehicle details after successful update
+                onDialogClose(); // Close dialog after successful update
+            } else {
+                console.error('Failed to update vehicle status');
+            }
+        } catch (error) {
+            console.error('Error updating vehicle status:', error);
         }
     };
 
@@ -236,30 +240,26 @@ export default function VehicleDetails() {
                 <Thead>
                     {table.getHeaderGroups().map(headerGroup => (
                         <Tr key={headerGroup.id}>
-                            {headerGroup.headers.map(header => {
-                                const meta = header.column.columnDef.meta;
-                                return (
-                                    <Th
-                                        key={header.id}
-                                        onClick={header.column.getToggleSortingHandler()}
-                                        isNumeric={meta?.isNumeric}
-                                        className="custom-table-th"
-                                    >
-                                        {flexRender(header.column.columnDef.header, header.getContext())}
-                                        <chakra.span pl="4">
-                                            {header.column.getIsSorted() ? (
-                                                header.column.getIsSorted() === "desc" ? (
-                                                    <TriangleDownIcon aria-label="sorted descending" style={iconStyle} />
-                                                ) : (
-                                                    <TriangleUpIcon aria-label="sorted ascending" style={iconStyle} />
-                                                )
-                                            ) : (
-                                                <TiArrowUnsorted aria-label="unsorted" style={iconStyle} />
-                                            )}
-                                        </chakra.span>
-                                    </Th>
-                                );
-                            })}
+                            {headerGroup.headers.map(header => (
+                                <Th
+                                    key={header.id}
+                                    onClick={header.column.getToggleSortingHandler()}
+                                    isNumeric={header.column.columnDef.meta?.isNumeric}
+                                >
+                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                    {header.column.getIsSorted() ? (
+                                        header.column.getIsSorted() === 'desc' ? (
+                                            <TriangleDownIcon style={iconStyle} />
+                                        ) : (
+                                            <TriangleUpIcon style={iconStyle} />
+                                        )
+                                    ) : (
+                                        header.column.columnDef.header !== 'Actions' && (
+                                            <TiArrowUnsorted style={iconStyle} />
+                                        )
+                                    )}
+                                </Th>
+                            ))}
                         </Tr>
                     ))}
                 </Thead>
@@ -267,69 +267,44 @@ export default function VehicleDetails() {
                     {isEmpty ? (
                         <Tr>
                             <Td colSpan={columns.length} textAlign="center">
-                                <Text>No results found for {searchInput}</Text>
+                                No data found
                             </Td>
                         </Tr>
                     ) : (
-                        currentData.map((vehicle, index) => (
+                        currentData.map((row, index) => (
                             <Tr key={index}>
-                                <Td>{vehicle.vehicleRegistrationNo}</Td>
-                                <Td>{vehicle.licenseNo}</Td>
-                                <Td>{vehicle.licenseExpireDate}</Td>
-                                <Td>{vehicle.manufacturer}</Td>
-                                <Td>{vehicle.vehicleType}</Td>
-                                <Td>{vehicle.fuelType}</Td>
-                                <Td>{vehicle.vehicleColor}</Td>
-                                <Td>{vehicle.status ? "Active" : "Inactive"}</Td>
-                                <Td>
-                                    <Menu>
-                                        <MenuButton
-                                            color={theme.purple}
-                                            as={IconButton}
-                                            aria-label='profile-options'
-                                            fontSize='20px'
-                                            icon={<IoSettingsSharp />}
-                                        />
-                                        <MenuList>
-                                            <MenuItem>
-                                                <Link to={`/app/EditVehicleDetails/${vehicle.vehicleId}`}>
-                                                    Edit
-                                                </Link>
-                                            </MenuItem>
-                                            <MenuItem>
-                                                <Link to="/app/VehicleMaintenanceConfigurationTable">
-                                                    Vehicle Maintenance Configuration
-                                                </Link>
-                                            </MenuItem>
-                                            <MenuItem onClick={() => onClickDelete(vehicle)}>
-                                                {vehicle.status ? "Deactivate" : "Activate"}
-                                            </MenuItem>
-                                        </MenuList>
-                                    </Menu>
-                                </Td>
+                                {table.getRowModel().rows[index].getVisibleCells().map(cell => (
+                                    <Td key={cell.id}>
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </Td>
+                                ))}
                             </Tr>
                         ))
                     )}
                 </Tbody>
             </Table>
-            {!isEmpty && (
+
+            <Box mt="4">
                 <Pagination
                     pageCount={pageCount}
                     onPageChange={handlePageClick}
+                    currentPage={currentPage}
                 />
-            )}
+            </Box>
 
             <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} leastDestructiveRef={cancelRef}>
                 <AlertDialogOverlay>
                     <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
-                        <AlertDialogHeader>{selectedVehicle?.isActive ? "Deactivate" : "Activate"} Vehicle</AlertDialogHeader>
+                        <AlertDialogHeader>
+                            {selectedVehicle?.status ? "Deactivate" : "Activate"} Vehicle
+                        </AlertDialogHeader>
                         <AlertDialogBody>
-                            Are you sure you want to {selectedVehicle?.isActive ? "deactivate" : "activate"} this vehicle?
+                            Are you sure you want to {selectedVehicle?.status ? "deactivate" : "activate"} this vehicle?
                         </AlertDialogBody>
                         <AlertDialogFooter>
                             <Button ref={cancelRef} onClick={onDialogClose}>Cancel</Button>
-                            <Button colorScheme="red" onClick={onConfirmDelete} ml={3}>
-                                {selectedVehicle?.isActive ? "Deactivate" : "Activate"}
+                            <Button colorScheme={selectedVehicle?.status ? "red" : "red"} onClick={onConfirmDelete} ml={3}>
+                                {selectedVehicle?.status ? "Deactivate" : "Activate"}
                             </Button>
                         </AlertDialogFooter>
                     </AlertDialogContent>
