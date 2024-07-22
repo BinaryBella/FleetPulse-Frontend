@@ -60,8 +60,9 @@ export default function AccidentDetails() {
 
   const fetchAccidentDetails = async () => {
     try {
-      const response = await axiosApi.get("https://localhost:7265/api/AccidentDetails");
+      const response = await axiosApi.get("https://localhost:7265/api/Accidents");
       setAccidentDetails(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error("Error fetching accident details:", error);
     }
@@ -233,18 +234,17 @@ export default function AccidentDetails() {
             value={searchInput}
             onChange={handleSearchInputChange}
             variant="filled"
-            width="225px"
+            width="300px"
           />
         </InputGroup>
         <Link to="/app/AddAccidentDetails">
           <Button
-            bg={theme.purple}
-            _hover={{ bg: theme.onHoverPurple }}
-            color="white"
-            variant="solid"
-            ml="auto"
-            mr="37.5px"
-            fontSize="0.75rem"
+              bg={theme.purple}
+              _hover={{ bg: theme.onHoverPurple }}
+              color="white"
+              variant="solid"
+              w="180px"
+              mr="50px"
           >
             Add New Accident
           </Button>
@@ -295,12 +295,12 @@ export default function AccidentDetails() {
           ) : (
             currentData.map((accident, index) => (
               <Tr key={index}>
-                <Td fontSize="0.75rem">{accident.driverInjured}</Td>
+                <Td fontSize="0.75rem">{accident.driverInjuredStatus}</Td>
                 <Td fontSize="0.75rem">{accident.dateTime}</Td>
                 <Td fontSize="0.75rem">{accident.venue}</Td>
-                <Td fontSize="0.75rem">{accident.helperInjured}</Td>
-                <Td fontSize="0.75rem">{accident.vehicleDamaged}</Td>
-                <Td fontSize="0.75rem">{accident.vehicleRegistrationNo}</Td>
+                <Td fontSize="0.75rem">{accident.helperInjuredStatus}</Td>
+                <Td fontSize="0.75rem">{accident.vehicleDamagedStatus}</Td>
+                <Td fontSize="0.75rem">{accident.vehicleId}</Td>
                 <Td fontSize="0.75rem">{accident.driversNic}</Td>
                 <Td fontSize="0.75rem">{accident.helpersNic}</Td>
                 <Td fontSize="0.75rem">{accident.loss}</Td>

@@ -227,8 +227,8 @@ export default function StaffDetails() {
                         _hover={{ bg: theme.onHoverPurple }}
                         color="white"
                         variant="solid"
-                        w="260px"
-                        mr="10px"
+                        w="180px"
+                        mr="50px"
                     >
                         Add New Staff
                     </Button>

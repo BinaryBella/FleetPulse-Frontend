@@ -186,7 +186,7 @@ export default function TripDetails() {
                         _hover={{ bg: theme.onHoverPurple }}
                         color="white"
                         variant="solid"
-                        w="260px"
+                        w="180px"
                         mr="50px"
                     >
                         Add New Trip

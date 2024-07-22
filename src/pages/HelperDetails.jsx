@@ -175,6 +175,7 @@ export default function HelperDetails() {
             _hover={{ bg: theme.onHoverPurple }}
             color='white'
             variant='solid'
+            marginRight='50'
           >
             Add New Helper
           </Button>
