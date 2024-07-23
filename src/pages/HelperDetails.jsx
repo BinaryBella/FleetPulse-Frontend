@@ -230,6 +230,9 @@ export default function HelperDetails() {
                     <MenuButton as={IconButton} aria-label='options' icon={<IoSettingsSharp />} />
                     <MenuList>
                       <MenuItem onClick={() => navigate(`/app/EditHelperDetails/${helper.userId}`)}>Edit</MenuItem>
+                      <MenuItem>
+                        <Link to={`/app/ResetPasswordDriverHelper?username=${helper.userName}`}>Reset Password</Link>
+                      </MenuItem>
                       <MenuItem onClick={() => onClickInactive(helper)}>{helper.status ? 'Deactivate' : 'Activate'}</MenuItem>
                     </MenuList>
                   </Menu>

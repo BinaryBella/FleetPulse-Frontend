@@ -182,7 +182,7 @@ export default function DriverDetails() {
                             </Link>
                         </MenuItem>
                         <MenuItem>
-                            <Link to={`/app/ResetPassword/${row.original.id}`}>
+                            <Link to={`/app/ResetPasswordDriverHelper/${row.original.id}`}>
                                 Reset Password
                             </Link>
                         </MenuItem>
@@ -330,7 +330,7 @@ export default function DriverDetails() {
                                                 <Link to={`/app/EditDriverDetails/${driver.userId}`}>Edit</Link>
                                             </MenuItem>
                                             <MenuItem>
-                                                <Link to={`/app/ResetPassword/${driver.userId}`}>Reset Password</Link>
+                                                <Link to={`/app/ResetPasswordDriverHelper?username=${driver.userName}`}>Reset Password</Link>
                                             </MenuItem>
                                             <MenuItem onClick={() => onClickMoreDetails(driver)}>
                                                 More Details

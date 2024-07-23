@@ -3,12 +3,6 @@ import {Field, Form, Formik} from "formik";
 import {useNavigate} from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
 import {
-    AlertDialog,
-    AlertDialogBody,
-    AlertDialogContent,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogOverlay,
     Box,
     Button,
     Checkbox,
@@ -16,13 +10,17 @@ import {
     Input,
     InputGroup,
     InputRightElement,
+    Modal,
+    ModalBody,
+    ModalContent, ModalFooter,
+    ModalHeader,
+    ModalOverlay,
     Select,
     Tab,
     TabList,
     TabPanel,
     TabPanels,
     Tabs,
-    useDisclosure,
 } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
 import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
@@ -30,13 +28,14 @@ import PasswordStrengthBar from 'react-password-strength-bar';
 import $ from "jquery";
 import {axiosApi} from "../interceptor.js";
 import './AddDriverDetails.css'
+import emailsend from "../assets/images/emailsend.png";
 
 export default function AddDriverDetails() {
     const navigate = useNavigate();
-    const {isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose} = useDisclosure();
-    const [dialogMessage, setDialogMessage] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const onModalClose = () => setIsModalOpen(false);
     const [initialValues, setInitialValues] = useState({
         FirstName: "",
         LastName: "",
@@ -63,7 +62,6 @@ export default function AddDriverDetails() {
     useEffect(() => {
         // Simulated fetch function; replace with actual API call
         const fetchDriverData = async () => {
-            setIsLoading(true);
             try {
                 // Replace with your API endpoint
                 const response = await axiosApi.get("https://localhost:7265/api/Driver");
@@ -92,8 +90,6 @@ export default function AddDriverDetails() {
             } catch (error) {
                 console.error("Error fetching data:", error);
                 // Handle error state or show an error message
-            } finally {
-                setIsLoading(false);
             }
         };
 
@@ -107,32 +103,24 @@ export default function AddDriverDetails() {
         });
     }, []);
 
-
+    const handleSuccessModalClose = () => {
+        setIsModalOpen(false);
+        navigate("/app/DriverDetails");
+    };
     const handleSubmit = async (values, actions) => {
         try {
-            console.log(values);
+            const response = await axiosApi.post("https://localhost:7265/api/Driver", values);
 
-            const response = await axiosApi.post("https://localhost:7265/api/Driver", values, {
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setDialogMessage("Driver details saved successfully.");
-                onDialogOpen();
-
-                // Reset form after successful submission
+            if (response.status === 201) {
+                setModalMessage(`Driver added successfully. User credentials have been sent!`);
+                setIsModalOpen(true);
                 actions.resetForm();
             } else {
-                setDialogMessage("Failed to save driver details.");
-                onDialogOpen();
+                throw new Error('Failed to add driver');
             }
         } catch (error) {
-            // Handle errors (simulated with dialog for demo)
-            setDialogMessage("Failed to save driver details.");
-            onDialogOpen();
+            setModalMessage(`Failed to add driver: ${error.message}`);
+            setIsModalOpen(true);
         }
     };
 
@@ -140,17 +128,9 @@ export default function AddDriverDetails() {
         navigate("/app/DriverDetails");
     };
 
-    const handleSuccessDialogClose = () => {
-        onDialogClose();
-        navigate("/app/DriverDetails");
-    };
-
     return (
         <>
             <PageHeader title="Add Driver Details" breadcrumbs={breadcrumbs}/>
-            {isLoading ? (
-                <p>Loading...</p>
-            ) : (
                 <Box className="mr-14">
                     <Tabs>
                         <TabList>
@@ -551,21 +531,24 @@ export default function AddDriverDetails() {
                         </Button>
                     </div>
                 </Box>
-            )}
 
-            {/* Dialog for showing error message */}
-            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay/>
-                <AlertDialogContent position="absolute" top="30%" left="50%" transform="translate(-50%, -50%)">
-                    <AlertDialogHeader>Success</AlertDialogHeader>
-                    <AlertDialogBody>{dialogMessage}</AlertDialogBody>
-                    <AlertDialogFooter>
-                        <Button bg={theme.purple} color="#FFFFFF" onClick={handleSuccessDialogClose}>
+
+            <Modal isOpen={isModalOpen} onClose={onModalClose}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Success</ModalHeader>
+                    <ModalBody>
+                        {/* eslint-disable-next-line react/jsx-no-undef */}
+                        <img src={emailsend} alt="email send" width="300" height="300"/>
+                        <p>{modalMessage}</p>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button bg={theme.purple} color="#FFFFFF" onClick={handleSuccessModalClose}>
                             Ok
                         </Button>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </>
     );
 }
