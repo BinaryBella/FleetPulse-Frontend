@@ -1,47 +1,53 @@
-import { useState, useEffect, useRef } from "react";
+import {useEffect, useRef, useState} from "react";
 import {axiosApi} from "../interceptor.js";
 import {
-    Table,
-    Thead,
-    Tbody,
-    Tr,
-    Th,
-    Td,
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogContent,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogOverlay,
     Box,
     Button,
-    Menu,
-    MenuButton,
-    IconButton,
-    MenuList,
-    MenuItem,
-    Input,
     chakra,
+    IconButton,
+    Input,
     InputGroup,
     InputLeftElement,
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuList,
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
+    Table,
+    Tbody,
+    Td,
     Text,
-    AlertDialogOverlay,
-    AlertDialogContent,
-    AlertDialogHeader,
-    AlertDialogBody,
-    AlertDialogFooter,
-    AlertDialog,
+    Th,
+    Thead,
+    Tr,
     useDisclosure,
     useToast
 } from "@chakra-ui/react";
-import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
-import { Link } from "react-router-dom";
-import { TiArrowUnsorted } from "react-icons/ti";
-import { IoSettingsSharp, IoSearchOutline } from "react-icons/io5";
+import {TriangleDownIcon, TriangleUpIcon} from "@chakra-ui/icons";
+import {Link} from "react-router-dom";
+import {TiArrowUnsorted} from "react-icons/ti";
+import {IoSearchOutline, IoSettingsSharp} from "react-icons/io5";
 import theme from "../config/ThemeConfig.jsx";
 import PageHeader from "../components/PageHeader.jsx";
 import Pagination from "../components/Pagination";
 import {
-    useReactTable,
+    flexRender,
     getCoreRowModel,
+    getFilteredRowModel,
     getSortedRowModel,
-    getFilteredRowModel
+    useReactTable
 } from '@tanstack/react-table';
-import { flexRender } from '@tanstack/react-table';
 
 export default function DriverDetails() {
     const [driverDetails, setDriverDetails] = useState([]);
@@ -50,7 +56,8 @@ export default function DriverDetails() {
     const [searchInput, setSearchInput] = useState("");
     const [selectedDriver, setSelectedDriver] = useState(null);
     const cancelRef = useRef();
-    const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
+    const {isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose} = useDisclosure();
+    const { isOpen, onOpen, onClose } = useDisclosure()
     const itemsPerPage = 10;
     const toast = useToast();
 
@@ -62,6 +69,11 @@ export default function DriverDetails() {
         setSelectedDriver(driver);
         onDialogOpen();
     };
+
+    const onClickMoreDetails = (driver) => {
+        setSelectedDriver(driver);
+        onOpen();
+    }
 
     const onConfirmDelete = async () => {
         try {
@@ -88,6 +100,7 @@ export default function DriverDetails() {
         try {
             const response = await axiosApi.get("https://localhost:7265/api/Driver");
             setDriverDetails(response.data);
+            console.log(response.data)
         } catch (error) {
             console.error("Error fetching driver details:", error);
         }
@@ -97,70 +110,70 @@ export default function DriverDetails() {
         {
             accessorKey: 'firstName',
             header: 'First Name',
-            meta: { isNumeric: false, filter: 'text' }
+            meta: {isNumeric: false, filter: 'text'}
         },
         {
             accessorKey: 'lastName',
             header: 'Last Name',
-            meta: { isNumeric: false, filter: 'text' }
+            meta: {isNumeric: false, filter: 'text'}
         },
-        {
-            accessorKey: 'DoB',
-            header: 'DoB',
-            meta: { isNumeric: false, filter: 'text' }
-        },
+        // {
+        //     accessorKey: 'DoB',
+        //     header: 'DoB',
+        //     meta: { isNumeric: false, filter: 'text' }
+        // },
         {
             accessorKey: 'lNIC',
             header: 'NIC',
-            meta: { isNumeric: false, filter: 'text' }
+            meta: {isNumeric: false, filter: 'text'}
         },
         {
             accessorKey: 'driverLicenseNo',
-            header: 'Driver License No',
-            meta: { isNumeric: false, filter: 'text' }
+            header: 'License No',
+            meta: {isNumeric: false, filter: 'text'}
         },
         {
             accessorKey: 'licenseExpiryDate',
-            header: 'License Expiry Date',
-            meta: { isNumeric: false, filter: 'text' }
+            header: 'License Exp Date',
+            meta: {isNumeric: false, filter: 'text'}
         },
-        {
-            accessorKey: 'emailAddress',
-            header: 'Email Address',
-            meta: { isNumeric: false, filter: 'text' }
-        },
+        // {
+        //     accessorKey: 'emailAddress',
+        //     header: 'Email Address',
+        //     meta: { isNumeric: false, filter: 'text' }
+        // },
         {
             accessorKey: 'phoneNo',
             header: 'Phone No',
-            meta: { isNumeric: false, filter: 'text' }
+            meta: {isNumeric: false, filter: 'text'}
         },
         {
             accessorKey: 'emergencyContact',
             header: 'Emergency Contact',
-            meta: { isNumeric: false, filter: 'text' }
+            meta: {isNumeric: false, filter: 'text'}
         },
-        {
-            accessorKey: 'bloodGroup',
-            header: 'Blood Group',
-            meta: { isNumeric: false, filter: 'text' }
-        },
+        // {
+        //     accessorKey: 'bloodGroup',
+        //     header: 'Blood Group',
+        //     meta: { isNumeric: false, filter: 'text' }
+        // },
         {
             accessorKey: 'status',
             header: 'Status',
             cell: info => (info.getValue() ? "Active" : "Inactive"),
-            meta: { isNumeric: false, filter: 'boolean' }
+            meta: {isNumeric: false, filter: 'boolean'}
         },
         {
             id: 'actions',
             header: 'Actions',
-            cell: ({ row }) => (
+            cell: ({row}) => (
                 <Menu>
                     <MenuButton
                         color={theme.purple}
                         as={IconButton}
                         aria-label="profile-options"
                         fontSize="20px"
-                        icon={<IoSettingsSharp />}
+                        icon={<IoSettingsSharp/>}
                     />
                     <MenuList>
                         <MenuItem>
@@ -173,13 +186,16 @@ export default function DriverDetails() {
                                 Reset Password
                             </Link>
                         </MenuItem>
+                        <MenuItem onClick={() => onClickMoreDetails(row.original)}>
+                            More Details
+                        </MenuItem>
                         <MenuItem onClick={() => onClickDelete(row.original)}>
                             {row.original.status ? "Deactivate" : "Activate"}
                         </MenuItem>
                     </MenuList>
                 </Menu>
             ),
-            meta: { isNumeric: false, filter: null },
+            meta: {isNumeric: false, filter: null},
             enableSorting: false,
         },
     ];
@@ -187,7 +203,7 @@ export default function DriverDetails() {
     const table = useReactTable({
         data: driverDetails,
         columns,
-        state: { sorting, globalFilter: searchInput },
+        state: {sorting, globalFilter: searchInput},
         onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -202,11 +218,11 @@ export default function DriverDetails() {
     };
 
     const breadcrumbs = [
-        { label: "Driver", link: "/app/DriverDetails" },
-        { label: "Driver Details", link: "/app/DriverDetails" }
+        {label: "Driver", link: "/app/DriverDetails"},
+        {label: "Driver Details", link: "/app/DriverDetails"}
     ];
 
-    const handlePageClick = ({ selected }) => {
+    const handlePageClick = ({selected}) => {
         setCurrentPage(selected);
     };
 
@@ -216,15 +232,15 @@ export default function DriverDetails() {
     const currentData = sortedData.slice(startOffset, endOffset);
     const pageCount = Math.ceil(table.getFilteredRowModel().rows.length / itemsPerPage);
     const isEmpty = currentData.length === 0;
-    const iconStyle = { display: "inline-block", verticalAlign: "middle", marginLeft: "5px" };
+    const iconStyle = {display: "inline-block", verticalAlign: "middle", marginLeft: "5px"};
 
     return (
         <div className="main-content">
-            <PageHeader title="Driver Details" breadcrumbs={breadcrumbs} />
+            <PageHeader title="Driver Details" breadcrumbs={breadcrumbs}/>
             <Box mb="20px" mt="50px" display="flex" alignItems="center" gap="20px" marginTop="60px" marginBottom="10px">
                 <InputGroup>
                     <InputLeftElement pointerEvents="none">
-                        <IoSearchOutline />
+                        <IoSearchOutline/>
                     </InputLeftElement>
                     <Input
                         placeholder="Search"
@@ -237,11 +253,11 @@ export default function DriverDetails() {
                 <Link to="/app/AddDriverDetails">
                     <Button
                         bg={theme.purple}
-                        _hover={{ bg: theme.onHoverPurple }}
+                        _hover={{bg: theme.onHoverPurple}}
                         color="white"
                         variant="solid"
-                        w="260px"
-                        mr="10px"
+                        w="180px"
+                        mr="50px"
                     >
                         Add New Driver
                     </Button>
@@ -265,12 +281,12 @@ export default function DriverDetails() {
                                         <chakra.span pl="4">
                                             {header.column.getIsSorted() ? (
                                                 header.column.getIsSorted() === "desc" ? (
-                                                    <TriangleDownIcon aria-label="sorted descending" style={iconStyle} />
+                                                    <TriangleDownIcon aria-label="sorted descending" style={iconStyle}/>
                                                 ) : (
-                                                    <TriangleUpIcon aria-label="sorted ascending" style={iconStyle} />
+                                                    <TriangleUpIcon aria-label="sorted ascending" style={iconStyle}/>
                                                 )
                                             ) : (
-                                                <TiArrowUnsorted aria-label="unsorted" style={iconStyle} />
+                                                <TiArrowUnsorted aria-label="unsorted" style={iconStyle}/>
                                             )}
                                         </chakra.span>
                                     </Th>
@@ -291,14 +307,14 @@ export default function DriverDetails() {
                             <Tr key={index}>
                                 <Td className="custom-table-td">{driver.firstName}</Td>
                                 <Td className="custom-table-td">{driver.lastName}</Td>
-                                <Td className="custom-table-td">{driver.dateOfBirth}</Td>
+                                {/*<Td className="custom-table-td">{driver.dateOfBirth.split("T")[0]}</Td>*/}
                                 <Td className="custom-table-td">{driver.nic}</Td>
                                 <Td className="custom-table-td">{driver.driverLicenseNo}</Td>
-                                <Td className="custom-table-td">{driver.licenseExpiryDate}</Td>
-                                <Td className="custom-table-td">{driver.emailAddress}</Td>
+                                <Td className="custom-table-td">{driver.licenseExpiryDate?.split("T")[0]}</Td>
+                                {/*<Td className="custom-table-td">{driver.emailAddress}</Td>*/}
                                 <Td className="custom-table-td">{driver.phoneNo}</Td>
                                 <Td className="custom-table-td">{driver.emergencyContact}</Td>
-                                <Td className="custom-table-td">{driver.bloodGroup}</Td>
+                                {/*<Td className="custom-table-td">{driver.bloodGroup}</Td>*/}
                                 <Td className="custom-table-td">{driver.status ? "Active" : "Inactive"}</Td>
                                 <Td className="custom-table-td">
                                     <Menu>
@@ -307,7 +323,7 @@ export default function DriverDetails() {
                                             as={IconButton}
                                             aria-label="profile-options"
                                             fontSize="20px"
-                                            icon={<IoSettingsSharp />}
+                                            icon={<IoSettingsSharp/>}
                                         />
                                         <MenuList>
                                             <MenuItem>
@@ -315,6 +331,9 @@ export default function DriverDetails() {
                                             </MenuItem>
                                             <MenuItem>
                                                 <Link to={`/app/ResetPassword/${driver.userId}`}>Reset Password</Link>
+                                            </MenuItem>
+                                            <MenuItem onClick={() => onClickMoreDetails(driver)}>
+                                                More Details
                                             </MenuItem>
                                             <MenuItem onClick={() => onClickDelete(driver)}>
                                                 {driver.status ? "Deactivate" : "Activate"}
@@ -328,37 +347,70 @@ export default function DriverDetails() {
                 </Tbody>
             </Table>
 
-            {!isEmpty && <Pagination pageCount={pageCount} onPageChange={handlePageClick} />}
+            {!isEmpty && <Pagination pageCount={pageCount} onPageChange={handlePageClick}/>}
 
             <AlertDialog
                 isOpen={isDialogOpen}
                 onClose={onDialogClose}
                 motionPreset="slideInBottom"
                 leastDestructiveRef={cancelRef}
+                isCentered
             >
-                <AlertDialogOverlay />
-                <AlertDialogContent position="absolute" top="30%" left="50%" transform="translate(-50%, -50%)">
+                <AlertDialogOverlay/>
+                <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
                     <AlertDialogHeader>{selectedDriver?.status ? "Deactivate" : "Activate"} Driver</AlertDialogHeader>
                     <AlertDialogBody>
-                        Are you sure you want to {selectedDriver?.status ? "deactivate" : "activate"} {selectedDriver?.firstName} {selectedDriver?.lastName}?
+                        Are you sure you want
+                        to {selectedDriver?.status ? "deactivate" : "activate"} {selectedDriver?.firstName} {selectedDriver?.lastName}?
                     </AlertDialogBody>
                     <AlertDialogFooter>
-                        <Button
-                            bg="gray.400"
-                            _hover={{ bg: "gray.500" }}
-                            color="#ffffff"
-                            variant="solid"
-                            onClick={onDialogClose}
-                            ref={cancelRef}
-                        >
-                            Cancel
-                        </Button>
-                        <Button colorScheme="red" color="#FFFFFF" onClick={onConfirmDelete}>
-                            {selectedDriver?.status ? "Deactivate" : "Activate"}
-                        </Button>
+                        <div className="flex flex-row gap-8">
+                            <Button
+                                bg="gray.400"
+                                _hover={{bg: "gray.500"}}
+                                color="#ffffff"
+                                variant="solid"
+                                onClick={onDialogClose}
+                                ref={cancelRef}
+                            >
+                                Cancel
+                            </Button>
+                            <Button colorScheme="red" color="#FFFFFF" onClick={onConfirmDelete}>
+                                {selectedDriver?.status ? "Deactivate" : "Activate"}
+                            </Button>
+                        </div>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            <Modal isOpen={isOpen} onClose={onClose} isCentered>
+                <ModalOverlay/>
+                <ModalContent>
+                    <ModalHeader>Driver Details</ModalHeader>
+
+                    <ModalBody>
+                        <Text as='b'>First Name</Text>
+                        <Text className="mb-3">{selectedDriver?.firstName}</Text>
+                        <Text as='b'>Last Name</Text>
+                        <Text className="mb-3">{selectedDriver?.lastName}</Text>
+                        <Text as='b'>Birthday</Text>
+                        <Text className="mb-3">{selectedDriver?.dateOfBirth.split("T")[0]}</Text>
+                        <Text as='b'>Blood Group</Text>
+                        <Text className="mb-3">{selectedDriver?.bloodGroup}</Text>
+                        <Text as='b'>Email</Text>
+                        <Text className="mb-3">{selectedDriver?.emailAddress}</Text>
+                    </ModalBody>
+
+                    <ModalFooter>
+                        <Button bg={theme.purple}
+                                _hover={{bg: theme.onHoverPurple}}
+                                color="white"
+                                variant="solid" mr={3} onClick={onClose}>
+                            Close
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </div>
     );
 }

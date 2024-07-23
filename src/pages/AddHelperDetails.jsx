@@ -1,580 +1,520 @@
-import { useState } from "react";
-import { Formik, Form, Field } from "formik";
-import { useNavigate } from "react-router-dom";
+import {useEffect, useState} from "react";
+import {Field, Form, Formik} from "formik";
+import {useNavigate} from "react-router-dom";
+import PageHeader from "../components/PageHeader.jsx";
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  Box,
   Button,
   Checkbox,
-  Input,
   IconButton,
+  Input,
+  InputGroup,
+  InputRightElement,
   Select,
-  AlertDialog,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogBody,
-  AlertDialogFooter,
-  Tabs,
-  TabList,
-  TabPanels,
   Tab,
+  TabList,
   TabPanel,
+  TabPanels,
+  Tabs,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { MdArrowDropDown } from "react-icons/md";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import theme from "../config/ThemeConfig.jsx";
+import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
 import PasswordStrengthBar from 'react-password-strength-bar';
 import $ from "jquery";
-import PageHeader from "../components/PageHeader.jsx";
-import theme from "../config/ThemeConfig.jsx";
 import {axiosApi} from "../interceptor.js";
+import './AddHelperDetails.css'
 
 export default function AddHelperDetails() {
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
+  const {isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose} = useDisclosure();
   const [dialogMessage, setDialogMessage] = useState("");
-  const [successDialogMessage, setSuccessDialogMessage] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [initialValues, setInitialValues] = useState({
+    FirstName: "",
+    LastName: "",
+    DateOfBirth: "",
+    NIC: "",
+    EmailAddress: "",
+    PhoneNo: "",
+    EmergencyContact: "",
+    BloodGroup: "",
+    UserName: "",
+    Password: "",
+    confirmPassword: "",
+    Status: true,
+  });
 
   const breadcrumbs = [
-    { label: 'Helper', link: '/app/HelperDetails' },
-    { label: 'Helper Details', link: '/app/HelperDetails' },
-    { label: 'Add Helper Details', link: '/app/AddHelperDetails' },
+    {label: "Helper", link: "/app/HelperDetails"},
+    {label: "Helper Details", link: "/app/HelperDetails"},
+    {label: "Add Helper Details", link: "/app/AddHelperDetails"},
   ];
 
-  const handleSubmit = async (values) => {
+  useEffect(() => {
+    // Simulated fetch function; replace with actual API call
+    const fetchHelperData = async () => {
+      setIsLoading(true);
+      try {
+        // Replace with your API endpoint
+        const response = await axiosApi.get("https://localhost:7265/api/Helper");
+        if (response.status !== 200) {
+          throw new Error("Failed to fetch data");
+        }
+        const data = response.data;
+
+        // Set initial form values from fetched data
+        setInitialValues({
+          FirstName: data.firstName,
+          LastName: data.lastName,
+          DateOfBirth: data.dob,
+          NIC: data.nationalId,
+          EmailAddress: data.email,
+          PhoneNo: data.contactNo,
+          EmergencyContact: data.emergencyContactNo,
+          BloodGroup: data.bloodGroup,
+          UserName: data.username,
+          Password: data.password,
+          confirmPassword: data.confirmPassword,
+          Status: data.isActive,
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        // Handle error state or show an error message
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Call fetch function when component mounts
+    fetchHelperData();
+  }, []);
+
+  useEffect(() => {
+    $(".pwd-meter > div").children().each(function () {
+      $(this).css({"height": "2px", "border-radius": "5px"})
+    });
+  }, []);
+
+
+  const handleSubmit = async (values, actions) => {
     try {
-      const errors = {};
-      if (!values.firstName) {
-        errors.firstName = "First Name is required";
-      } else if (values.firstName.length < 2) {
-        errors.firstName = "First Name must be at least 2 characters";
-      }
+      console.log(values);
 
-      if (!values.lastName) {
-        errors.lastName = "Last Name is required";
-      } else if (values.lastName.length < 2) {
-        errors.lastName = "Last Name must be at least 2 characters";
-      }
-
-      if (!values.dob) {
-        errors.dob = "Date of Birth is required";
-      } else if (new Date(values.dob) > new Date()) {
-        errors.dob = "Date of Birth cannot be in the future";
-      }
-
-      if (!values.nic) {
-        errors.nic = "NIC is required";
-      } else if (values.nic.length < 10 || values.nic.length > 12) {
-        errors.nic = "NIC must be between 10 to 12 characters";
-      }
-
-      if (!values.emailAddress) {
-        errors.emailAddress = "Email Address is required";
-      } else if (!/^\S+@\S+\.\S+$/.test(values.emailAddress)) {
-        errors.emailAddress = "Invalid email address";
-      }
-
-      if (!values.phoneNo) {
-        errors.phoneNo = "Contact No is required";
-      } else if (!/^[0-9]{10}$/.test(values.phoneNo)) {
-        errors.phoneNo = "Contact No must be exactly 10 digits";
-      }
-
-      if (!values.emergencyContact) {
-        errors.emergencyContact = "Emergency Contact No is required";
-      } else if (!/^[0-9]{10}$/.test(values.emergencyContact)) {
-        errors.emergencyContact = "Emergency Contact No must be exactly 10 digits";
-      }
-
-      if (!values.bloodGroup) {
-        errors.bloodGroup = "Blood Group is required";
-      }
-
-      if (!values.userName) {
-        errors.userName = "User Name is required";
-      }
-
-      if (!values.password) {
-        errors.password = "Password is required";
-      } else if (values.password.length < 6) {
-        errors.password = "Password must be at least 6 characters";
-      }
-
-      if (!values.confirmPassword) {
-        errors.confirmPassword = "Confirm Password is required";
-      } else if (values.confirmPassword !== values.password) {
-        errors.confirmPassword = "Passwords must match";
-      }
-
-      if (Object.keys(errors).length > 0) {
-        throw new Error("Validation failed.");
-      }
-
-      const status = values.isActive ? true : false;
-
-      const response = await axiosApi.post('https://localhost:7265/api/Helper', {
-        FirstName: values.firstName,
-        LastName: values.lastName,
-        DateOfBirth: values.dob,
-        NIC: values.nic,
-        EmailAddress: values.emailAddress,
-        PhoneNo: values.phoneNo,
-        EmergencyContact: values.emergencyContact,
-        BloodGroup: values.bloodGroup,
-        UserName: values.userName,
-        Password: values.password,
-        Status: values.isActive,
-      }, {
+      const response = await axiosApi.post("https://localhost:7265/api/Helper", values, {
         headers: {
-          'Content-Type': 'application/json',
-        },
+          "Content-Type": "application/json"
+        }
       });
 
-      const data = await response.json();
+      if (response.ok) {
+        const data = await response.json();
+        setDialogMessage("Helper details saved successfully.");
+        onDialogOpen();
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to add helper.');
-      }
-
-      if (data.message && data.message.toLowerCase().includes('exist')) {
-        setDialogMessage('Helper already exists');
-        setIsDialogOpen(true);
+        // Reset form after successful submission
+        actions.resetForm();
       } else {
-        setSuccessDialogMessage('Helper added successfully.');
-        setIsSuccessDialogOpen(true);
+        setDialogMessage("Failed to save helper details.");
+        onDialogOpen();
       }
     } catch (error) {
-      if (error instanceof TypeError) {
-        setDialogMessage('Failed to connect to the server.');
-      } else {
-        setDialogMessage(error.message || 'Failed to add helper.');
-      }
-      setIsDialogOpen(true);
+      // Handle errors (simulated with dialog for demo)
+      setDialogMessage("Failed to save helper details.");
+      onDialogOpen();
     }
   };
 
   const handleCancel = () => {
-    navigate('/app/HelperDetails');
+    navigate("/app/HelperDetails");
   };
 
   const handleSuccessDialogClose = () => {
-    setIsSuccessDialogOpen(false);
-    navigate('/app/HelperDetails');
-  };
-
-  const stylePasswordStrengthBar = () => {
-    // Example of styling children of .pwd-meter
-    $(".pwd-meter > div").children().each(function () {
-      $(this).css({ "height": "3px", "border-radius": "5px" });
-    });
+    onDialogClose();
+    navigate("/app/HelperDetails");
   };
 
   return (
-    <>
-      <PageHeader title="Add Helper Details" breadcrumbs={breadcrumbs} />
-      <Formik
-        initialValues={{
-          firstName: "",
-          lastName: "",
-          dob: "",
-          nic: "",
-          emailAddress: "",
-          phoneNo: "",
-          emergencyContact: "",
-          bloodGroup: "",
-          userName: "",
-          password: "",
-          confirmPassword: "",
-          isActive: false,
-        }}
-        onSubmit={handleSubmit}
-      >
-        {({ errors, touched, values }) => (
-          <Form>
-            <Tabs>
-              <TabList>
-                <Tab>Contact Info</Tab>
-                <Tab>Account Info</Tab>
-              </TabList>
-              <TabPanels>
-                <TabPanel>
-                  <div className="grid grid-cols-2 gap-10 mt-8">
-                    <div className="flex flex-col gap-3">
-                      <p>First Name</p>
-                      <Field name="firstName">
-                        {({ field }) => (
-                          <div>
-                            <Input
-                              {...field}
-                              type="text"
-                              variant="filled"
-                              borderRadius="md"
-                              px={3}
-                              py={2}
-                              mt={1}
-                              width="400px"
-                              id="firstName"
-                              placeholder="First Name"
-                            />
-                            {errors.firstName && touched.firstName ? (
-                              <div className="text-red-500">{errors.firstName}</div>
-                            ) : null}
-                          </div>
-                        )}
-                      </Field>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <p>Last Name</p>
-                      <Field name="lastName">
-                        {({ field }) => (
-                          <div>
-                            <Input
-                              {...field}
-                              type="text"
-                              variant="filled"
-                              borderRadius="md"
-                              px={3}
-                              py={2}
-                              mt={1}
-                              width="400px"
-                              id="lastName"
-                              placeholder="Last Name"
-                            />
-                            {errors.lastName && touched.lastName ? (
-                              <div className="text-red-500">{errors.lastName}</div>
-                            ) : null}
-                          </div>
-                        )}
-                      </Field>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <p>Date of Birth</p>
-                      <Field name="dob">
-                        {({ field }) => (
-                          <div>
-                            <Input
-                              {...field}
-                              type="date"
-                              variant="filled"
-                              borderRadius="md"
-                              px={3}
-                              py={2}
-                              mt={1}
-                              width="400px"
-                              id="dob"
-                              placeholder="Date of Birth"
-                            />
-                            {errors.dob && touched.dob ? (
-                              <div className="text-red-500">{errors.dob}</div>
-                            ) : null}
-                          </div>
-                        )}
-                      </Field>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <p>NIC</p>
-                      <Field name="nic">
-                        {({ field }) => (
-                          <div>
-                            <Input
-                              {...field}
-                              type="text"
-                              variant="filled"
-                              borderRadius="md"
-                              px={3}
-                              py={2}
-                              mt={1}
-                              width="400px"
-                              id="nic"
-                              placeholder="NIC No"
-                            />
-                            {errors.nic && touched.nic ? (
-                              <div className="text-red-500">{errors.nic}</div>
-                            ) : null}
-                          </div>
-                        )}
-                      </Field>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <p>Email Address</p>
-                      <Field name="emailAddress">
-                        {({ field }) => (
-                          <div>
-                            <Input
-                              {...field}
-                              type="email"
-                              variant="filled"
-                              borderRadius="md"
-                              px={3}
-                              py={2}
-                              mt={1}
-                              width="400px"
-                              id="emailAddress"
-                              placeholder="Email Address"
-                            />
-                            {errors.emailAddress && touched.emailAddress ? (
-                              <div className="text-red-500">{errors.emailAddress}</div>
-                            ) : null}
-                          </div>
-                        )}
-                      </Field>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <p>Contact No</p>
-                      <Field name="phoneNo">
-                        {({ field }) => (
-                          <div>
-                            <Input
-                              {...field}
-                              type="tel"
-                              variant="filled"
-                              borderRadius="md"
-                              px={3}
-                              py={2}
-                              mt={1}
-                              width="400px"
-                              id="phoneNo"
-                              placeholder="Contact No"
-                            />
-                            {errors.phoneNo && touched.phoneNo ? (
-                              <div className="text-red-500">{errors.phoneNo}</div>
-                            ) : null}
-                          </div>
-                        )}
-                      </Field>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <p>Emergency Contact No</p>
-                      <Field name="emergencyContact">
-                        {({ field }) => (
-                          <div>
-                            <Input
-                              {...field}
-                              type="tel"
-                              variant="filled"
-                              borderRadius="md"
-                              px={3}
-                              py={2}
-                              mt={1}
-                              width="400px"
-                              id="emergencyContact"
-                              placeholder="Emergency Contact No"
-                            />
-                            {errors.emergencyContact && touched.emergencyContact ? (
-                              <div className="text-red-500">{errors.emergencyContact}</div>
-                            ) : null}
-                          </div>
-                        )}
-                      </Field>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <p>Blood Group</p>
-                      <Field name="bloodGroup">
-                        {({ field }) => (
-                          <div>
-                            <Select
-                              {...field}
-                              icon={<MdArrowDropDown />}
-                              variant="filled"
-                              borderRadius="md"
-                              px={3}
-                              py={2}
-                              mt={1}
-                              width="400px"
-                              id="bloodGroup"
-                              placeholder="Blood Group"
-                            >
-                              <option value="A+">A+</option>
-                              <option value="A-">A-</option>
-                              <option value="B+">B+</option>
-                              <option value="B-">B-</option>
-                              <option value="AB+">AB+</option>
-                              <option value="AB-">AB-</option>
-                              <option value="O+">O+</option>
-                              <option value="O-">O-</option>
-                            </Select>
-                            {errors.bloodGroup && touched.bloodGroup ? (
-                              <div className="text-red-500">{errors.bloodGroup}</div>
-                            ) : null}
-                          </div>
-                        )}
-                      </Field>
-                    </div>
-                  </div>
-                </TabPanel>
-                <TabPanel>
-                  <div className="grid grid-cols-2 gap-10 mt-8">
-                    <div className="flex flex-col gap-3">
-                      <p>User Name</p>
-                      <Field name="userName">
-                        {({ field }) => (
-                          <div>
-                            <Input
-                              {...field}
-                              type="text"
-                              variant="filled"
-                              borderRadius="md"
-                              px={3}
-                              py={2}
-                              mt={1}
-                              width="400px"
-                              id="userName"
-                              placeholder="User Name"
-                            />
-                            {errors.userName && touched.userName ? (
-                              <div className="text-red-500">{errors.userName}</div>
-                            ) : null}
-                          </div>
-                        )}
-                      </Field>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <p>Password</p>
-                      <Field name="password">
-                        {({ field }) => (
-                          <div className="relative">
-                            <Input
-                              {...field}
-                              type={showPassword ? "text" : "password"}
-                              variant="filled"
-                              borderRadius="md"
-                              px={3}
-                              py={2}
-                              mt={1}
-                              width="400px"
-                              id="password"
-                              placeholder="Password"
-                              pr="4.5rem"
-                            />
-                            <div className="css-1e7f4z6" style={{ marginRight: '60px', marginTop: '3px' }}>
-                            <IconButton
-                              aria-label={showPassword ? "Hide password" : "Show password"}
-                              icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                              onClick={() => setShowPassword(!showPassword)}
-                              position="absolute"
-                              right="5px"
-                              top="50%"
-                              transform="translateY(-50%)"
-                              size="sm"
-                            />
+      <>
+        <PageHeader title="Add Helper Details" breadcrumbs={breadcrumbs}/>
+        {isLoading ? (
+            <p>Loading...</p>
+        ) : (
+            <Box className="mr-14">
+              <Tabs>
+                <TabList>
+                  <Tab _selected={{color: 'white', bg: theme.purple}}>Contact Info</Tab>
+                  <Tab _selected={{color: 'white', bg: theme.purple}}>Account Info</Tab>
+                </TabList>
+                <TabPanels>
+                  <TabPanel>
+                    <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+                      {({errors, touched}) => (
+                          <Form className="grid grid-cols-2 gap-x-12 gap-y-10 mt-8">
+                            <div className="flex flex-col gap-3">
+                              <p>First Name</p>
+                              <Field name="FirstName">
+                                {({field}) => (
+                                    <Input
+                                        {...field}
+                                        type="text"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="FirstName"
+                                        placeholder="First Name"
+                                    />
+                                )}
+                              </Field>
+                              {errors.FirstName && touched.FirstName && (
+                                  <div className="text-red-500">{errors.FirstName}</div>
+                              )}
                             </div>
-                          </div>
-                        )}
-                      </Field>
-                      <PasswordStrengthBar password={values.password} />
-                      {errors.password && touched.password && (
-                        <div className="text-red-500">{errors.password}</div>
+                            <div className="flex flex-col gap-3">
+                              <p>Last Name</p>
+                              <Field name="LastName">
+                                {({field}) => (
+                                    <Input
+                                        {...field}
+                                        type="text"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="LastName"
+                                        placeholder="Last Name"
+                                    />
+                                )}
+                              </Field>
+                              {errors.LastName && touched.LastName && (
+                                  <div className="text-red-500">{errors.LastName}</div>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-3">
+                              <p>Date of Birth</p>
+                              <Field name="DateOfBirth">
+                                {({field}) => (
+                                    <Input
+                                        {...field}
+                                        type="date"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="DateOfBirth"
+                                        max={new Date().toISOString().split('T')[0]}
+                                        placeholder="Date of Birth"
+                                    />
+                                )}
+                              </Field>
+                              {errors.DateOfBirth && touched.DateOfBirth && (
+                                  <div className="text-red-500">{errors.DateOfBirth}</div>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-3">
+                              <p>National Identity Card No</p>
+                              <Field name="NIC">
+                                {({field}) => (
+                                    <Input
+                                        {...field}
+                                        type="text"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="NIC"
+                                        placeholder="NIC No"
+                                    />
+                                )}
+                              </Field>
+                              {errors.NIC && touched.NIC && (
+                                  <div className="text-red-500">{errors.NIC}</div>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-3">
+                              <p>Contact Number</p>
+                              <Field name="PhoneNo">
+                                {({field}) => (
+                                    <Input
+                                        {...field}
+                                        type="tel"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="PhoneNo"
+                                        placeholder="Contact Number"
+                                    />
+                                )}
+                              </Field>
+                              {errors.PhoneNo && touched.PhoneNo && (
+                                  <div className="text-red-500">{errors.PhoneNo}</div>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-3">
+                              <p>Blood Group</p>
+                              <Field name="BloodGroup">
+                                {({field}) => (
+                                    <Select
+                                        {...field}
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="BloodGroup"
+                                        placeholder="Select Blood Group"
+                                    >
+                                      <option value="A+">A+</option>
+                                      <option value="A-">A-</option>
+                                      <option value="B+">B+</option>
+                                      <option value="B-">B-</option>
+                                      <option value="O+">O+</option>
+                                      <option value="O-">O-</option>
+                                      <option value="AB+">AB+</option>
+                                      <option value="AB-">AB-</option>
+                                    </Select>
+                                )}
+                              </Field>
+                              {errors.BloodGroup && touched.BloodGroup && (
+                                  <div className="text-red-500">{errors.BloodGroup}</div>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-3">
+                              <p>Emergency Contact Number</p>
+                              <Field name="EmergencyContact">
+                                {({field}) => (
+                                    <Input
+                                        {...field}
+                                        type="tel"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="EmergencyContact"
+                                        placeholder="Emergency Contact Number"
+                                    />
+                                )}
+                              </Field>
+                              {errors.EmergencyContact && touched.EmergencyContact && (
+                                  <div className="text-red-500">{errors.EmergencyContact}</div>
+                              )}
+                            </div>
+                          </Form>
                       )}
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <p>Confirm Password</p>
-                      <Field name="confirmPassword">
-                        {({ field }) => (
-                          <div className="relative">
-                            <Input
-                              {...field}
-                              type={showPassword ? "text" : "password"}
-                              variant="filled"
-                              borderRadius="md"
-                              px={3}
-                              py={2}
-                              mt={1}
-                              width="400px"
-                              id="confirmPassword"
-                              placeholder="Confirm Password"
-                              pr="4.5rem"
-                            />
-                            <div className="css-1e7f4z6" style={{ marginRight: '60px', marginTop: '3px' }}>
-                            <IconButton
-                              aria-label={showPassword ? "Hide password" : "Show password"}
-                              icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                              onClick={() => setShowPassword(!showPassword)}
-                              position="absolute"
-                              right="5px"
-                              top="50%"
-                              transform="translateY(-50%)"
-                              size="sm"
-                            />
-                          </div>
-                          </div>
-                        )}
-                      </Field>
-                      {errors.confirmPassword && touched.confirmPassword && (
-                        <div className="text-red-500">{errors.confirmPassword}</div>
+                    </Formik>
+                  </TabPanel>
+                  <TabPanel>
+                    <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+                      {({errors, touched, values}) => (
+                          <Form className="grid grid-cols-2 gap-x-12 gap-y-10 mt-8">
+                            <div className="flex flex-col gap-3">
+                              <p>Username</p>
+                              <Field name="UserName">
+                                {({field}) => (
+                                    <Input
+                                        {...field}
+                                        type="text"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="UserName"
+                                        placeholder="Username"
+                                    />
+                                )}
+                              </Field>
+                              {errors.UserName && touched.UserName && (
+                                  <div className="text-red-500">{errors.UserName}</div>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-3">
+                              <p>Email Address</p>
+                              <Field name="EmailAddress">
+                                {({field}) => (
+                                    <Input
+                                        {...field}
+                                        type="email"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="EmailAddress"
+                                        placeholder="Email Address"
+                                    />
+                                )}
+                              </Field>
+                              {errors.EmailAddress && touched.EmailAddress && (
+                                  <div className="text-red-500">{errors.EmailAddress}</div>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-3">
+                              <p>Password</p>
+                              <Field name="password">
+                                {({field}) => (
+                                    <div className="relative">
+                                      <Input
+                                          {...field}
+                                          type={showPassword ? "text" : "password"}
+                                          variant="filled"
+                                          borderRadius="md"
+                                          px={3}
+                                          py={2}
+                                          mt={1}
+                                          width="400px"
+                                          id="password"
+                                          placeholder="Password"
+                                          pr="4.5rem"
+                                      />
+                                      <IconButton
+                                          aria-label={showPassword ? "Hide password" : "Show password"}
+                                          icon={showPassword ? <ViewOffIcon/> : <ViewIcon/>}
+                                          onClick={() => setShowPassword(!showPassword)}
+                                          position="absolute"
+                                          right="5px"
+                                          top="50%"
+                                          transform="translateY(-50%)"
+                                          size="sm"
+                                          variant="ghost"
+                                          marginRight="280px"
+                                      />
+                                    </div>
+                                )}
+                              </Field>
+                              <PasswordStrengthBar className="pwd-meter w-7/12"  password={values.password}/>
+                              {errors.Password && touched.Password && (
+                                  <div className="text-red-500">{errors.Password}</div>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-3">
+                              <p>Confirm Password</p>
+                              <Field name="confirmPassword">
+                                {({field}) => (
+                                    <div>
+                                      <InputGroup>
+                                        <Input
+                                            {...field}
+                                            type={showPassword ? "text" : "password"}
+                                            variant="filled"
+                                            borderRadius="md"
+                                            width="400px"
+                                            id="confirmPassword"
+                                            placeholder="Confirm Password"
+                                            pr={0}
+                                        />
+                                        <InputRightElement>
+                                          <IconButton
+                                              aria-label={showPassword ? "Hide password" : "Show password"}
+                                              icon={showPassword ? <ViewOffIcon/> :
+                                                  <ViewIcon/>}
+                                              onClick={() => setShowPassword(!showPassword)}
+                                              position="absolute"
+                                              right="5px"
+                                              top="50%"
+                                              transform="translateY(-50%)"
+                                              size="sm"
+                                              variant="ghost"
+                                              marginRight="280px"
+                                          />
+                                        </InputRightElement>
+                                      </InputGroup>
+                                    </div>
+                                )}
+                              </Field>
+                              {errors.confirmPassword && touched.confirmPassword && (
+                                  <div className="text-red-500">{errors.confirmPassword}</div>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-3">
+                              <Field name="Status">
+                                {({field}) => (
+                                    <Checkbox
+                                        {...field}
+                                        colorScheme="purple"
+                                        size="lg"
+                                        id="Status"
+                                        defaultChecked={initialValues.Status}
+                                    >
+                                      Active
+                                    </Checkbox>
+                                )}
+                              </Field>
+                              {errors.Status && touched.Status && (
+                                  <div className="text-red-500">{errors.Status}</div>
+                              )}
+                            </div>
+                          </Form>
                       )}
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <p>Status</p>
-                      <Field name="isActive">
-                        {({ field }) => (
-                          <Checkbox
-                            {...field}
-                            borderRadius="md"
-                            px={3}
-                            py={2}
-                            mt={1}
-                            id="isActive"
-                            colorScheme="green"
-                            isChecked={field.value}
-                          >
-                            Active
-                          </Checkbox>
-                        )}
-                      </Field>
-                    </div>
-                  </div>
-                </TabPanel>
-              </TabPanels>
-            </Tabs>
-            <div className="flex justify-end gap-10 mr-16 mt-8">
-              <Button
-                bg="gray.400"
-                _hover={{ bg: "gray.500" }}
-                color="#ffffff"
-                variant="solid"
-                w="180px"
-                onClick={handleCancel}
-              >
-                Cancel
-              </Button>
-              <Button
-                bg={theme.purple}
-                _hover={{ bg: theme.onHoverPurple }}
-                color="#ffffff"
-                variant="solid"
-                w="180px"
-                type="submit"
-              >
-                Save
-              </Button>
-            </div>
-          </Form>
-        )}
-      </Formik>
+                    </Formik>
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
 
-      <AlertDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader>Error</AlertDialogHeader>
+              <div className="flex justify-end gap-10 mr-10 mb-10">
+                <Button
+                    bg="gray.400"
+                    _hover={{bg: "gray.500"}}
+                    color="#ffffff"
+                    variant="solid"
+                    w="180px"
+                    marginTop="10"
+                    onClick={handleCancel}
+                >
+                  Cancel
+                </Button>
+                <Button
+                    bg={theme.purple}
+                    _hover={{bg: theme.onHoverPurple}}
+                    color="#ffffff"
+                    variant="solid"
+                    w="180px"
+                    marginTop="10"
+                    type="submit"
+                >
+                  Save
+                </Button>
+              </div>
+            </Box>
+        )}
+
+        {/* Dialog for showing error message */}
+        <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
+          <AlertDialogOverlay/>
+          <AlertDialogContent position="absolute" top="30%" left="50%" transform="translate(-50%, -50%)">
+            <AlertDialogHeader>Success</AlertDialogHeader>
             <AlertDialogBody>{dialogMessage}</AlertDialogBody>
             <AlertDialogFooter>
-              <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
+              <Button bg={theme.purple} color="#FFFFFF" onClick={handleSuccessDialogClose}>
+                Ok
+              </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-
-      <AlertDialog isOpen={isSuccessDialogOpen} onClose={handleSuccessDialogClose}>
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader>Success</AlertDialogHeader>
-            <AlertDialogBody>{successDialogMessage}</AlertDialogBody>
-            <AlertDialogFooter>
-              <Button onClick={handleSuccessDialogClose}>Close</Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-    </>
+        </AlertDialog>
+      </>
   );
 }

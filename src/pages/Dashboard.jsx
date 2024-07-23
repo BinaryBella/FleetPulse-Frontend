@@ -60,12 +60,12 @@ export default function Dashboard() {
     return (
         <>
             <PageHeader title="Dashboard" breadcrumbs={breadcrumbs} />
-            <div className="flex justify-between items-center mr-16 mb-16 space-x-14">
+            <div className="flex justify-between items-center mr-16 mb-20 space-x-16">
                 <DashboardCard img={testu} title={userCount} subtitle="Users" />
                 <DashboardCard img={testd} title={driverCount} subtitle="Drivers" />
                 <DashboardCard img={testh} title={helperCount} subtitle="Helpers" />
             </div>
-            <div className="flex justify-between items-center mr-16 space-x-14">
+            <div className="flex justify-between items-center mr-16 space-x-16">
                 <DashboardCard img={testc} title={vehicleCount} subtitle="Vehicles" />
                 <DashboardCard img={testt} title={dailyTripCount} subtitle="Daily Trips" />
                 <DashboardCard img={testa} title={accidentCount} subtitle="Monthly Accidents" />

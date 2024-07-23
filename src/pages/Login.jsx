@@ -99,7 +99,7 @@ export default function Login() {
                 }}
             >
                 {({ handleSubmit, errors, touched }) => (
-                    <form onSubmit={handleSubmit} className="w-2/4">
+                    <form onSubmit={handleSubmit} className="w-2/5">
                         <Stack spacing={2}>
                             <FormControl isInvalid={errors.username && touched.username}>
                                 <FormLabel htmlFor="username" fontSize="sm">Username</FormLabel>

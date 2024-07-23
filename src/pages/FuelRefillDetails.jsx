@@ -94,7 +94,7 @@ export default function FuelRefillDetails() {
         },
         {
             accessorKey: 'vehicleRegistrationNo',
-            header: 'Vehicle Registration No',
+            header: 'Vehicle Reg No',
             meta: { isNumeric: false, filter: 'text' }
         },
         {

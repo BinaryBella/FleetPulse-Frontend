@@ -70,13 +70,18 @@ export default function AccidentDetails() {
 
   const columns = [
     {
-      accessorKey: "driverInjured",
-      header: "Driver Injured",
+      accessorKey: "vehicleId",
+      header: "Vehicle ID",
       meta: { isNumeric: false, filter: "text" },
     },
     {
-      accessorKey: "dateTime",
-      header: "Date Time",
+      accessorKey: "date",
+      header: "Date",
+      meta: { isNumeric: false, filter: "text" },
+    },
+    {
+      accessorKey: "time",
+      header: "Time",
       meta: { isNumeric: false, filter: "text" },
     },
     {
@@ -85,18 +90,18 @@ export default function AccidentDetails() {
       meta: { isNumeric: false, filter: "text" },
     },
     {
-      accessorKey: "helperInjured",
+      accessorKey: "driverInjuredStatus",
+      header: "Driver Injured",
+      meta: { isNumeric: false, filter: "text" },
+    },
+    {
+      accessorKey: "helperInjuredStatus",
       header: "Helper Injured",
       meta: { isNumeric: false, filter: "text" },
     },
     {
-      accessorKey: "vehicleDamaged",
+      accessorKey: "vehicleDamagedStatus",
       header: "Vehicle Damaged",
-      meta: { isNumeric: false, filter: "text" },
-    },
-    {
-      accessorKey: "vehicleRegistrationNo",
-      header: "Vehicle Reg No",
       meta: { isNumeric: false, filter: "text" },
     },
     {
@@ -115,49 +120,40 @@ export default function AccidentDetails() {
       meta: { isNumeric: false, filter: "text" },
     },
     {
-      accessorKey: "specialNote",
-      header: "Special Note",
+      accessorKey: "status",
+      header: "Status",
       meta: { isNumeric: false, filter: "text" },
     },
-    {
-      accessorKey: "photos",
-      header: "Photos",
-      meta: { isNumeric: false, filter: "text" },
-      cell: ({ row }) => (
-        <a href={row.original.photos} target="_blank" rel="noopener noreferrer">View Photos</a>
-      ),
-    },
-
     {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <Menu>
-          <MenuButton
-            color={theme.purple}
-            as={IconButton}
-            aria-label="profile-options"
-            fontSize="15px"
-            icon={<IoSettingsSharp />}
-          />
-          <MenuList>
-            <MenuItem>
-              <Link to={`/app/EditAccidentDetails/${row.original.id}`}>Edit</Link>
-            </MenuItem>
-            <MenuItem onClick={() => onClickDelete(row.original)}>
-              {row.original.isActive ? "Deactivate" : "Activate"}
-            </MenuItem>
-          </MenuList>
-        </Menu>
+          <Menu>
+            <MenuButton
+                color={theme.purple}
+                as={IconButton}
+                aria-label="profile-options"
+                fontSize="15px"
+                icon={<IoSettingsSharp />}
+            />
+            <MenuList>
+              <MenuItem>
+                <Link to={`/app/EditAccidentDetails/${row.original.accidentId}`}>Edit</Link>
+              </MenuItem>
+              <MenuItem onClick={() => onClickDelete(row.original)}>
+                {row.original.status ? "Deactivate" : "Activate"}
+              </MenuItem>
+              <MenuItem>
+                <Link to={`/app/ViewSpecialNotes/${row.original.accidentId}`}>Special Notes</Link>
+              </MenuItem>
+              <MenuItem>
+                <Link to={`/app/ViewPhotos/${row.original.accidentId}`}>View Photos</Link>
+              </MenuItem>
+            </MenuList>
+          </Menu>
       ),
       meta: { isNumeric: false, filter: null },
       enableSorting: false,
-    },
-
-    {
-      accessorKey: "status",
-      header: "Status",
-      meta: { isNumeric: false, filter: "text" },
     },
   ];
 
@@ -189,6 +185,17 @@ export default function AccidentDetails() {
   const pageCount = Math.ceil(table.getFilteredRowModel().rows.length / itemsPerPage);
   const isEmpty = currentData.length === 0;
   const iconStyle = { display: "inline-block", verticalAlign: "middle", marginLeft: "3.75px" };
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState({ notes: '', photos: [] });
+
+  const openModal = (notes, photos) => {
+    setModalContent({ notes, photos });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   const breadcrumbs = [
     { label: "Accidents", link: "/app/AccidentDetails" },
@@ -287,48 +294,57 @@ export default function AccidentDetails() {
         </Thead>
         <Tbody>
           {isEmpty ? (
-            <Tr>
-              <Td colSpan={columns.length} textAlign="center">
-                <Text>No results found for {searchInput}</Text>
-              </Td>
-            </Tr>
-          ) : (
-            currentData.map((accident, index) => (
-              <Tr key={index}>
-                <Td fontSize="0.75rem">{accident.driverInjuredStatus}</Td>
-                <Td fontSize="0.75rem">{accident.dateTime}</Td>
-                <Td fontSize="0.75rem">{accident.venue}</Td>
-                <Td fontSize="0.75rem">{accident.helperInjuredStatus}</Td>
-                <Td fontSize="0.75rem">{accident.vehicleDamagedStatus}</Td>
-                <Td fontSize="0.75rem">{accident.vehicleId}</Td>
-                <Td fontSize="0.75rem">{accident.driversNic}</Td>
-                <Td fontSize="0.75rem">{accident.helpersNic}</Td>
-                <Td fontSize="0.75rem">{accident.loss}</Td>
-                <Td fontSize="0.75rem">{accident.specialNote}</Td>
-                <Td fontSize="0.75rem">
-                  <a href={accident.photos} target="_blank" rel="noopener noreferrer">View Photos</a>
-                </Td>
-                <Td fontSize="0.75rem">
-                  <Menu>
-                    <MenuButton
-                      color={theme.purple}
-                      as={IconButton}
-                      aria-label="profile-options"
-                      fontSize="15px"
-                      icon={<IoSettingsSharp />}
-                    />
-                    <MenuList>
-                      <MenuItem>
-                        <Link to={`/app/EditAccidentDetails/${accident.id}`}>Edit</Link>
-                      </MenuItem>
-                      <MenuItem onClick={() => onClickDelete(accident)}>
-                        {accident.isActive ? "Deactivate" : "Activate"}
-                      </MenuItem>
-                    </MenuList>
-                  </Menu>
+              <Tr>
+                <Td colSpan={columns.length} textAlign="center">
+                  <Text>No results found for {searchInput}</Text>
                 </Td>
               </Tr>
-            ))
+          ) : (
+              currentData.map((accident, index) => {
+                const date = new Date(accident.dateTime).toLocaleDateString();
+                const time = new Date(accident.dateTime).toLocaleTimeString();
+
+                return (
+                    <Tr key={index}>
+                      <Td fontSize="0.75rem">{accident.vehicleId}</Td>
+                      <Td fontSize="0.75rem">{date}</Td>
+                      <Td fontSize="0.75rem">{time}</Td>
+                      <Td fontSize="0.75rem">{accident.venue}</Td>
+                      <Td fontSize="0.75rem">{accident.driverInjuredStatus ? 'Yes' : 'No'}</Td>
+                      <Td fontSize="0.75rem">{accident.helperInjuredStatus ? 'Yes' : 'No'}</Td>
+                      <Td fontSize="0.75rem">{accident.vehicleDamagedStatus ? 'Yes' : 'No'}</Td>
+                      <Td fontSize="0.75rem">{accident.driversNic}</Td>
+                      <Td fontSize="0.75rem">{accident.helpersNic}</Td>
+                      <Td fontSize="0.75rem">{accident.loss}</Td>
+                      <Td fontSize="0.75rem">{accident.status ? 'Active' : 'Inactive'}</Td>
+                      <Td fontSize="0.75rem">
+                        <Menu>
+                          <MenuButton
+                              color={theme.purple}
+                              as={IconButton}
+                              aria-label="profile-options"
+                              fontSize="15px"
+                              icon={<IoSettingsSharp />}
+                          />
+                          <MenuList>
+                            <MenuItem>
+                              <Link to={`/app/EditAccidentDetails/${accident.accidentId}`}>Edit</Link>
+                            </MenuItem>
+                            <MenuItem onClick={() => onClickDelete(accident)}>
+                              {accident.status ? "Deactivate" : "Activate"}
+                            </MenuItem>
+                            <MenuItem>
+                              <Link to={`/app/ViewSpecialNotes/${accident.accidentId}`}>Special Notes</Link>
+                            </MenuItem>
+                            <MenuItem>
+                              <Link to={`/app/ViewPhotos/${accident.accidentId}`}>View Photos</Link>
+                            </MenuItem>
+                          </MenuList>
+                        </Menu>
+                      </Td>
+                    </Tr>
+                );
+              })
           )}
         </Tbody>
       </Table>

@@ -1,0 +1,11 @@
+div[role='tablist'] {
+    border-bottom: 2px solid #edf2f7;
+}
+div[role='tablist'] button {
+    border-radius: 5px 5px 0 0;
+}
+.pwd-meter > div > div {
+    height: 3px !important;
+    border-radius: 5px !important;
+    width: 10px !important;
+}

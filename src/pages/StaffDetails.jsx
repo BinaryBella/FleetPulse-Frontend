@@ -132,11 +132,6 @@ export default function StaffDetails() {
             meta: { isNumeric: false, filter: 'text' }
         },
         {
-            accessorKey: 'jobTitle',
-            header: 'Job Title',
-            meta: { isNumeric: false, filter: 'text' }
-        },
-        {
             accessorKey: 'status',
             header: 'Status',
             cell: info => (info.getValue() ? "Active" : "Inactive"),
@@ -283,7 +278,6 @@ export default function StaffDetails() {
                                 <Td className="custom-table-td">{staff.emailAddress}</Td>
                                 <Td className="custom-table-td">{staff.phoneNo}</Td>
                                 <Td className="custom-table-td">{staff.emergencyContact}</Td>
-                                <Td className="custom-table-td">{staff.jobTitle}</Td>
                                 <Td className="custom-table-td">{staff.status ? "Active" : "Inactive"}</Td>
                                 <Td className="custom-table-td">
                                     <Menu>

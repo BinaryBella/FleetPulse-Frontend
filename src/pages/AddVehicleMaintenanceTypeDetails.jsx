@@ -5,6 +5,7 @@ import PageHeader from "../components/PageHeader.jsx";
 import { Button, Checkbox, Input, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, useDisclosure } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
 import {axiosApi} from "../interceptor.js";
+import maintenanceType from "../assets/images/maintenanceType.png";
 
 export default function AddVehicleMaintenanceTypeDetails() {
     const navigate = useNavigate();
@@ -63,6 +64,8 @@ export default function AddVehicleMaintenanceTypeDetails() {
     return (
         <>
             <PageHeader title="Add Vehicle Maintenance Type Details" breadcrumbs={breadcrumbs}/>
+            <div className="flex justify-between vertical-container">
+                <div className="flex flex-col gap-6 mt-5">
             <Formik
                 initialValues={{
                     TypeName: "",
@@ -147,7 +150,11 @@ export default function AddVehicleMaintenanceTypeDetails() {
                     </Form>
                 )}
             </Formik>
-
+                </div>
+                <div className="flex items-end">
+                    <img src={maintenanceType} alt="Add Vehicle Maintenance Type" width="400" height="400" className="mr-14"/>
+                </div>
+            </div>
             <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
                 <AlertDialogOverlay />
                 <AlertDialogContent

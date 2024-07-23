@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import {useState, useEffect, useRef} from "react";
 import {axiosApi} from "../interceptor.js";
 import {
     Table,
@@ -26,11 +26,18 @@ import {
     AlertDialogHeader,
     AlertDialogBody,
     AlertDialogFooter,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton
 } from "@chakra-ui/react";
-import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
-import { Link } from "react-router-dom";
-import { TiArrowUnsorted } from "react-icons/ti";
-import { IoSearchOutline, IoSettingsSharp } from "react-icons/io5";
+import {TriangleDownIcon, TriangleUpIcon} from "@chakra-ui/icons";
+import {Link} from "react-router-dom";
+import {TiArrowUnsorted} from "react-icons/ti";
+import {IoSearchOutline, IoSettingsSharp} from "react-icons/io5";
 import theme from "../config/ThemeConfig.jsx";
 import PageHeader from "../components/PageHeader.jsx";
 import Pagination from "../components/Pagination.jsx";
@@ -40,7 +47,7 @@ import {
     getSortedRowModel,
     getFilteredRowModel,
 } from "@tanstack/react-table";
-import { flexRender } from "@tanstack/react-table";
+import {flexRender} from "@tanstack/react-table";
 
 export default function VehicleMaintenanceDetails() {
     const [vehicleMaintenance, setVehicleMaintenance] = useState([]);
@@ -50,6 +57,8 @@ export default function VehicleMaintenanceDetails() {
     const [selectedMaintenance, setSelectedMaintenance] = useState(null);
     const itemsPerPage = 10;
     const cancelRef = useRef();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedMaintenanceForModal, setSelectedMaintenanceForModal] = useState(null);
 
     useEffect(() => {
         fetchVehicleMaintenance();
@@ -79,7 +88,7 @@ export default function VehicleMaintenanceDetails() {
             setVehicleMaintenance((prev) =>
                 prev.map((maintenance) =>
                     maintenance.maintenanceId === selectedMaintenance.maintenanceId
-                        ? { ...maintenance, status: !maintenance.status }
+                        ? {...maintenance, status: !maintenance.status}
                         : maintenance
                 )
             );
@@ -89,60 +98,60 @@ export default function VehicleMaintenanceDetails() {
         }
     };
 
+    const openModal = (maintenance) => {
+        setSelectedMaintenanceForModal(maintenance);
+        setIsModalOpen(true);
+    };
+
     const columns = [
         {
             accessorKey: "vehicleRegistrationNo",
-            header: "Vehicle Registration No",
-            meta: { isNumeric: false, filter: "text" },
+            header: "Vehicle Reg No",
+            meta: {isNumeric: false, filter: "text"},
         },
         {
             accessorKey: "typeName",
             header: "Maintenance Type",
-            meta: { isNumeric: false, filter: "text" },
+            meta: {isNumeric: false, filter: "text"},
         },
         {
             accessorKey: "maintenanceDate",
             header: "Date",
             cell: (info) => formatDate(info.row.original),
-            meta: { isNumeric: false, filter: "date" },
+            meta: {isNumeric: false, filter: "date"},
         },
         {
             accessorKey: "cost",
             header: "Cost",
-            meta: { isNumeric: true, filter: "text" },
+            meta: {isNumeric: true, filter: "text"},
         },
         {
             accessorKey: "partsReplaced",
             header: "Parts Replaced",
-            meta: { isNumeric: false, filter: "text" },
+            meta: {isNumeric: false, filter: "text"},
         },
         {
             accessorKey: "serviceProvider",
             header: "Service Provider",
-            meta: { isNumeric: false, filter: "text" },
-        },
-        {
-            accessorKey: "specialNotes",
-            header: "Special Notes",
-            meta: { isNumeric: false, filter: "text" },
+            meta: {isNumeric: false, filter: "text"},
         },
         {
             accessorKey: "status",
             header: "Status",
             cell: (info) => (info.getValue() ? "Active" : "Inactive"),
-            meta: { isNumeric: false, filter: "boolean" },
+            meta: {isNumeric: false, filter: "boolean"},
         },
         {
             accessorKey: "actions",
             header: "Actions",
-            cell: ({ row }) => (
+            cell: ({row}) => (
                 <Menu>
                     <MenuButton
                         color={theme.purple}
                         as={IconButton}
                         aria-label="profile-options"
                         fontSize="20px"
-                        icon={<IoSettingsSharp />}
+                        icon={<IoSettingsSharp/>}
                     />
                     <MenuList>
                         <MenuItem>
@@ -153,10 +162,13 @@ export default function VehicleMaintenanceDetails() {
                         <MenuItem onClick={() => onClickDelete(row.original)}>
                             {row.original.status ? "Deactivate" : "Activate"}
                         </MenuItem>
+                        <MenuItem onClick={() => openModal(row.original)}>
+                            Special Notes
+                        </MenuItem>
                     </MenuList>
                 </Menu>
             ),
-            meta: { isNumeric: false, filter: null },
+            meta: {isNumeric: false, filter: null},
             enableSorting: false,
         },
     ];
@@ -164,7 +176,7 @@ export default function VehicleMaintenanceDetails() {
     const table = useReactTable({
         data: vehicleMaintenance,
         columns,
-        state: { sorting, globalFilter: searchInput },
+        state: {sorting, globalFilter: searchInput},
         onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -178,7 +190,7 @@ export default function VehicleMaintenanceDetails() {
         setCurrentPage(0);
     };
 
-    const handlePageClick = ({ selected }) => {
+    const handlePageClick = ({selected}) => {
         setCurrentPage(selected);
     };
 
@@ -188,8 +200,8 @@ export default function VehicleMaintenanceDetails() {
     const currentData = sortedData.slice(startOffset, endOffset);
     const pageCount = Math.ceil(table.getFilteredRowModel().rows.length / itemsPerPage);
     const isEmpty = currentData.length === 0;
-    const iconStyle = { display: "inline-block", verticalAlign: "middle", marginLeft: "5px" };
-    const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
+    const iconStyle = {display: "inline-block", verticalAlign: "middle", marginLeft: "5px"};
+    const {isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose} = useDisclosure();
 
     const formatDate = (maintenance) => {
         if (!maintenance.maintenanceDate) return "N/A";
@@ -198,17 +210,17 @@ export default function VehicleMaintenanceDetails() {
     };
 
     const breadcrumbs = [
-        { label: "Vehicle", link: "/app/VehicleDetails" },
-        { label: "Vehicle Maintenance Details", link: "/app/VehicleMaintenanceDetails" },
+        {label: "Vehicle", link: "/app/VehicleDetails"},
+        {label: "Vehicle Maintenance Details", link: "/app/VehicleMaintenanceDetails"},
     ];
 
     return (
         <div className="main-content">
-            <PageHeader title="Vehicle Maintenance Details" breadcrumbs={breadcrumbs} />
+            <PageHeader title="Vehicle Maintenance Details" breadcrumbs={breadcrumbs}/>
             <Box mb="20px" mt="50px" display="flex" alignItems="center" gap="20px" marginTop="60px" marginBottom="10px">
                 <InputGroup>
                     <InputLeftElement pointerEvents="none">
-                        <IoSearchOutline />
+                        <IoSearchOutline/>
                     </InputLeftElement>
                     <Input
                         placeholder="Search"
@@ -221,7 +233,7 @@ export default function VehicleMaintenanceDetails() {
                 <Link to="/app/AddVehicleMaintenanceDetails">
                     <Button
                         bg={theme.purple}
-                        _hover={{ bg: theme.onHoverPurple }}
+                        _hover={{bg: theme.onHoverPurple}}
                         color="white"
                         variant="solid"
                         w="300px"
@@ -250,12 +262,14 @@ export default function VehicleMaintenanceDetails() {
                                             <chakra.span pl="4">
                                                 {header.column.getIsSorted() ? (
                                                     header.column.getIsSorted() === "desc" ? (
-                                                        <TriangleDownIcon aria-label="sorted descending" style={iconStyle} />
+                                                        <TriangleDownIcon aria-label="sorted descending"
+                                                                          style={iconStyle}/>
                                                     ) : (
-                                                        <TriangleUpIcon aria-label="sorted ascending" style={iconStyle} />
+                                                        <TriangleUpIcon aria-label="sorted ascending"
+                                                                        style={iconStyle}/>
                                                     )
                                                 ) : (
-                                                    <TiArrowUnsorted aria-label="unsorted" style={iconStyle} />
+                                                    <TiArrowUnsorted aria-label="unsorted" style={iconStyle}/>
                                                 )}
                                             </chakra.span>
                                         )}
@@ -281,7 +295,6 @@ export default function VehicleMaintenanceDetails() {
                                 <Td>{maintenance.cost}</Td>
                                 <Td>{maintenance.partsReplaced}</Td>
                                 <Td>{maintenance.serviceProvider}</Td>
-                                <Td>{maintenance.specialNotes}</Td>
                                 <Td>{maintenance.status ? "Active" : "Inactive"}</Td>
                                 <Td>
                                     <Menu>
@@ -290,7 +303,7 @@ export default function VehicleMaintenanceDetails() {
                                             as={IconButton}
                                             aria-label="profile-options"
                                             fontSize="20px"
-                                            icon={<IoSettingsSharp />}
+                                            icon={<IoSettingsSharp/>}
                                         />
                                         <MenuList>
                                             <MenuItem>
@@ -301,6 +314,9 @@ export default function VehicleMaintenanceDetails() {
                                             <MenuItem onClick={() => onClickDelete(maintenance)}>
                                                 {maintenance.status ? "Deactivate" : "Activate"}
                                             </MenuItem>
+                                            <MenuItem onClick={() => openModal(maintenance)}>
+                                                Special Notes
+                                            </MenuItem>
                                         </MenuList>
                                     </Menu>
                                 </Td>
@@ -310,19 +326,23 @@ export default function VehicleMaintenanceDetails() {
                 </Tbody>
             </Table>
             {!isEmpty && (
-                <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
+                <Pagination pageCount={pageCount} onPageChange={handlePageClick}/>
             )}
 
-            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom" leastDestructiveRef={cancelRef}>
-                <AlertDialogOverlay />
+            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom"
+                         leastDestructiveRef={cancelRef}>
+                <AlertDialogOverlay/>
                 <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
-                    <AlertDialogHeader>{selectedMaintenance?.status ? "Deactivate" : "Activate"} Maintenance Details</AlertDialogHeader>
+                    <AlertDialogHeader>{selectedMaintenance?.status ? "Deactivate" : "Activate"} Maintenance
+                        Details</AlertDialogHeader>
                     <AlertDialogBody>
-                        Are you sure you want to {selectedMaintenance?.status ? "deactivate" : "activate"} {selectedMaintenance?.typeName} Maintenance?
+                        Are you sure you want
+                        to {selectedMaintenance?.status ? "deactivate" : "activate"} {selectedMaintenance?.typeName} Maintenance?
                     </AlertDialogBody>
                     <AlertDialogFooter>
                         <div className="flex flex-row gap-8">
-                            <Button bg="gray.400" _hover={{ bg: "gray.500" }} color="#ffffff" variant="solid" onClick={onDialogClose} ref={cancelRef}>
+                            <Button bg="gray.400" _hover={{bg: "gray.500"}} color="#ffffff" variant="solid"
+                                    onClick={onDialogClose} ref={cancelRef}>
                                 Cancel
                             </Button>
                             <Button colorScheme="red" color="#FFFFFF" onClick={onConfirmDelete}>
@@ -332,6 +352,34 @@ export default function VehicleMaintenanceDetails() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} isCentered>
+                <ModalOverlay/>
+                <ModalContent>
+                    <ModalHeader>Maintenance Details</ModalHeader>
+                    <ModalCloseButton/>
+                    <ModalBody>
+                        {selectedMaintenanceForModal && (
+                            <>
+                                <Text as='b'>Vehicle Registration No</Text>
+                                <Text className="mb-3">{selectedMaintenanceForModal.vehicleRegistrationNo}</Text>
+                                <Text as='b'>Maintenance Type</Text>
+                                <Text className="mb-3">{selectedMaintenanceForModal.typeName}</Text>
+                                <Text as='b'>Special Notes</Text>
+                                <Text className="mb-3">{selectedMaintenanceForModal.specialNotes}</Text>
+                            </>
+                        )}
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button bg={theme.purple}
+                                _hover={{bg: theme.onHoverPurple}}
+                                color="white"
+                                variant="solid" onClick={() => setIsModalOpen(false)}>
+                            Close
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </div>
     );
 }

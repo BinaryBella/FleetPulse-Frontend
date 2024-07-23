@@ -7,7 +7,7 @@ export default function MainLayout({ isAdmin }) {
     return (
         <div className="flex min-w-screen min-h-screen bg-[#2c2c59]">
             <SideMenu isAdmin={isAdmin} />
-            <div className="bg-[#E1E4EB] w-4/5 pl-16 ml-[304px]">
+            <div className="bg-[#E1E4EB] w-4/5 pl-16 ml-[384px]">
                 <TopMenu />
                 <Outlet />
             </div>
