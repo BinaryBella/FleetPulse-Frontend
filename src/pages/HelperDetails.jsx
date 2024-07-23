@@ -108,7 +108,19 @@ export default function HelperDetails() {
   const columns = [
     { accessorKey: 'firstName', header: 'First Name', meta: { isNumeric: false, filter: 'text' } },
     { accessorKey: 'lastName', header: 'Last Name', meta: { isNumeric: false, filter: 'text' } },
-    { accessorKey: 'dateOfBirth', header: 'DoB', meta: { isNumeric: false, filter: 'text' } },
+    {
+      accessorKey: 'dateOfBirth',
+      header: 'DoB',
+      cell: info => {
+        const dateString = info.getValue();
+        if (dateString) {
+          const dateOnly = dateString.split('T')[0];
+          return dateOnly;
+        }
+        return '';
+      },
+      meta: { isNumeric: false, filter: 'text' }
+    },
     { accessorKey: 'nic', header: 'NIC', meta: { isNumeric: false, filter: 'text' } },
     { accessorKey: 'emailAddress', header: 'Email Address', meta: { isNumeric: false, filter: 'text' } },
     { accessorKey: 'phoneNo', header: 'Phone No.', meta: { isNumeric: false, filter: 'text' } },
@@ -218,7 +230,7 @@ export default function HelperDetails() {
               <Tr key={index}>
                 <Td>{helper.firstName}</Td>
                 <Td>{helper.lastName}</Td>
-                <Td>{helper.dateOfBirth}</Td>
+                <Td>{helper.dateOfBirth ? helper.dateOfBirth.split('T')[0] : ''}</Td>
                 <Td>{helper.nic}</Td>
                 <Td>{helper.emailAddress}</Td>
                 <Td>{helper.phoneNo}</Td>

@@ -273,7 +273,7 @@ export default function StaffDetails() {
                             <Tr key={index}>
                                 <Td className="custom-table-td">{staff.firstName}</Td>
                                 <Td className="custom-table-td">{staff.lastName}</Td>
-                                <Td className="custom-table-td">{staff.dateOfBirth}</Td>
+                                <Td>{staff.dateOfBirth ? staff.dateOfBirth.split('T')[0] : ''}</Td>
                                 <Td className="custom-table-td">{staff.nic}</Td>
                                 <Td className="custom-table-td">{staff.emailAddress}</Td>
                                 <Td className="custom-table-td">{staff.phoneNo}</Td>
