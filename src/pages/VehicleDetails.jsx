@@ -1,5 +1,5 @@
-import {useState, useEffect, useRef} from 'react';
-import {axiosApi} from "../interceptor.js";
+import { useState, useRef, useEffect } from 'react';
+import { axiosApi } from "../interceptor.js";
 import {
     Table,
     Thead,
@@ -23,12 +23,20 @@ import {
     AlertDialogBody,
     AlertDialogFooter,
     AlertDialog,
+    Checkbox,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
     useDisclosure,
+    Stack
 } from "@chakra-ui/react";
-import {TriangleDownIcon, TriangleUpIcon, ChevronDownIcon} from "@chakra-ui/icons";
-import {Link} from "react-router-dom";
-import {TiArrowUnsorted} from "react-icons/ti";
-import {IoSettingsSharp, IoSearchOutline} from "react-icons/io5";
+import {ChevronDownIcon, TriangleDownIcon, TriangleUpIcon} from "@chakra-ui/icons";
+import { Link } from "react-router-dom";
+import { TiArrowUnsorted } from "react-icons/ti";
+import { IoSettingsSharp, IoSearchOutline } from "react-icons/io5";
 import theme from "../config/ThemeConfig.jsx";
 import PageHeader from "../components/PageHeader.jsx";
 import Pagination from "../components/Pagination.jsx";
@@ -38,10 +46,11 @@ import {
     getSortedRowModel,
     getFilteredRowModel
 } from '@tanstack/react-table';
-import {flexRender} from '@tanstack/react-table';
+import { flexRender } from '@tanstack/react-table';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import ExcelJS from 'exceljs';
+import logo from "../assets/images/logo.png";
 
 export default function VehicleDetails() {
     const [vehicleDetails, setVehicleDetails] = useState([]);
@@ -49,53 +58,76 @@ export default function VehicleDetails() {
     const [currentPage, setCurrentPage] = useState(0);
     const [searchInput, setSearchInput] = useState("");
     const [selectedVehicle, setSelectedVehicle] = useState(null);
+    const [selectedColumns, setSelectedColumns] = useState([]);
+    const [previewData, setPreviewData] = useState([]);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [isColumnSelectionOpen, setIsColumnSelectionOpen] = useState(false); // New state for column selection modal
+    const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
     const cancelRef = useRef();
-    const {isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose} = useDisclosure();
     const itemsPerPage = 10;
 
     const exportToPDF = () => {
         const doc = new jsPDF();
+        const date = new Date();
+        const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+
+        // Add Logo at the center top
+        const imgProps = doc.getImageProperties(logo);
+        const imgWidth = 50;
+        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const centerX = (pageWidth - imgWidth) / 2;
+
+        doc.addImage(logo, "PNG", centerX, 8, imgWidth, imgHeight);
+
+        // Add Report Title centered below the logo
+        doc.setFontSize(16);
+        const reportTitleY = imgHeight + 10;
+        doc.text("Vehicle Details Report", pageWidth / 2, reportTitleY, { align: "center" });
+
+        // Add Report creation date left-aligned below the report title
+        doc.setFontSize(10);
+        const creationDateY = reportTitleY + 10;
+        doc.text(`Report created on: ${formattedDate}`, 20, creationDateY);
+
+        // Generate the table
         doc.autoTable({
-            head: [columns.filter(column => column.accessorKey !== 'status' && column.id !== 'actions').map(column => column.header)],
-            body: vehicleDetails.map(item =>
-                columns
-                    .filter(column => column.accessorKey !== 'status' && column.id !== 'actions')
-                    .map(column => {
-                        if (column.accessorKey === 'status') {
-                            return item[column.accessorKey] ? 'Active' : 'Inactive';
-                        }
-                        return item[column.accessorKey];
-                    })
-            )
+            startY: creationDateY + 10,
+            head: [selectedColumns.map(column => column.header)],
+            body: previewData.map(item =>
+                selectedColumns.map(column => {
+                    if (column.accessorKey === 'licenseExpireDate') {
+                        const date = new Date(item[column.accessorKey]);
+                        return date.toLocaleDateString();
+                    }
+                    return item[column.accessorKey];
+                })
+            ),
         });
+
         doc.save('vehicle_details.pdf');
     };
-
 
     const exportToExcel = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Vehicle Details');
 
-        // Add headers excluding status and actions
-        worksheet.addRow(columns.filter(column => column.accessorKey !== 'status' && column.id !== 'actions').map(column => column.header));
+        worksheet.addRow(selectedColumns.map(column => column.header));
 
-        // Add data excluding status and actions
-        vehicleDetails.forEach(item => {
-            worksheet.addRow(columns
-                .filter(column => column.accessorKey !== 'status' && column.id !== 'actions')
-                .map(column => {
-                    if (column.accessorKey === 'status') {
-                        return item[column.accessorKey] ? 'Active' : 'Inactive';
-                    }
-                    return item[column.accessorKey];
-                })
-            );
+        previewData.forEach(item => {
+            worksheet.addRow(selectedColumns.map(column => {
+                if (column.accessorKey === 'licenseExpireDate') {
+                    const date = new Date(item[column.accessorKey]);
+                    return date.toLocaleDateString();
+                }
+                if (column.accessorKey === 'status') {
+                    return item[column.accessorKey] ? 'Active' : 'Inactive';
+                }
+                return item[column.accessorKey];
+            }));
         });
 
-        // Generate buffer
         const buffer = await workbook.xlsx.writeBuffer();
-
-        // Create blob and download
         const blob = new Blob([buffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
@@ -106,17 +138,18 @@ export default function VehicleDetails() {
 
     const exportToCSV = () => {
         const csvContent = [
-            columns.filter(column => column.accessorKey !== 'status' && column.id !== 'actions').map(column => column.header).join(','),
-            ...vehicleDetails.map(item =>
-                columns
-                    .filter(column => column.accessorKey !== 'status' && column.id !== 'actions')
-                    .map(column => {
-                        if (column.accessorKey === 'status') {
-                            return item[column.accessorKey] ? 'Active' : 'Inactive';
-                        }
-                        return item[column.accessorKey];
-                    })
-                    .join(',')
+            selectedColumns.map(column => column.header).join(','),
+            ...previewData.map(item =>
+                selectedColumns.map(column => {
+                    if (column.accessorKey === 'licenseExpireDate') {
+                        const date = new Date(item[column.accessorKey]);
+                        return date.toLocaleDateString();
+                    }
+                    if (column.accessorKey === 'status') {
+                        return item[column.accessorKey] ? 'Active' : 'Inactive';
+                    }
+                    return item[column.accessorKey];
+                }).join(',')
             )
         ].join('\n');
 
@@ -127,7 +160,6 @@ export default function VehicleDetails() {
         link.click();
         URL.revokeObjectURL(link.href);
     };
-
 
     useEffect(() => {
         fetchVehicleDetails();
@@ -144,7 +176,7 @@ export default function VehicleDetails() {
     };
 
     const onClickDelete = (vehicle) => {
-        setSelectedVehicle(vehicle); // Ensure vehicle object is correctly set here
+        setSelectedVehicle(vehicle);
         onDialogOpen();
     };
 
@@ -163,10 +195,9 @@ export default function VehicleDetails() {
                 }
             });
 
-            // Handle successful response
             if (response.status === 200 || response.status === 204) {
-                fetchVehicleDetails(); // Refresh vehicle details after successful update
-                onDialogClose(); // Close dialog after successful update
+                fetchVehicleDetails();
+                onDialogClose();
             } else {
                 console.error('Failed to update vehicle status');
             }
@@ -189,6 +220,10 @@ export default function VehicleDetails() {
         {
             accessorKey: 'licenseExpireDate',
             header: 'License Exp Date',
+            cell: info => {
+                const date = new Date(info.getValue());
+                return date.toLocaleDateString();
+            },
             meta: {isNumeric: false, filter: 'text'}
         },
         {
@@ -283,6 +318,43 @@ export default function VehicleDetails() {
     const isEmpty = currentData.length === 0;
     const iconStyle = {display: "inline-block", verticalAlign: "middle", marginLeft: "5px"};
 
+    const handleGenerateReport = () => {
+        setIsColumnSelectionOpen(true); // Open column selection modal
+    };
+
+    const handleColumnSelection = () => {
+        const selected = columns.filter(col => selectedColumns.includes(col.accessorKey) || col.id === 'actions');
+        setSelectedColumns(selected);
+    };
+
+    const handlePreview = () => {
+        // Apply the column selection, excluding the 'actions' column
+        const selected = columns.filter(col =>
+            selectedColumns.includes(col.accessorKey) && col.accessorKey !== 'actions'
+        );
+        setSelectedColumns(selected);
+
+        // Generate preview data, excluding the 'actions' column
+        const preview = vehicleDetails.map(item =>
+            Object.fromEntries(
+                selected.map(col => [col.accessorKey, item[col.accessorKey]])
+            )
+        );
+        setPreviewData(preview);
+
+        // Close the column selection modal and open the preview modal
+        setIsColumnSelectionOpen(false);
+        setIsPreviewOpen(true);
+    };
+
+    const handleCheckboxChange = (accessorKey) => {
+        setSelectedColumns(prev =>
+            prev.includes(accessorKey)
+                ? prev.filter(col => col !== accessorKey)
+                : [...prev, accessorKey]
+        );
+    };
+
     return (
         <div className="main-content">
             <PageHeader title="Vehicle Details" breadcrumbs={breadcrumbs}/>
@@ -299,35 +371,28 @@ export default function VehicleDetails() {
                         width="300px"
                     />
                 </InputGroup>
-                <Menu>
-                    <MenuButton
-                        as={Button}
-                        rightIcon={<ChevronDownIcon/>}
+                <Button
+                    bg={theme.purple}
+                    _hover={{bg: theme.onHoverPurple}}
+                    color="white"
+                    variant="solid"
+                    width="250px"
+                    onClick={handleGenerateReport}
+                >
+                    Generate Report
+                </Button>
+                <Link to="/app/AddVehicleDetails">
+                    <Button
                         bg={theme.purple}
                         _hover={{bg: theme.onHoverPurple}}
                         color="white"
                         variant="solid"
-                        className="w-32">
-                        Export
-                    </MenuButton>
-                    <MenuList>
-                        <MenuItem onClick={exportToPDF}>Export to PDF</MenuItem>
-                        <MenuItem onClick={exportToExcel}>Export to Excel</MenuItem>
-                        <MenuItem onClick={exportToCSV}>Export to CSV</MenuItem>
-                    </MenuList>
-                    <Link to="/app/AddVehicleDetails">
-                        <Button
-                            bg={theme.purple}
-                            _hover={{bg: theme.onHoverPurple}}
-                            color="white"
-                            variant="solid"
-                            w="200px"
-                            mr="50"
-                        >
-                            Add New Vehicle Details
-                        </Button>
-                    </Link>
-                </Menu>
+                        w="200px"
+                        mr="50"
+                    >
+                        Add New Vehicle Details
+                    </Button>
+                </Link>
             </Box>
 
             <Table className="custom-table">
@@ -397,14 +462,118 @@ export default function VehicleDetails() {
                         </AlertDialogBody>
                         <AlertDialogFooter>
                             <Button ref={cancelRef} onClick={onDialogClose}>Cancel</Button>
-                            <Button colorScheme={selectedVehicle?.status ? "red" : "red"} onClick={onConfirmDelete}
-                                    ml={3}>
+                            <Button colorScheme={selectedVehicle?.status ? "red" : "red"} onClick={onConfirmDelete} ml={3}>
                                 {selectedVehicle?.status ? "Deactivate" : "Activate"}
                             </Button>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>
             </AlertDialog>
+
+            {/* Modal for Column Selection */}
+            <Modal isOpen={isColumnSelectionOpen} onClose={() => setIsColumnSelectionOpen(false)} isCentered>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Select Columns for Report</ModalHeader>
+                    <ModalBody>
+                        <Stack spacing={3}>
+                            {columns.map(column => (
+                                column.id !== 'actions' && (
+                                    <Checkbox
+                                        key={column.accessorKey}
+                                        isChecked={selectedColumns.includes(column.accessorKey)}
+                                        onChange={() => handleCheckboxChange(column.accessorKey)}
+                                    >
+                                        {column.header}
+                                    </Checkbox>
+                                )
+                            ))}
+                        </Stack>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button
+                            onClick={handlePreview}
+                            isDisabled={selectedColumns.length === 0}
+                            bg={theme.purple}
+                            _hover={{ bg: theme.onHoverPurple }}
+                            color="white"
+                        >
+                            Preview
+                        </Button>
+                        <Button ml={3} onClick={() => setIsColumnSelectionOpen(false)}>Cancel</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            {/* Modal for Preview */}
+            <Modal
+                isOpen={isPreviewOpen}
+                onClose={() => setIsPreviewOpen(false)}
+                size="6xl"
+                isCentered
+            >
+                <ModalOverlay />
+                <ModalContent maxHeight="80vh">
+                    <ModalHeader>Preview</ModalHeader>
+                    <ModalBody overflowY="auto">
+                        <Table className="custom-table">
+                            <Thead>
+                                <Tr>
+                                    {selectedColumns.map((column) => (
+                                        <Th key={column.accessorKey}>
+                                            {column.header}
+                                        </Th>
+                                    ))}
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                {previewData.length > 0 ? (
+                                    previewData.map((row, rowIndex) => (
+                                        <Tr key={rowIndex}>
+                                            {selectedColumns.map((column) => (
+                                                <Td key={column.accessorKey}>
+                                                    {column.accessorKey === 'licenseExpireDate'
+                                                        ? new Date(row[column.accessorKey]).toLocaleDateString()
+                                                        : column.accessorKey === 'status'
+                                                            ? row[column.accessorKey] ? 'Active' : 'Inactive'
+                                                            : row[column.accessorKey]}
+                                                </Td>
+                                            ))}
+                                        </Tr>
+                                    ))
+                                ) : (
+                                    <Tr>
+                                        <Td colSpan={selectedColumns.length} textAlign="center">
+                                            No data available
+                                        </Td>
+                                    </Tr>
+                                )}
+                            </Tbody>
+                        </Table>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Menu>
+                            <MenuButton
+                                as={Button}
+                                rightIcon={<ChevronDownIcon />}
+                                bg={theme.purple}
+                                _hover={{bg: theme.onHoverPurple}}
+                                color="white"
+                                variant="solid"
+                                className="w-32"
+                            >
+                                Export
+                            </MenuButton>
+                            <MenuList>
+                                <MenuItem onClick={exportToPDF}>Export to PDF</MenuItem>
+                                <MenuItem onClick={exportToExcel}>Export to Excel</MenuItem>
+                                <MenuItem onClick={exportToCSV}>Export to CSV</MenuItem>
+                            </MenuList>
+                        </Menu>
+                        <Button ml={3} onClick={() => setIsPreviewOpen(false)}>Close</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </div>
     );
 }
