@@ -19,7 +19,6 @@ import {FaCarAlt, FaCarCrash} from "react-icons/fa";
 import {MdAirlineSeatReclineNormal} from "react-icons/md";
 import {IoMdPeople, IoMdPerson} from "react-icons/io";
 import {BiTrip} from "react-icons/bi";
-import {TbReportAnalytics} from "react-icons/tb";
 import $ from 'jquery';
 
 export default function SideMenu({isAdmin}) {
@@ -34,18 +33,18 @@ export default function SideMenu({isAdmin}) {
                     <img src={Logo} alt="Logo" style={{height: "80%"}}/>
                 </Link>
             </div>
-            <VStack spacing={4} align='stretch' width="full">
+            <VStack spacing={7} align='stretch' width="full">
                 <Link className="flex items-center pl-16" to="/app/Dashboard">
                     <IconButton
                         variant="link"
                         color={theme.orange}
                         aria-label="dashboard"
-                        fontSize="15px"
+                        fontSize="20px"
                         icon={<AiOutlineDashboard/>}
 
                     />
                     <Text color={theme.orange}
-                          fontSize="sm"
+                          fontSize="md"
                           paddingLeft="6"
                           _hover={{
                               color: '#FFA500', // Change this to your desired hover color
@@ -59,7 +58,7 @@ export default function SideMenu({isAdmin}) {
                         color={theme.orange}
                         aria-label='vehicle'
                         marginTop="4"
-                        fontSize="15px"
+                        fontSize="20px"
                         icon={<FaCarAlt/>}
                         style={{marginRight: "8px"}}
                     />
@@ -79,7 +78,7 @@ export default function SideMenu({isAdmin}) {
                                     <Link className="flex items-center pl-3 " to="/app/VehicleDetails">
                                         <Text
                                             color={theme.orange}
-                                            fontSize="sm"
+                                            fontSize="md"
                                             _hover={{
                                                 color: '#FFA500', // Change this to your desired hover color
                                             }}
@@ -90,7 +89,7 @@ export default function SideMenu({isAdmin}) {
                                     <Link className="flex items-center pl-3 " to="/app/VehicleTypeDetails">
                                         <Text
                                             color={theme.orange}
-                                            fontSize="sm"
+                                            fontSize="md"
                                             _hover={{
                                                 color: '#FFA500', // Change this to your desired hover color
                                             }}
@@ -101,7 +100,7 @@ export default function SideMenu({isAdmin}) {
                                     <Link className="flex items-center pl-3 " to="/app/ManufacturerDetails">
                                         <Text
                                             color={theme.orange}
-                                            fontSize="sm"
+                                            fontSize="md"
                                             _hover={{
                                                 color: '#FFA500', // Change this to your desired hover color
                                             }}
@@ -112,7 +111,7 @@ export default function SideMenu({isAdmin}) {
                                     <Link className="flex items-center pl-3 " to="/app/VehicleMaintenanceDetails">
                                         <Text
                                             color={theme.orange}
-                                            fontSize="sm"
+                                            fontSize="md"
                                             _hover={{
                                                 color: '#FFA500', // Change this to your desired hover color
                                             }}
@@ -123,7 +122,7 @@ export default function SideMenu({isAdmin}) {
                                     <Link className="flex items-center pl-3 " to="/app/VehicleMaintenanceTypeDetails">
                                         <Text
                                             color={theme.orange}
-                                            fontSize="sm"
+                                            fontSize="md"
                                             _hover={{
                                                 color: '#FFA500', // Change this to your desired hover color
                                             }}
@@ -134,7 +133,7 @@ export default function SideMenu({isAdmin}) {
                                     <Link className="flex items-center pl-3" to="/app/FuelRefillDetails">
                                         <Text
                                             color={theme.orange}
-                                            fontSize="sm"
+                                            fontSize="md"
                                             _hover={{
                                                 color: '#FFA500', // Change this to your desired hover color
                                             }}
@@ -152,10 +151,10 @@ export default function SideMenu({isAdmin}) {
                         variant="link"
                         color={theme.orange}
                         aria-label='driver'
-                        fontSize="15px"
+                        fontSize="20px"
                         icon={<MdAirlineSeatReclineNormal/>}
                     />
-                    <Text color={theme.orange} fontSize="sm" paddingLeft="6">
+                    <Text color={theme.orange} fontSize="md" paddingLeft="6">
                         Driver
                     </Text>
                 </Link>
@@ -164,10 +163,10 @@ export default function SideMenu({isAdmin}) {
                         variant='link'
                         color={theme.orange}
                         aria-label='helper'
-                        fontSize="15px"
+                        fontSize="20px"
                         icon={<IoMdPerson/>}
                     />
-                    <Text color={theme.orange} fontSize="sm" paddingLeft="6">
+                    <Text color={theme.orange} fontSize="md" paddingLeft="6">
                         Helper
                     </Text>
                 </Link>
@@ -177,10 +176,10 @@ export default function SideMenu({isAdmin}) {
                             variant='link'
                             color={theme.orange}
                             aria-label='staff'
-                            fontSize="15px"
+                            fontSize="20px"
                             icon={<IoMdPeople/>}
                         />
-                        <Text color={theme.orange} fontSize="sm" paddingLeft="6">
+                        <Text color={theme.orange} fontSize="md" paddingLeft="6">
                             Staff
                         </Text>
                     </Link>
@@ -190,10 +189,10 @@ export default function SideMenu({isAdmin}) {
                         variant='link'
                         color={theme.orange}
                         aria-label='trip'
-                        fontSize="15px"
+                        fontSize="20px"
                         icon={<BiTrip/>}
                     />
-                    <Text color={theme.orange} fontSize="sm" paddingLeft="6">
+                    <Text color={theme.orange} fontSize="md" paddingLeft="6">
                         Trip
                     </Text>
                 </Link>
@@ -202,120 +201,13 @@ export default function SideMenu({isAdmin}) {
                         variant='link'
                         color={theme.orange}
                         aria-label='accident'
-                        fontSize="15px"
+                        fontSize="20px"
                         icon={<FaCarCrash/>}
                     />
-                    <Text color={theme.orange} fontSize="sm" paddingLeft="6">
+                    <Text color={theme.orange} fontSize="md" paddingLeft="6">
                         Accident
                     </Text>
                 </Link>
-                <div className="flex items-start pl-16">
-                    <IconButton
-                        variant='link'
-                        color={theme.orange}
-                        aria-label='report'
-                        marginTop="4"
-                        fontSize="15px"
-                        icon={<TbReportAnalytics/>}
-                        style={{marginRight: "8px"}}
-                    />
-                    <Accordion allowMultiple>
-                        <AccordionItem>
-                            <h2>
-                                <AccordionButton>
-                                    <Box as="span" flex='1' textAlign='left' color={theme.orange} fontSize='sm'
-                                         paddingLeft="0">
-                                        Reports
-                                    </Box>
-                                    <AccordionIcon color={theme.orange}/>
-                                </AccordionButton>
-                            </h2>
-                            <AccordionPanel pb={4}>
-                                <div>
-                                    <Accordion allowMultiple>
-                                        <AccordionItem>
-                                            <h2>
-                                                <AccordionButton>
-                                                    <Box as="span" flex='1' textAlign='left' color={theme.orange}
-                                                         fontSize='sm'
-                                                         paddingLeft="0">
-                                                        Vehicle Reports
-                                                    </Box>
-                                                    <AccordionIcon color={theme.orange}/>
-                                                </AccordionButton>
-                                            </h2>
-                                            <AccordionPanel pb={4}>
-                                                <div>
-                                                    <Link className="flex items-center pl-2"
-                                                          to="/app/VehicleDetailsReport">
-                                                        <Text color={theme.orange} fontSize="sm">
-                                                            Vehicle Details
-                                                        </Text>
-                                                    </Link>
-                                                    <Link className="flex items-center pl-2"
-                                                          to="/app/VehicleTypeReport">
-                                                        <Text color={theme.orange} fontSize="sm">
-                                                            Vehicle Type
-                                                        </Text>
-                                                    </Link>
-                                                    <Link className="flex items-center pl-2"
-                                                          to="/app/VehicleManufacturerReport">
-                                                        <Text color={theme.orange} fontSize="sm">
-                                                            Vehicle Manufacturer
-                                                        </Text>
-                                                    </Link>
-                                                    <Link className="flex items-center pl-2"
-                                                          to="/app/VehicleMaintenanceReport">
-                                                        <Text color={theme.orange} fontSize="sm">
-                                                            Maintenance
-                                                        </Text>
-                                                    </Link>
-                                                    <Link className="flex items-center pl-2"
-                                                          to="/app/VehicleMainTypeReport">
-                                                        <Text color={theme.orange} fontSize="sm">
-                                                            Maintenance Type
-                                                        </Text>
-                                                    </Link>
-                                                    <Link className="flex items-center pl-2"
-                                                          to="/app/VehicleFuelRefillReport">
-                                                        <Text color={theme.orange} fontSize="sm">
-                                                            Vehicle Fuel Refill
-                                                        </Text>
-                                                    </Link>
-                                                </div>
-                                            </AccordionPanel>
-                                        </AccordionItem>
-                                    </Accordion>
-                                    <Link className="flex items-center pl-5 mb-3" to="/app/DriverReport">
-                                        <Text color={theme.orange} fontSize="sm">
-                                            Driver Report
-                                        </Text>
-                                    </Link>
-                                    <Link className="flex items-center pl-5 mb-3" to="/app/HelperReport">
-                                        <Text color={theme.orange} fontSize="sm">
-                                            Helper Report
-                                        </Text>
-                                    </Link>
-                                    <Link className="flex items-center pl-5 mb-3" to="/app/StaffReport">
-                                        <Text color={theme.orange} fontSize="sm">
-                                            Staff Report
-                                        </Text>
-                                    </Link>
-                                    <Link className="flex items-center pl-5 mb-3" to="/app/TripReport">
-                                        <Text color={theme.orange} fontSize="sm">
-                                            Trip Report
-                                        </Text>
-                                    </Link>
-                                    <Link className="flex items-center pl-5 mb-3" to="/app/AccidentReport">
-                                        <Text color={theme.orange} fontSize="sm">
-                                            Accident Report
-                                        </Text>
-                                    </Link>
-                                </div>
-                            </AccordionPanel>
-                        </AccordionItem>
-                    </Accordion>
-                </div>
             </VStack>
         </div>
     );

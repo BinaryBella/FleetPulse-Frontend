@@ -42,6 +42,8 @@ import {
     getFilteredRowModel
 } from '@tanstack/react-table';
 import { flexRender } from '@tanstack/react-table';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default function TripDetails() {
     const [tripDetails, setTripDetails] = useState([]);
@@ -164,6 +166,37 @@ export default function TripDetails() {
         }
     };
 
+    // Function to generate the PDF report
+    const generatePDF = () => {
+        const doc = new jsPDF();
+
+        // Title
+        doc.setFontSize(18);
+        doc.text('Trip Details Report', 14, 22);
+
+        // Date of report
+        doc.setFontSize(11);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+
+        // Add a table with trip details
+        doc.autoTable({
+            startY: 40,
+            head: [['Driver\'s NIC', 'Helper\'s NIC', 'Vehicle Reg.No', 'Date', 'Start Time', 'End Time', 'Status']],
+            body: currentData.map(trip => [
+                trip.driversNIC,
+                trip.helpersNIC,
+                trip.vehicleRegNo,
+                trip.date,
+                trip.startTime,
+                trip.endTime,
+                trip.status ? 'Active' : 'Inactive'
+            ]),
+        });
+
+        // Save the PDF
+        doc.save('trip_details_report.pdf');
+    };
+
     return (
         <div className="main-content">
             <PageHeader title="Trip Details" breadcrumbs={breadcrumbs} />
@@ -192,6 +225,15 @@ export default function TripDetails() {
                         Add New Trip
                     </Button>
                 </Link>
+                <Button
+                    onClick={generatePDF}
+                    bg={theme.purple}
+                    _hover={{ bg: theme.onHoverPurple }}
+                    color="white"
+                    variant="solid"
+                >
+                    Generate Report
+                </Button>
             </Box>
 
             <Table className="custom-table">

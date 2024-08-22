@@ -1,32 +1,13 @@
-import { useState, useEffect, useRef } from "react";
-import {axiosApi} from "../interceptor.js";
+import  { useState, useEffect, useRef } from "react";
+import { axiosApi } from "../interceptor.js";
 import {
-    Table,
-    Thead,
-    Tbody,
-    Tr,
-    Th,
-    Td,
-    Box,
-    Button,
-    Menu,
-    MenuButton,
-    IconButton,
-    MenuList,
-    MenuItem,
-    Input,
-    chakra,
-    InputGroup,
-    InputLeftElement,
-    Text,
-    AlertDialogOverlay,
-    AlertDialogContent,
-    AlertDialogHeader,
-    AlertDialogBody,
-    AlertDialogFooter,
-    AlertDialog,
-    useDisclosure,
-    useToast
+    Table, Thead, Tbody, Tr, Th, Td, Box, Button, Menu,
+    MenuButton, IconButton, MenuList, MenuItem, Input, chakra,
+    InputGroup, InputLeftElement, Text, AlertDialogOverlay,
+    AlertDialogContent, AlertDialogHeader, AlertDialogBody,
+    AlertDialogFooter, AlertDialog, useDisclosure, useToast,
+    Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody,
+    ModalFooter, Checkbox, Stack
 } from "@chakra-ui/react";
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
@@ -35,13 +16,11 @@ import { IoSettingsSharp, IoSearchOutline } from "react-icons/io5";
 import theme from "../config/ThemeConfig.jsx";
 import PageHeader from "../components/PageHeader.jsx";
 import Pagination from "../components/Pagination";
-import {
-    useReactTable,
-    getCoreRowModel,
-    getSortedRowModel,
-    getFilteredRowModel
-} from '@tanstack/react-table';
+import { useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table';
 import { flexRender } from '@tanstack/react-table';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import ExcelJS from 'exceljs';
 
 export default function StaffDetails() {
     const [staffDetails, setStaffDetails] = useState([]);
@@ -49,6 +28,11 @@ export default function StaffDetails() {
     const [currentPage, setCurrentPage] = useState(0);
     const [searchInput, setSearchInput] = useState("");
     const [selectedStaff, setSelectedStaff] = useState(null);
+    const [selectedColumns, setSelectedColumns] = useState([]);
+    const [previewData, setPreviewData] = useState([]);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [isColumnSelectionOpen, setIsColumnSelectionOpen] = useState(false);
+
     const cancelRef = useRef();
     const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
     const itemsPerPage = 10;
@@ -96,64 +80,21 @@ export default function StaffDetails() {
     };
 
     const columns = [
+        { accessorKey: 'firstName', header: 'First Name', meta: { isNumeric: false, filter: 'text' } },
+        { accessorKey: 'lastName', header: 'Last Name', meta: { isNumeric: false, filter: 'text' } },
+        { accessorKey: 'dateOfBirth', header: 'DoB', meta: { isNumeric: false, filter: 'text' } },
+        { accessorKey: 'nic', header: 'NIC', meta: { isNumeric: false, filter: 'text' } },
+        { accessorKey: 'emailAddress', header: 'Email Address', meta: { isNumeric: false, filter: 'text' } },
+        { accessorKey: 'phoneNo', header: 'Phone No', meta: { isNumeric: false, filter: 'text' } },
+        { accessorKey: 'emergencyContact', header: 'Emergency Contact', meta: { isNumeric: false, filter: 'text' } },
+        { accessorKey: 'status', header: 'Status', cell: info => (info.getValue() ? "Active" : "Inactive"), meta: { isNumeric: false, filter: 'boolean' } },
         {
-            accessorKey: 'firstName',
-            header: 'First Name',
-            meta: { isNumeric: false, filter: 'text' }
-        },
-        {
-            accessorKey: 'lastName',
-            header: 'Last Name',
-            meta: { isNumeric: false, filter: 'text' }
-        },
-        {
-            accessorKey: 'dateOfBirth',
-            header: 'DoB',
-            meta: { isNumeric: false, filter: 'text' }
-        },
-        {
-            accessorKey: 'nic',
-            header: 'NIC',
-            meta: { isNumeric: false, filter: 'text' }
-        },
-        {
-            accessorKey: 'emailAddress',
-            header: 'Email Address',
-            meta: { isNumeric: false, filter: 'text' }
-        },
-        {
-            accessorKey: 'phoneNo',
-            header: 'Phone No',
-            meta: { isNumeric: false, filter: 'text' }
-        },
-        {
-            accessorKey: 'emergencyContact',
-            header: 'Emergency Contact',
-            meta: { isNumeric: false, filter: 'text' }
-        },
-        {
-            accessorKey: 'status',
-            header: 'Status',
-            cell: info => (info.getValue() ? "Active" : "Inactive"),
-            meta: { isNumeric: false, filter: 'boolean' }
-        },
-        {
-            id: 'actions',
-            header: 'Actions',
-            cell: ({ row }) => (
+            id: 'actions', header: 'Actions', cell: ({ row }) => (
                 <Menu>
-                    <MenuButton
-                        color={theme.purple}
-                        as={IconButton}
-                        aria-label="profile-options"
-                        fontSize="20px"
-                        icon={<IoSettingsSharp />}
-                    />
+                    <MenuButton color={theme.purple} as={IconButton} aria-label="profile-options" fontSize="20px" icon={<IoSettingsSharp />} />
                     <MenuList>
                         <MenuItem>
-                            <Link to={`/app/EditStaffDetails/${row.original.userId}`}>
-                                Edit
-                            </Link>
+                            <Link to={`/app/EditStaffDetails/${row.original.userId}`}>Edit</Link>
                         </MenuItem>
                         <MenuItem onClick={() => onClickDelete(row.original)}>
                             {row.original.status ? "Deactivate" : "Activate"}
@@ -200,6 +141,97 @@ export default function StaffDetails() {
     const isEmpty = currentData.length === 0;
     const iconStyle = { display: "inline-block", verticalAlign: "middle", marginLeft: "5px" };
 
+    const handleGenerateReport = () => {
+        setIsColumnSelectionOpen(true); // Open column selection modal
+    };
+
+    const handleColumnSelection = () => {
+        const selected = columns.filter(col => selectedColumns.includes(col.accessorKey) || col.id === 'actions');
+        setSelectedColumns(selected);
+    };
+
+    const handlePreview = () => {
+        const selected = columns.filter(col => selectedColumns.includes(col.accessorKey) && col.accessorKey !== 'actions');
+        setSelectedColumns(selected);
+
+        const preview = staffDetails.map(item =>
+            Object.fromEntries(
+                selected.map(col => [col.accessorKey, item[col.accessorKey]])
+            )
+        );
+        setPreviewData(preview);
+
+        setIsColumnSelectionOpen(false);
+        setIsPreviewOpen(true);
+    };
+
+    const handleCheckboxChange = (accessorKey) => {
+        setSelectedColumns(prev =>
+            prev.includes(accessorKey)
+                ? prev.filter(col => col !== accessorKey)
+                : [...prev, accessorKey]
+        );
+    };
+
+    const exportToPDF = () => {
+        const doc = new jsPDF();
+        const date = new Date();
+        const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+
+        doc.setFontSize(16);
+        const reportTitleY = 10;
+        doc.text("Staff Details Report", doc.internal.pageSize.getWidth() / 2, reportTitleY, { align: "center" });
+
+        doc.setFontSize(10);
+        const creationDateY = reportTitleY + 10;
+        doc.text(`Report created on: ${formattedDate}`, 20, creationDateY);
+
+        doc.autoTable({
+            startY: creationDateY + 10,
+            head: [selectedColumns.map(column => column.header)],
+            body: previewData.map(item =>
+                selectedColumns.map(column => item[column.accessorKey])
+            ),
+        });
+
+        doc.save('staff_details.pdf');
+    };
+
+    const exportToExcel = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Staff Details');
+
+        worksheet.addRow(selectedColumns.map(column => column.header));
+
+        previewData.forEach(item => {
+            worksheet.addRow(selectedColumns.map(column => item[column.accessorKey]));
+        });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'staff_details.xlsx';
+        link.click();
+        URL.revokeObjectURL(link.href);
+    };
+
+    const exportToCSV = () => {
+        const csvContent = [
+            selectedColumns.map(column => column.header).join(','),
+            ...previewData.map(item =>
+                selectedColumns.map(column => item[column.accessorKey]).join(',')
+            )
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'staff_details.csv';
+        link.click();
+        URL.revokeObjectURL(link.href);
+    };
+
     return (
         <div className="main-content">
             <PageHeader title="Staff Details" breadcrumbs={breadcrumbs} />
@@ -216,6 +248,16 @@ export default function StaffDetails() {
                         width="300px"
                     />
                 </InputGroup>
+                <Button
+                    bg={theme.purple}
+                    _hover={{ bg: theme.onHoverPurple }}
+                    color="white"
+                    variant="solid"
+                    width="250px"
+                    onClick={handleGenerateReport}
+                >
+                    Generate Report
+                </Button>
                 <Link to="/app/AddStaffDetails">
                     <Button
                         bg={theme.purple}
@@ -338,6 +380,107 @@ export default function StaffDetails() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Modal for Column Selection */}
+            <Modal isOpen={isColumnSelectionOpen} onClose={() => setIsColumnSelectionOpen(false)} isCentered>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Select Columns for Report</ModalHeader>
+                    <ModalBody>
+                        <Stack spacing={3}>
+                            {columns.map(column => (
+                                column.id !== 'actions' && (
+                                    <Checkbox
+                                        key={column.accessorKey}
+                                        isChecked={selectedColumns.includes(column.accessorKey)}
+                                        onChange={() => handleCheckboxChange(column.accessorKey)}
+                                    >
+                                        {column.header}
+                                    </Checkbox>
+                                )
+                            ))}
+                        </Stack>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button
+                            onClick={handlePreview}
+                            isDisabled={selectedColumns.length === 0}
+                            bg={theme.purple}
+                            _hover={{ bg: theme.onHoverPurple }}
+                            color="white"
+                        >
+                            Preview
+                        </Button>
+                        <Button ml={3} onClick={() => setIsColumnSelectionOpen(false)}>Cancel</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            {/* Modal for Preview */}
+            <Modal
+                isOpen={isPreviewOpen}
+                onClose={() => setIsPreviewOpen(false)}
+                size="6xl"
+                isCentered
+            >
+                <ModalOverlay />
+                <ModalContent maxHeight="80vh">
+                    <ModalHeader>Preview</ModalHeader>
+                    <ModalBody overflowY="auto">
+                        <Table className="custom-table">
+                            <Thead>
+                                <Tr>
+                                    {selectedColumns.map((column) => (
+                                        <Th key={column.accessorKey}>
+                                            {column.header}
+                                        </Th>
+                                    ))}
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                {previewData.length > 0 ? (
+                                    previewData.map((row, rowIndex) => (
+                                        <Tr key={rowIndex}>
+                                            {selectedColumns.map((column) => (
+                                                <Td key={column.accessorKey}>
+                                                    {row[column.accessorKey]}
+                                                </Td>
+                                            ))}
+                                        </Tr>
+                                    ))
+                                ) : (
+                                    <Tr>
+                                        <Td colSpan={selectedColumns.length} textAlign="center">
+                                            No data available
+                                        </Td>
+                                    </Tr>
+                                )}
+                            </Tbody>
+                        </Table>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Menu>
+                            <MenuButton
+                                as={Button}
+                                rightIcon={<TriangleDownIcon />}
+                                bg={theme.purple}
+                                _hover={{ bg: theme.onHoverPurple }}
+                                color="white"
+                                variant="solid"
+                            >
+                                Export
+                            </MenuButton>
+                            <MenuList>
+                                <MenuItem onClick={exportToPDF}>Export to PDF</MenuItem>
+                                <MenuItem onClick={exportToExcel}>Export to Excel</MenuItem>
+                                <MenuItem onClick={exportToCSV}>Export to CSV</MenuItem>
+                            </MenuList>
+                        </Menu>
+                            <Button ml={3} onClick={() => setIsPreviewOpen(false)}>Close</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </div>
-    );
+);
 }
+

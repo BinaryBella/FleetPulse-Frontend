@@ -54,7 +54,7 @@ export default function FuelRefillDetails() {
         // Add Report Title centered below the logo
         doc.setFontSize(16);
         const reportTitleY = imgHeight + 10;
-        doc.text("Vehicle Details Report", pageWidth / 2, reportTitleY, {align: "center"});
+        doc.text("Fuel Refill Details Report", pageWidth / 2, reportTitleY, {align: "center"});
 
         // Add Report creation date left-aligned below the report title
         doc.setFontSize(10);
@@ -76,12 +76,12 @@ export default function FuelRefillDetails() {
             ),
         });
 
-        doc.save('vehicle_details.pdf');
+        doc.save('fuelrefill_details.pdf');
     };
 
     const exportToExcel = async () => {
         const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Vehicle Details');
+        const worksheet = workbook.addWorksheet('Fuel Refill Details');
 
         worksheet.addRow(selectedColumns.map(column => column.header));
 
@@ -102,7 +102,7 @@ export default function FuelRefillDetails() {
         const blob = new Blob([buffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = 'vehicle_details.xlsx';
+        link.download = 'fuelrefill_details.xlsx';
         link.click();
         URL.revokeObjectURL(link.href);
     };
@@ -127,7 +127,7 @@ export default function FuelRefillDetails() {
         const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = 'vehicle_details.csv';
+        link.download = 'fuelrefill_details.csv';
         link.click();
         URL.revokeObjectURL(link.href);
     };

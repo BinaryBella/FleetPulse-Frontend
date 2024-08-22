@@ -16,7 +16,7 @@ export default function AddVehicleDetails() {
     const [manufacturers, setManufacturers] = useState([]);
 
     const breadcrumbs = [
-        {label: "Vehicle", link: "/VehicleDetails"},
+        {label: "Vehicle", link: "/app/VehicleDetails"},
         {label: "Vehicle Details", link: "/app/VehicleDetails"},
         {label: "Add Vehicle Details", link: "/app/AddvehicleDetails"},
     ];
