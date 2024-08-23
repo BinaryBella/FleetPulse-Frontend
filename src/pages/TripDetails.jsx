@@ -213,27 +213,28 @@ export default function TripDetails() {
                         width="300px"
                     />
                 </InputGroup>
-                <Link to="/app/AddTripDetails">
+                <Button
+                    bg={theme.purple}
+                    _hover={{ bg: theme.onHoverPurple }}
+                    color="white"
+                    variant="solid"
+                    width="250px"
+                    // onClick={handleGenerateReport}
+                >
+                    Generate Report
+                </Button>
+                <Link to="/app/AddDriverDetails">
                     <Button
                         bg={theme.purple}
                         _hover={{ bg: theme.onHoverPurple }}
                         color="white"
                         variant="solid"
-                        w="180px"
-                        mr="50px"
+                        w="200px"
+                        mr="50"
                     >
-                        Add New Trip
+                        Add New Driver Details
                     </Button>
                 </Link>
-                <Button
-                    onClick={generatePDF}
-                    bg={theme.purple}
-                    _hover={{ bg: theme.onHoverPurple }}
-                    color="white"
-                    variant="solid"
-                >
-                    Generate Report
-                </Button>
             </Box>
 
             <Table className="custom-table">

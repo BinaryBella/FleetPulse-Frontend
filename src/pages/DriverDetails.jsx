@@ -4,7 +4,7 @@ import {
     IconButton, MenuList, MenuItem, Input, InputGroup, InputLeftElement,
     AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody,
     AlertDialogFooter, AlertDialog, Checkbox, Modal, ModalOverlay, ModalContent,
-    ModalHeader, ModalBody, ModalFooter, useDisclosure, Stack,Text
+    ModalHeader, ModalBody, ModalFooter, useDisclosure, Stack, Text
 } from "@chakra-ui/react";
 import { ChevronDownIcon, TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
@@ -45,7 +45,6 @@ export default function DriverDetails() {
         try {
             const response = await axiosApi.get("https://localhost:7265/api/Driver");
             setDriverDetails(response.data);
-            console.log(response.data);
         } catch (error) {
             console.error("Error fetching driver details:", error);
         }
@@ -63,7 +62,6 @@ export default function DriverDetails() {
         { accessorKey: 'licenseExpiryDate', header: 'License Exp Date', meta: { isNumeric: false, filter: 'text' } },
         { accessorKey: 'phoneNo', header: 'Phone No', meta: { isNumeric: false, filter: 'text' } },
         { accessorKey: 'emergencyContact', header: 'Emergency Contact', meta: { isNumeric: false, filter: 'text' } },
-        { accessorKey: 'dateOfBirth', header: 'Date of Birth', meta: { isNumeric: false, filter: 'date' } },
         {
             accessorKey: 'status',
             header: 'Status',
@@ -156,11 +154,17 @@ export default function DriverDetails() {
         );
         setSelectedColumns(selected);
 
-        const preview = driverDetails.map(item =>
-            Object.fromEntries(
+        const preview = driverDetails.map(item => {
+            const data = Object.fromEntries(
                 selected.map(col => [col.accessorKey, item[col.accessorKey]])
-            )
-        );
+            );
+            // Add the additional fields from 'More Details' modal to the report
+            data.emailAddress = item.emailAddress;
+            data.bloodGroup = item.bloodGroup;
+            data.dateOfBirth = item.dateOfBirth;
+            return data;
+        });
+
         setPreviewData(preview);
 
         setIsColumnSelectionOpen(false);
@@ -199,15 +203,13 @@ export default function DriverDetails() {
 
         doc.autoTable({
             startY: additionalInfoY + 20,
-            head: [selectedColumns.map(column => column.header)],
+            head: [selectedColumns.map(column => column.header).concat(["Email", "Blood Group", "Date of Birth"])],
             body: previewData.map(item =>
-                selectedColumns.map(column => {
-                    if (column.accessorKey === 'licenseExpiryDate') {
-                        const date = new Date(item[column.accessorKey]);
-                        return date.toLocaleDateString();
-                    }
-                    return item[column.accessorKey];
-                })
+                selectedColumns.map(column => item[column.accessorKey]).concat(
+                    item.emailAddress,
+                    item.bloodGroup,
+                    new Date(item.dateOfBirth).toLocaleDateString()
+                )
             ),
         });
 
@@ -221,7 +223,11 @@ export default function DriverDetails() {
         worksheet.columns = selectedColumns.map(column => ({
             header: column.header,
             key: column.accessorKey,
-        }));
+        })).concat([
+            { header: "Email", key: "emailAddress" },
+            { header: "Blood Group", key: "bloodGroup" },
+            { header: "Date of Birth", key: "dateOfBirth" }
+        ]);
 
         const date = new Date();
         const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
@@ -242,13 +248,11 @@ export default function DriverDetails() {
         worksheet.getCell('A3').alignment = { vertical: 'middle', horizontal: 'center' };
 
         previewData.forEach(item => {
-            worksheet.addRow(selectedColumns.map(column => {
-                if (column.accessorKey === 'licenseExpiryDate') {
-                    const date = new Date(item[column.accessorKey]);
-                    return date.toLocaleDateString();
-                }
-                return item[column.accessorKey];
-            }));
+            worksheet.addRow(selectedColumns.map(column => item[column.accessorKey]).concat(
+                item.emailAddress,
+                item.bloodGroup,
+                new Date(item.dateOfBirth).toLocaleDateString()
+            ));
         });
 
         const buffer = await workbook.xlsx.writeBuffer();
@@ -267,15 +271,13 @@ export default function DriverDetails() {
 
         const csvContent = [
             header,
-            selectedColumns.map(column => column.header).join(','),
+            selectedColumns.map(column => column.header).concat(["Email", "Blood Group", "Date of Birth"]).join(','),
             ...previewData.map(item =>
-                selectedColumns.map(column => {
-                    if (column.accessorKey === 'licenseExpiryDate') {
-                        const date = new Date(item[column.accessorKey]);
-                        return date.toLocaleDateString();
-                    }
-                    return item[column.accessorKey];
-                }).join(',')
+                selectedColumns.map(column => item[column.accessorKey]).concat(
+                    item.emailAddress,
+                    item.bloodGroup,
+                    new Date(item.dateOfBirth).toLocaleDateString()
+                ).join(',')
             )
         ].join('\n');
 
@@ -472,6 +474,10 @@ export default function DriverDetails() {
                                                             : row[column.accessorKey]}
                                                 </Td>
                                             ))}
+                                            {/* Include additional details here */}
+                                            <Td>{row.emailAddress}</Td>
+                                            <Td>{row.bloodGroup}</Td>
+                                            <Td>{new Date(row.dateOfBirth).toLocaleDateString()}</Td>
                                         </Tr>
                                     ))
                                 ) : (
@@ -507,11 +513,12 @@ export default function DriverDetails() {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
+
+            {/* Modal for More Details */}
             <Modal isOpen={isOpen} onClose={onClose} isCentered>
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Driver Details</ModalHeader>
-
                     <ModalBody>
                         <Text as='b'>First Name</Text>
                         <Text className="mb-3">{selectedDriver?.firstName}</Text>
@@ -524,7 +531,6 @@ export default function DriverDetails() {
                         <Text as='b'>Email</Text>
                         <Text className="mb-3">{selectedDriver?.emailAddress}</Text>
                     </ModalBody>
-
                     <ModalFooter>
                         <Button bg={theme.purple}
                                 _hover={{ bg: theme.onHoverPurple }}
