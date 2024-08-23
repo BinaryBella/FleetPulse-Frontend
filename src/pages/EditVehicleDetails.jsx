@@ -18,7 +18,7 @@ export default function EditVehicleDetails() {
     const [vehicleDetails, setVehicleDetails] = useState(null);
 
     const breadcrumbs = [
-        { label: "Vehicle", link: "/VehicleDetails" },
+        { label: "Vehicle", link: "/app/VehicleDetails" },
         { label: "Vehicle Details", link: "/app/VehicleDetails" },
         { label: "Edit Vehicle Details", link: `/app/EditVehicleDetails/${vehicleId}` },
     ];

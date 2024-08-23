@@ -156,7 +156,7 @@ const VehicleMaintenanceConfiguration = () => {
                                             placeholder="Vehicle Registration No"
                                             variant="filled"
                                             borderRadius="md"
-                                            size="sm"
+                                            size="md"
                                             width="100%"
                                         >
                                             {vehicleRegNoDetails.map((option, index) => (
@@ -180,7 +180,7 @@ const VehicleMaintenanceConfiguration = () => {
                                             placeholder="Vehicle Maintenance Type"
                                             variant="filled"
                                             borderRadius="md"
-                                            size="sm"
+                                            size="md"
                                             width="100%"
                                         >
                                             {maintenanceTypeDetails.map((option, index) => (
@@ -204,7 +204,7 @@ const VehicleMaintenanceConfiguration = () => {
                                             placeholder="Duration"
                                             variant="filled"
                                             borderRadius="md"
-                                            size="sm"
+                                            size="md"
                                             width="100%"
                                         >
                                             <option value="weekly">Weekly</option>
@@ -242,7 +242,7 @@ const VehicleMaintenanceConfiguration = () => {
                                     _hover={{ bg: 'gray.500' }}
                                     color="#ffffff"
                                     variant="solid"
-                                    size="sm"
+                                    size="md"
                                     width="50%"
                                     onClick={handleCancel}
                                 >
@@ -253,7 +253,7 @@ const VehicleMaintenanceConfiguration = () => {
                                     _hover={{ bg: theme.onHoverPurple }}
                                     color="#ffffff"
                                     variant="solid"
-                                    size="sm"
+                                    size="md"
                                     width="50%"
                                     type="submit"
                                 >

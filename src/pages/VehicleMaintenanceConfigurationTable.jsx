@@ -163,7 +163,7 @@ export default function VehicleMaintenanceConfigurationTable() {
     };
 
     const breadcrumbs = [
-        { label: "Vehicle", link: "/app/Vehicle" },
+        { label: "Vehicle", link: "/app/VehicleDetails" },
         { label: "Vehicle Maintenance Configuration", link: "/app/VehicleMaintenanceConfigurationTable" }
     ];
 

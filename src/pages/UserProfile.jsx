@@ -243,8 +243,7 @@ export default function UserProfile() {
                                                             px={3}
                                                             py={2}
                                                             mt={1}
-                                                            width="320px"
-                                                            size="sm"
+                                                            width="350px"
                                                             id="FirstName"
                                                             placeholder="First Name"
                                                         />
@@ -275,8 +274,7 @@ export default function UserProfile() {
                                                             px={3}
                                                             py={2}
                                                             mt={1}
-                                                            size="sm"
-                                                            width="320px"
+                                                            width="350px"
                                                             id="DateofBirth"
                                                             placeholder="Date of Birth"
                                                         />
@@ -309,8 +307,7 @@ export default function UserProfile() {
                                                             px={3}
                                                             py={2}
                                                             mt={1}
-                                                            size="sm"
-                                                            width="320px"
+                                                            width="350px"
                                                             id="PhoneNo"
                                                             placeholder="Phone No"
                                                             maxLength="10"
@@ -346,8 +343,7 @@ export default function UserProfile() {
                                                             px={3}
                                                             py={2}
                                                             mt={1}
-                                                            size="sm"
-                                                            width="320px"
+                                                            width="350px"
                                                             id="LastName"
                                                             placeholder="Last Name"
                                                         />
@@ -379,8 +375,7 @@ export default function UserProfile() {
                                                             px={3}
                                                             py={2}
                                                             mt={1}
-                                                            size="sm"
-                                                            width="320px"
+                                                            width="350px"
                                                             id="EmailAddress"
                                                             placeholder="Email Address"
                                                         />
@@ -412,8 +407,7 @@ export default function UserProfile() {
                                                             px={3}
                                                             py={2}
                                                             mt={1}
-                                                            size="sm"
-                                                            width="320px"
+                                                            width="350px"
                                                             id="NIC"
                                                             placeholder="NIC"
                                                         />
@@ -432,8 +426,8 @@ export default function UserProfile() {
                                         _hover={{bg: "gray.500"}}
                                         color="#ffffff"
                                         variant="solid"
-                                        w="150px"
-                                        size="sm"
+                                        w="180px"
+                                        size="md"
                                         onClick={handleCancel}
                                     >
                                         Cancel
@@ -443,8 +437,8 @@ export default function UserProfile() {
                                         _hover={{bg: theme.onHoverPurple}}
                                         color="#ffffff"
                                         variant="solid"
-                                        w="150px"
-                                        size="sm"
+                                        w="180px"
+                                        size="md"
                                         type="submit"
                                     >
                                         Save

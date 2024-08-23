@@ -116,7 +116,7 @@ export default function ManufacturerDetails() {
                     />
                     <MenuList>
                         <MenuItem>
-                            <Link to={`/app/EditManufacturerTypeDetails/${row.original.id}`}>
+                            <Link to={`/app/EditManufactureDetails/${row.original.id}`}>
                                 Edit
                             </Link>
                         </MenuItem>
@@ -249,7 +249,7 @@ export default function ManufacturerDetails() {
                                         />
                                         <MenuList>
                                             <MenuItem>
-                                                <Link to={`/app/EditManufacturerTypeDetails/${manufacturer.manufactureId}`}>
+                                                <Link to={`/app/EditManufactureDetails/${manufacturer.manufactureId}`}>
                                                     Edit
                                                 </Link>
                                             </MenuItem>

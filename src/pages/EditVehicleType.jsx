@@ -17,34 +17,40 @@ import {
 import theme from "../config/ThemeConfig.jsx";
 import {axiosApi} from "../interceptor.js";
 
-export default function EditMaintenanceType() {
+export default function EditVehicleType() {
     const navigate = useNavigate();
     const { id } = useParams();
     const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
     const { isOpen: isSuccessDialogOpen, onOpen: onSuccessDialogOpen, onClose: onSuccessDialogClose } = useDisclosure();
     const [dialogMessage, setDialogMessage] = useState("");
     const [successDialogMessage, setSuccessDialogMessage] = useState("");
-    const [initialValues, setInitialValues] = useState({ TypeName: "", isActive: false });
+    const [initialValues, setInitialValues] = useState({ typeName: "", isActive: true });
+
+    const breadcrumbs = [
+        { label: 'Vehicle', link: '/' },
+        { label: 'Vehicle Type', link: '/app/VehicleType' },
+        { label: 'Edit Vehicle Type Details', link: '/app/VehicleType' }
+    ];
 
     useEffect(() => {
-        fetchMaintenanceTypeData(id);
+        fetchVehicleTypeData(id);
     }, [id]);
 
-    const fetchMaintenanceTypeData = async (id) => {
+    const fetchVehicleTypeData = async (id) => {
         try {
-            const response = await axiosApi.get(`https://localhost:7265/api/VehicleMaintenanceType/${id}`);
-            const data = response.data;
+            const response = await axiosApi.post(`https://localhost:7265/api/VehicleType/${id}`);
+            const data = await response.json();
 
-            if (response.status !== 200) {
-                throw new Error(data.message || 'Failed to fetch maintenance type data.');
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to fetch vehicle type data.');
             }
 
             setInitialValues({
-                TypeName: data.typeName || "", // Use the correct key 'typeName'
-                isActive: data.status || false // Use the correct key 'status'
+                typeName: data.type || "",
+                isActive: data.status
             });
         } catch (error) {
-            setDialogMessage(error.message || 'Failed to fetch maintenance type data.');
+            setDialogMessage(error.message || 'Failed to fetch vehicle type data.');
             onDialogOpen();
         }
     };
@@ -53,41 +59,43 @@ export default function EditMaintenanceType() {
         try {
             const status = values.isActive ? true : false;
 
-            const response = await axiosApi.put(`https://localhost:7265/api/VehicleMaintenanceType/UpdateVehicleMaintenanceType`, {
-                Id: id,
-                TypeName: values.TypeName,
-                Status: status
-            }, {
+            const response = await fetch(`https://localhost:7265/api/VehicleType/UpdateVehicleType`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({
+                    VehicleTypeId: id,
+                    Type: values.typeName,
+                    Status: status
+                })
             });
 
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.message || 'Failed to update maintenance type.');
+                throw new Error(data.message || 'Failed to update vehicle type.');
             }
 
-            setSuccessDialogMessage('Maintenance type updated successfully.');
+            setSuccessDialogMessage('Vehicle type updated successfully.');
             onSuccessDialogOpen();
         } catch (error) {
-            setDialogMessage(error.message || 'Failed to update maintenance type.');
+            setDialogMessage(error.message || 'Failed to update vehicle type.');
             onDialogOpen();
         }
     };
 
     const handleCancel = () => {
-        navigate('/app/VehicleMaintenanceTypeDetails');
+        navigate('/app/VehicleType');
     };
 
     const handleSuccessDialogClose = () => {
         onSuccessDialogClose();
-        navigate('/app/MaintenanceTypeTable');
+        navigate('/app/VehicleType');
     };
 
     return (
         <>
-            <PageHeader title="Edit Vehicle Maintenance Type Details" />
+            <PageHeader title="Edit Vehicle Type" breadcrumbs={breadcrumbs} />
             <Formik
                 enableReinitialize
                 initialValues={initialValues}
@@ -96,11 +104,11 @@ export default function EditMaintenanceType() {
                 {({ errors, touched, values, setFieldValue }) => (
                     <Form className="grid grid-cols-2 gap-10 mt-8">
                         <div className="flex flex-col gap-3">
-                            <p>Vehicle Maintenance Type</p>
-                            <Field name="TypeName" validate={(value) => {
+                            <p>Vehicle Type</p>
+                            <Field name="typeName" validate={(value) => {
                                 let error;
                                 if (!value) {
-                                    error = "Maintenance type is required.";
+                                    error = "Vehicle type is required.";
                                 }
                                 return error;
                             }}>
@@ -115,12 +123,12 @@ export default function EditMaintenanceType() {
                                             py={2}
                                             mt={1}
                                             width="500px"
-                                            id="TypeName"
-                                            placeholder="Enter Vehicle Maintenance Type"
-                                            value={values.TypeName} // Ensure the value is controlled
+                                            id="typeName"
+                                            placeholder="Enter Vehicle Type"
+                                            value={values.typeName} // Ensure the value is controlled
                                         />
-                                        {errors.TypeName && touched.TypeName && (
-                                            <div className="text-red-500">{errors.TypeName}</div>
+                                        {errors.typeName && touched.typeName && (
+                                            <div className="text-red-500">{errors.typeName}</div>
                                         )}
                                     </div>
                                 )}
@@ -131,8 +139,9 @@ export default function EditMaintenanceType() {
                                         <Checkbox
                                             {...field}
                                             size='lg'
-                                            checked={values.isActive}
+                                            isChecked={values.isActive}
                                             className="mt-8"
+                                            id="isActive"
                                             onChange={e => setFieldValue('isActive', e.target.checked)}
                                         >
                                             Is Active
@@ -177,7 +186,7 @@ export default function EditMaintenanceType() {
                 <AlertDialogContent
                     position="absolute"
                     top="30%"
-                    left="35%"
+                    left="50%"
                     transform="translate(-50%, -50%)">
                     <AlertDialogHeader>Error</AlertDialogHeader>
                     <AlertDialogBody>
@@ -194,7 +203,7 @@ export default function EditMaintenanceType() {
                 <AlertDialogContent
                     position="absolute"
                     top="30%"
-                    left="35%"
+                    left="50%"
                     transform="translate(-50%, -50%)">
                     <AlertDialogHeader>Success</AlertDialogHeader>
                     <AlertDialogBody>

@@ -39,13 +39,13 @@ const PasswordField = ({ fieldId, label, showPassword, handleShowPassword, place
                 type={showPassword ? "text" : "password"}
                 variant="filled"
                 placeholder={placeholder}
-                size="sm"
+                size="md"
                 borderRadius="md"
             />
             <InputRightElement width="4.5rem">
                 <IconButton
                     h="1.75rem"
-                    size="sm"
+                    size="md"
                     variant="ghost"
                     onClick={handleShowPassword}
                     icon={showPassword ? <ViewOffIcon/> : <ViewIcon/>}
@@ -197,7 +197,7 @@ export default function ChangePassword() {
                                         variant="solid"
                                         w="200px"
                                         gap="18"
-                                        size="sm"
+                                        size="md"
                                         onClick={handleCancel}
                                         isDisabled={isSubmitting}
                                     >
@@ -210,7 +210,7 @@ export default function ChangePassword() {
                                         variant="solid"
                                         w="200px"
                                         type="submit"
-                                        size="sm"
+                                        size="md"
                                         isLoading={isSubmitting}
                                     >
                                         Save

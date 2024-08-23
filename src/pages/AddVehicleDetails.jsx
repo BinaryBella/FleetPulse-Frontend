@@ -336,7 +336,7 @@ export default function AddVehicleDetails() {
                             </Button>
                             <Button
                                 bg={theme.purple}
-                                _hover={{ bg: "blue.500" }}
+                                _hover={{bg: theme.onHoverPurple}}
                                 color="#ffffff"
                                 variant="solid"
                                 w="250px"
