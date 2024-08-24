@@ -371,10 +371,11 @@ export default function StaffDetails() {
                             variant="solid"
                             onClick={onDialogClose}
                             ref={cancelRef}
+                            ml={3}
                         >
                             Cancel
                         </Button>
-                        <Button colorScheme="red" color="#FFFFFF" onClick={onConfirmDelete}>
+                        <Button colorScheme="red" color="#FFFFFF" onClick={onConfirmDelete} ml={3}>
                             {selectedStaff?.status ? "Deactivate" : "Activate"}
                         </Button>
                     </AlertDialogFooter>

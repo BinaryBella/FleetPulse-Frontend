@@ -15,7 +15,7 @@ import {
     useDisclosure
 } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
-import {axiosApi} from "../interceptor.js";
+import { axiosApi } from "../interceptor.js";
 
 export default function EditMaintenanceType() {
     const navigate = useNavigate();
@@ -40,8 +40,8 @@ export default function EditMaintenanceType() {
             }
 
             setInitialValues({
-                TypeName: data.typeName || "", // Use the correct key 'typeName'
-                isActive: data.status || false // Use the correct key 'status'
+                TypeName: data.typeName || "",
+                isActive: data.status || false
             });
         } catch (error) {
             setDialogMessage(error.message || 'Failed to fetch maintenance type data.');
@@ -51,30 +51,29 @@ export default function EditMaintenanceType() {
 
     const handleSubmit = async (values) => {
         try {
-            const status = values.isActive ? true : false;
-
             const response = await axiosApi.put(`https://localhost:7265/api/VehicleMaintenanceType/UpdateVehicleMaintenanceType`, {
                 Id: id,
                 TypeName: values.TypeName,
-                Status: status
+                Status: values.isActive
             }, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
 
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || 'Failed to update maintenance type.');
+            if (response.status === 200) {
+                setSuccessDialogMessage('Maintenance type updated successfully.');
+                onSuccessDialogOpen();
+            } else {
+                setDialogMessage(response.data.message || 'Failed to update maintenance type.');
+                onDialogOpen();
             }
-
-            setSuccessDialogMessage('Maintenance type updated successfully.');
-            onSuccessDialogOpen();
         } catch (error) {
             setDialogMessage(error.message || 'Failed to update maintenance type.');
             onDialogOpen();
         }
     };
+
 
     const handleCancel = () => {
         navigate('/app/VehicleMaintenanceTypeDetails');
@@ -82,7 +81,7 @@ export default function EditMaintenanceType() {
 
     const handleSuccessDialogClose = () => {
         onSuccessDialogClose();
-        navigate('/app/MaintenanceTypeTable');
+        navigate('/app/VehicleMaintenanceTypeDetails');
     };
 
     return (
@@ -117,7 +116,6 @@ export default function EditMaintenanceType() {
                                             width="500px"
                                             id="TypeName"
                                             placeholder="Enter Vehicle Maintenance Type"
-                                            value={values.TypeName} // Ensure the value is controlled
                                         />
                                         {errors.TypeName && touched.TypeName && (
                                             <div className="text-red-500">{errors.TypeName}</div>
@@ -131,15 +129,12 @@ export default function EditMaintenanceType() {
                                         <Checkbox
                                             {...field}
                                             size='lg'
-                                            checked={values.isActive}
+                                            isChecked={values.isActive}
                                             className="mt-8"
                                             onChange={e => setFieldValue('isActive', e.target.checked)}
                                         >
                                             Is Active
                                         </Checkbox>
-                                        {errors.isActive && touched.isActive && (
-                                            <div className="text-red-500">{errors.isActive}</div>
-                                        )}
                                     </div>
                                 )}
                             </Field>

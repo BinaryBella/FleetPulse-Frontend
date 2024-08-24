@@ -54,6 +54,11 @@ export default function DriverDetails() {
         setCurrentPage(selected);
     };
 
+    const breadcrumbs = [
+        { label: "Driver", link: "/app/DriverDetails" },
+        { label: "Driver Details", link: "/app/DriverDetails" },
+    ];
+
     const columns = useMemo(() => [
         { accessorKey: 'firstName', header: 'First Name', meta: { isNumeric: false, filter: 'text' } },
         { accessorKey: 'lastName', header: 'Last Name', meta: { isNumeric: false, filter: 'text' } },
@@ -291,7 +296,7 @@ export default function DriverDetails() {
 
     return (
         <div className="main-content">
-            <PageHeader title="Driver Details" />
+            <PageHeader title="Driver Details" breadcrumbs={breadcrumbs} />
             <Box mb="20px" mt="50px" display="flex" alignItems="center" gap="20px">
                 <InputGroup>
                     <InputLeftElement pointerEvents="none">

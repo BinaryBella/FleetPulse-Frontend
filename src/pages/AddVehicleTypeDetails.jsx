@@ -31,13 +31,12 @@ export default function AddVehicleType() {
         { label: 'Add Vehicle Type Details', link: '/app/AddVehicleTypeDetails' }
     ];
 
-    const handleSubmit = async (values) => {
+    const handleSubmit = async (values, { setSubmitting }) => {
         try {
-            console.log(values.TypeName, values.isActive);
             const status = values.isActive === false ? "false" : "true";
 
             const response = await axiosApi.post('https://localhost:7265/api/VehicleType', {
-                Type: values.TypeName,
+                Type: values.type,
                 Status: status
             }, {
                 headers: {
@@ -45,10 +44,8 @@ export default function AddVehicleType() {
                 }
             });
 
-            // Check for response status indicating success
             if (response.status === 200) {
                 const responseData = response.data;
-                // Check if there's a specific message indicating the type already exists
                 if (responseData.message && responseData.message.toLowerCase().includes('exists')) {
                     setDialogMessage('Vehicle Type already exists');
                     onDialogOpen();
@@ -60,7 +57,6 @@ export default function AddVehicleType() {
                 throw new Error('Failed to add vehicle type.');
             }
         } catch (error) {
-            console.error('Error adding vehicle type:', error);
             if (error.response && error.response.data && error.response.data.message) {
                 const errorMessage = error.response.data.message;
                 if (errorMessage.toLowerCase().includes('exist')) {
@@ -74,6 +70,8 @@ export default function AddVehicleType() {
                 setDialogMessage('Failed to add vehicle type.');
             }
             onDialogOpen();
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -91,91 +89,96 @@ export default function AddVehicleType() {
             <PageHeader title="Add Vehicle Type Details" breadcrumbs={breadcrumbs} />
             <Formik
                 initialValues={{
-                    TypeName: "",
+                    type: "",
                     isActive: false
                 }}
                 onSubmit={handleSubmit}
             >
-                {({ errors, touched }) => (
-                    <div className="flex justify-between vertical-container">
-                        <div className="flex flex-col gap-6 mt-5">
-                            <div className="flex flex-col gap-3">
-                                <p>Vehicle Type</p>
-                                <Field name="TypeName" validate={(value) => {
-                                    let error;
-                                    if (!value) {
-                                        error = "Vehicle type is required.";
-                                    }
-                                    return error;
-                                }}>
-                                    {({ field }) => (
-                                        <div>
-                                            <Input
-                                                {...field}
-                                                type="text"
-                                                variant="filled"
-                                                borderRadius="md"
-                                                px={3}
-                                                py={2}
-                                                mt={1}
-                                                width="400px"
-                                                id="TypeName"
-                                                placeholder="Vehicle Type"
-                                            />
-                                            {errors.TypeName && touched.TypeName && (
-                                                <div className="text-red-500">{errors.TypeName}</div>
-                                            )}
-                                        </div>
-                                    )}
-                                </Field>
-                                <Field name="isActive">
-                                    {({ field, form }) => (
-                                        <div>
-                                            <Checkbox
-                                                {...field}
-                                                size='lg'
-                                                defaultChecked={field.value}
-                                                className="mt-8"
-                                                onChange={e => form.setFieldValue(field.name, e.target.checked)}
-                                            >
-                                                Is Active
-                                            </Checkbox>
-                                            {form.errors.isActive && form.touched.isActive && (
-                                                <div className="text-red-500">{form.errors.isActive}</div>
-                                            )}
-                                        </div>
-                                    )}
-                                </Field>
-                                <div className="flex gap-10">
-                                    <Button
-                                        bg="gray.400"
-                                        _hover={{ bg: "gray.500" }}
-                                        color="#ffffff"
-                                        variant="solid"
-                                        w="180px"
-                                        marginTop="10"
-                                        onClick={handleCancel}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        bg={theme.purple}
-                                        _hover={{ bg: theme.onHoverPurple }}
-                                        color="#ffffff"
-                                        variant="solid"
-                                        w="180px"
-                                        marginTop="10"
-                                        type="submit"
-                                    >
-                                        Save
-                                    </Button>
+                {({ isSubmitting, errors, touched, handleSubmit }) => (
+                    <form onSubmit={handleSubmit}>
+                        <div className="flex justify-between vertical-container">
+                            <div className="flex flex-col gap-6 mt-5">
+                                <div className="flex flex-col gap-3">
+                                    <p>Vehicle Type</p>
+                                    <Field name="type" validate={(value) => {
+                                        let error;
+                                        if (!value) {
+                                            error = "Vehicle type is required.";
+                                        }
+                                        return error;
+                                    }}>
+                                        {({ field }) => (
+                                            <div>
+                                                <Input
+                                                    {...field}
+                                                    type="text"
+                                                    variant="filled"
+                                                    borderRadius="md"
+                                                    px={3}
+                                                    py={2}
+                                                    mt={1}
+                                                    width="400px"
+                                                    id="type"
+                                                    placeholder="Vehicle Type"
+                                                />
+                                                {errors.type && touched.type && (
+                                                    <div className="text-red-500">{errors.type}</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </Field>
+                                    <Field name="isActive">
+                                        {({ field, form }) => (
+                                            <div>
+                                                <Checkbox
+                                                    {...field}
+                                                    size='lg'
+                                                    defaultChecked={field.value}
+                                                    className="mt-8"
+                                                    onChange={e => form.setFieldValue(field.name, e.target.checked)}
+                                                >
+                                                    Is Active
+                                                </Checkbox>
+                                                {form.errors.isActive && form.touched.isActive && (
+                                                    <div className="text-red-500">{form.errors.isActive}</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </Field>
+                                    <div className="flex gap-10">
+                                        <Button
+                                            bg="gray.400"
+                                            _hover={{ bg: "gray.500" }}
+                                            color="#ffffff"
+                                            variant="solid"
+                                            w="180px"
+                                            marginTop="10"
+                                            onClick={handleCancel}
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button
+                                            bg={theme.purple}
+                                            _hover={{ bg: theme.onHoverPurple }}
+                                            color="#ffffff"
+                                            variant="solid"
+                                            w="180px"
+                                            marginTop="10"
+                                            type="submit"
+                                            isLoading={isSubmitting}
+                                            disabled={isSubmitting}
+                                        >
+                                            Save
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
+                            <div className="flex items-end">
+                                <img src={addVehicleType} alt="add Vehicle Type" width="400" height="400"
+                                     className="mr-14" />
+                            </div>
                         </div>
-                        <div className="flex items-end">
-                            <img src={addVehicleType} alt="add Vehicle Type" width="400" height="400" className="mr-14" />
-                        </div>
-                    </div>
+                    </form>
                 )}
             </Formik>
             <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
@@ -196,7 +199,7 @@ export default function AddVehicleType() {
                 </AlertDialogContent>
             </AlertDialog>
 
-            <AlertDialog isOpen={isSuccessDialogOpen} onClose={onSuccessDialogClose} motionPreset="slideInBottom">
+            <AlertDialog isOpen={isSuccessDialogOpen} onClose={handleSuccessDialogClose} motionPreset="slideInBottom">
                 <AlertDialogOverlay />
                 <AlertDialogContent
                     position="absolute"

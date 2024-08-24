@@ -66,7 +66,7 @@ export default function SideMenu({isAdmin}) {
                         <AccordionItem>
                             <h2>
                                 <AccordionButton>
-                                    <Box as="span" flex='1' textAlign='left' color={theme.orange} fontSize='sm'
+                                    <Box as="span" flex='1' textAlign='left' color={theme.orange} fontSize='md'
                                          paddingLeft="0">
                                         Vehicle
                                     </Box>
@@ -75,7 +75,7 @@ export default function SideMenu({isAdmin}) {
                             </h2>
                             <AccordionPanel pb={4}>
                                 <div>
-                                    <Link className="flex items-center pl-3 " to="/app/VehicleDetails">
+                                    <Link className="flex items-center pl-3 mb-3" to="/app/VehicleDetails">
                                         <Text
                                             color={theme.orange}
                                             fontSize="md"
@@ -86,7 +86,7 @@ export default function SideMenu({isAdmin}) {
                                             Vehicle Details
                                         </Text>
                                     </Link>
-                                    <Link className="flex items-center pl-3 " to="/app/VehicleTypeDetails">
+                                    <Link className="flex items-center pl-3 mb-3" to="/app/VehicleTypeDetails">
                                         <Text
                                             color={theme.orange}
                                             fontSize="md"
@@ -97,7 +97,7 @@ export default function SideMenu({isAdmin}) {
                                             Vehicle Type
                                         </Text>
                                     </Link>
-                                    <Link className="flex items-center pl-3 " to="/app/ManufacturerDetails">
+                                    <Link className="flex items-center pl-3 mb-3" to="/app/ManufacturerDetails">
                                         <Text
                                             color={theme.orange}
                                             fontSize="md"
@@ -108,7 +108,7 @@ export default function SideMenu({isAdmin}) {
                                             Manufacturer
                                         </Text>
                                     </Link>
-                                    <Link className="flex items-center pl-3 " to="/app/VehicleMaintenanceDetails">
+                                    <Link className="flex items-center pl-3 mb-3" to="/app/VehicleMaintenanceDetails">
                                         <Text
                                             color={theme.orange}
                                             fontSize="md"
@@ -119,7 +119,7 @@ export default function SideMenu({isAdmin}) {
                                             Maintenance
                                         </Text>
                                     </Link>
-                                    <Link className="flex items-center pl-3 " to="/app/VehicleMaintenanceTypeDetails">
+                                    <Link className="flex items-center pl-3 mb-3" to="/app/VehicleMaintenanceTypeDetails">
                                         <Text
                                             color={theme.orange}
                                             fontSize="md"
@@ -130,7 +130,7 @@ export default function SideMenu({isAdmin}) {
                                             Maintenance Type
                                         </Text>
                                     </Link>
-                                    <Link className="flex items-center pl-3" to="/app/FuelRefillDetails">
+                                    <Link className="flex items-center pl-3 mb-3" to="/app/FuelRefillDetails">
                                         <Text
                                             color={theme.orange}
                                             fontSize="md"

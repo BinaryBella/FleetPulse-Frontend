@@ -56,12 +56,96 @@ export default function AddFuelRefillDetails() {
     const fetchVehicleRegNos = async () => {
         try {
             const response = await axiosApi.get("https://localhost:7265/api/Vehicles");
-            setVehicleRegNoDetails(response.data);
-            console.log(response.data); // Log fetched data for debugging
+            console.log("vehicle data", response); // Debugging line
+
+            // Map the data to use 'vehicleId' instead of 'id'
+            const mappedData = response.data.map(vehicle => ({
+                id: vehicle.vehicleId, // Use 'vehicleId' from the API response
+                vehicleRegistrationNo: vehicle.vehicleRegistrationNo
+            }));
+
+            console.log('Mapped vehicle registration numbers:', mappedData); // Debugging line
+            setVehicleRegNoDetails(mappedData);
         } catch (error) {
             console.error("Error fetching vehicle registration numbers:", error);
         }
     };
+
+
+    const handleSubmit = async (values, { setSubmitting }) => {
+        console.log("Form Values:", values); // Debugging log
+        console.log("Vehicle Registration Details:", vehicleRegNoDetails); // Debugging log
+
+        if (vehicleRegNoDetails.length === 0) {
+            setDialogMessage("Vehicle registration details are not loaded.");
+            onDialogOpen();
+            setSubmitting(false);
+            return;
+        }
+
+        // Find the selected vehicle using vehicleRegistrationNo
+        const selectedVehicle = vehicleRegNoDetails.find(
+            (vehicle) => vehicle.vehicleRegistrationNo === values.vehicleRegistrationNo // Match by registration number
+        );
+
+        if (!selectedVehicle) {
+            setDialogMessage("Invalid vehicle selected.");
+            onDialogOpen();
+            setSubmitting(false);
+            return;
+        }
+
+        try {
+            const payload = {
+                id: selectedVehicle.id, // Use 'id' from the found vehicle
+                vehicleRegistrationNo: selectedVehicle.vehicleRegistrationNo,
+                UserId: values.userId,
+                NIC: values.nic,
+                Cost: values.cost,
+                LiterCount: values.literCount,
+                Date: values.date,
+                Time: values.time,
+                FType: values.fType,
+                Status: values.IsActive
+            };
+
+            // Make sure to handle response correctly
+            const response = await axiosApi.post('https://localhost:7265/api/FuelRefill', payload, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Check for response status
+            if (response.status >= 200 && response.status < 300) {
+                const data = response.data;
+
+                if (data.message && data.message.toLowerCase().includes('exist')) {
+                    setDialogMessage('Fuel Refill already exists');
+                    onDialogOpen();
+                } else {
+                    setSuccessDialogMessage('Fuel Refill added successfully');
+                    onSuccessDialogOpen();
+                }
+            } else {
+                throw new Error(`Server responded with status ${response.status}`);
+            }
+        } catch (error) {
+            if (error.response && error.response.status) {
+                // Handle different response status codes here if needed
+                setDialogMessage(`Error: ${error.response.statusText}`);
+            } else if (error.request) {
+                // Network error or no response received
+                setDialogMessage('Failed to connect to the server');
+            } else {
+                // Other errors
+                setDialogMessage(error.message || 'Failed to add Fuel Refill.');
+            }
+            onDialogOpen();
+        }
+        setSubmitting(false);
+    };
+
 
     const fetchUser = async (setFieldValue) => {
         try {
@@ -113,61 +197,7 @@ export default function AddFuelRefillDetails() {
                     cost: "",
                     IsActive: false
                 }}
-                onSubmit={async (values, { setSubmitting }) => {
-                    const selectedVehicle = vehicleRegNoDetails.find(
-                        (vehicle) => vehicle.id === parseInt(values.vehicleRegistrationNo)
-                    );
-
-                    if (!selectedVehicle) {
-                        setDialogMessage("Invalid vehicle selected.");
-                        onDialogOpen();
-                        setSubmitting(false);
-                        return;
-                    }
-
-                    try {
-                        const payload = {
-                            id: selectedVehicle.id,
-                            vehicleRegistrationNo: selectedVehicle.vehicleRegistrationNo,
-                            UserId: values.userId,
-                            NIC: values.nic,
-                            Cost: values.cost,
-                            LiterCount: values.literCount,
-                            Date: values.date,
-                            Time: values.time,
-                            FType: values.fType,
-                            Status: values.IsActive
-                        };
-
-                        const response = await axiosApi.post('https://localhost:7265/api/FuelRefill', payload, {
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        });
-
-                        const data = await response.json();
-
-                        if (!response.ok) {
-                            throw new Error(data.message || 'Failed to add Fuel Refill.');
-                        }
-
-                        if (data.message && data.message.toLowerCase().includes('exist')) {
-                            setDialogMessage('Fuel Refill already exists');
-                            onDialogOpen();
-                        } else {
-                            setSuccessDialogMessage('Fuel Refill added successfully');
-                            onSuccessDialogOpen();
-                        }
-                    } catch (error) {
-                        if (error instanceof TypeError) {
-                            setDialogMessage('Failed to connect to the server');
-                        } else {
-                            setDialogMessage(error.message || 'Failed to add Fuel Refill.');
-                        }
-                        onDialogOpen();
-                    }
-                    setSubmitting(false);
-                }}
+                onSubmit={handleSubmit}
             >
                 {({ errors, touched, isSubmitting, setFieldValue }) => {
                     useEffect(() => {
@@ -211,37 +241,43 @@ export default function AddFuelRefillDetails() {
                             <div className="flex flex-col gap-3">
                                 <p>Vehicle Registration No</p>
                                 <Field name="vehicleRegistrationNo" validate={(value) => {
-                                    let error;
-                                    if (!value) {
-                                        error = "Vehicle Registration No is required.";
-                                    }
-                                    return error;
-                                }}>
-                                    {({ field }) => (
-                                        <div>
-                                            <Select
-                                                {...field}
-                                                placeholder='Vehicle Registration No'
-                                                size='md'
-                                                variant='filled'
-                                                borderRadius="md"
-                                                px={3}
-                                                py={2}
-                                                mt={1}
-                                                width="400px"
-                                            >
-                                                {vehicleRegNoDetails.map((option, index) => (
-                                                    <option key={index} value={option.id}>
-                                                        {option.vehicleRegistrationNo}
-                                                    </option>
-                                                ))}
-                                            </Select>
-                                            {errors.vehicleRegistrationNo && touched.vehicleRegistrationNo && (
-                                                <div className="text-red-500">{errors.vehicleRegistrationNo}</div>
-                                            )}
-                                        </div>
-                                    )}
-                                </Field>
+                                if (!value) return "Vehicle Registration No is required";
+                                return undefined;
+                            }}>
+                                {({field, form}) => (
+                                    <Select
+                                        {...field}
+                                        onChange={(e) => {
+                                            const selectedVehicle = vehicleRegNoDetails.find(v => v.vehicleRegistrationNo === e.target.value);
+                                            if (selectedVehicle) {
+                                                form.setFieldValue('vehicleRegistrationNo', selectedVehicle.vehicleRegistrationNo);
+                                                form.setFieldValue('vehicleId', selectedVehicle.id); // Ensure 'vehicleId' is set
+                                                console.log('Selected vehicle:', selectedVehicle); // Debugging line
+                                            } else {
+                                                console.error('Selected vehicle not found');
+                                            }
+                                        }}
+                                        placeholder='Vehicle Registration No'
+                                        size='md'
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                    >
+                                        {vehicleRegNoDetails.map((option) => (
+                                            <option key={option.id} value={option.vehicleRegistrationNo}>
+                                                {option.vehicleRegistrationNo}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                )}
+                            </Field>
+
+                                {errors.vehicleRegistrationNo && touched.vehicleRegistrationNo && (
+                                    <div className="text-red-500">{errors.vehicleRegistrationNo}</div>
+                                )}
                             </div>
                             <div className="flex flex-col gap-3">
                                 <p>Liter Count</p>
@@ -252,7 +288,7 @@ export default function AddFuelRefillDetails() {
                                     }
                                     return error;
                                 }}>
-                                    {({ field }) => (
+                                    {({field}) => (
                                         <div>
                                             <Input
                                                 {...field}
@@ -282,7 +318,7 @@ export default function AddFuelRefillDetails() {
                                     }
                                     return error;
                                 }}>
-                                    {({ field }) => (
+                                    {({field}) => (
                                         <div>
                                             <Input
                                                 {...field}
@@ -306,33 +342,30 @@ export default function AddFuelRefillDetails() {
                             </div>
                             <div className="flex flex-col gap-3">
                                 <p>Time</p>
-                                <Formik initialValues={{ time: "" }} onSubmit={(values) => console.log(values)}>
-                                    {({ errors, touched, setFieldValue }) => (
-                                        <Form>
-                                            <Field name="time" validate={validateTime}>
-                                                {({ field }) => (
-                                                    <div>
-                                                        <Input
-                                                            {...field}
-                                                            type="time"
-                                                            variant="filled"
-                                                            borderRadius="md"
-                                                            px={3}
-                                                            py={2}
-                                                            mt={1}
-                                                            width="400px"
-                                                            id="time"
-                                                            onChange={(e) => handleTimeChange(e, setFieldValue)}
-                                                        />
-                                                        {errors.time && touched.time && (
-                                                            <div className="text-red-500">{errors.time}</div>
-                                                        )}
-                                                    </div>
+                                <div className="flex flex-col gap-3">
+                                    <p>Time</p>
+                                    <Field name="time" validate={validateTime}>
+                                        {({field, form}) => (
+                                            <div>
+                                                <Input
+                                                    {...field}
+                                                    type="time"
+                                                    variant="filled"
+                                                    borderRadius="md"
+                                                    px={3}
+                                                    py={2}
+                                                    mt={1}
+                                                    width="400px"
+                                                    id="time"
+                                                    onChange={(e) => handleTimeChange(e, form.setFieldValue)}
+                                                />
+                                                {errors.time && touched.time && (
+                                                    <div className="text-red-500">{errors.time}</div>
                                                 )}
-                                            </Field>
-                                        </Form>
-                                    )}
-                                </Formik>
+                                            </div>
+                                        )}
+                                    </Field>
+                                </div>
                             </div>
                             <div className="flex flex-col gap-3">
                                 <p>Refill Type</p>
@@ -343,7 +376,7 @@ export default function AddFuelRefillDetails() {
                                     }
                                     return error;
                                 }}>
-                                    {({ field }) => (
+                                    {({field}) => (
                                         <div>
                                             <Select
                                                 {...field}

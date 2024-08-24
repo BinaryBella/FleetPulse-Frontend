@@ -26,7 +26,6 @@ import {
     AlertDialogFooter,
     AlertDialog,
     useDisclosure,
-    useToast
 } from "@chakra-ui/react";
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
@@ -54,32 +53,43 @@ export default function TripDetails() {
     const cancelRef = useRef();
     const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
     const itemsPerPage = 10;
-    const toast = useToast();
 
     useEffect(() => {
         fetchTripDetails();
     }, []);
 
+
     const fetchTripDetails = async () => {
         try {
             const response = await axiosApi.get("https://localhost:7265/api/Trip");
+            console.log("Fetched trip details:", response.data);
             setTripDetails(response.data);
-            console.log(response.data);
         } catch (error) {
             console.error("Error fetching trip details:", error);
         }
     };
 
+
+    const onClickDelete = (trip) => {
+        console.log("Selected trip:", trip);
+        setSelectedTrip(trip);
+        onDialogOpen();
+    };
+
+
     const columns = [
-        { accessorKey: 'driversNIC', header: 'Driver\'s NIC' },
-        { accessorKey: 'helpersNIC', header: 'Helper\'s NIC' },
-        { accessorKey: 'vehicleRegNo', header: 'Vehicle Reg.No' },
+        { accessorKey: 'nic', header: 'Driver\'s NIC' },
+        { accessorKey: 'vehicleRegistrationNo', header: 'Vehicle Reg.No' },
         { accessorKey: 'date', header: 'Date' },
         { accessorKey: 'startTime', header: 'Start Time' },
         { accessorKey: 'endTime', header: 'End Time' },
-        { accessorKey: 'status', header: 'Status' },
         {
-            accessorKey: 'actions',
+            accessorKey: 'status',
+            header: 'Status',
+            cell: info => (info.getValue() ? "Active" : "Inactive"),
+        },
+        {
+            id: 'actions',
             header: 'Actions',
             cell: ({ row }) => (
                 <Menu>
@@ -92,7 +102,7 @@ export default function TripDetails() {
                     />
                     <MenuList>
                         <MenuItem>
-                            <Link to={`/app/EditTripDetails/${row.original.id}`}>
+                            <Link to={`/app/EditTripDetails/${row.original.tripId}`}>
                                 Edit
                             </Link>
                         </MenuItem>
@@ -140,31 +150,48 @@ export default function TripDetails() {
     const isEmpty = currentData.length === 0;
     const iconStyle = { display: "inline-block", verticalAlign: "middle", marginLeft: "5px" };
 
-    const onClickDelete = (trip) => {
-        setSelectedTrip(trip);
-        onDialogOpen();
-    };
+
 
     const onConfirmDelete = async () => {
+        console.log("Confirming delete for trip:", selectedTrip);
+
+        if (!selectedTrip) {
+            console.error("No trip selected.");
+            return;
+        }
+
+        if (!selectedTrip.tripId) {
+            console.error("Selected trip has no tripId:", selectedTrip);
+            return;
+        }
+
         try {
-            const endpoint = `https://localhost:7265/api/TripDetails/${selectedTrip.id}/${selectedTrip.status ? 'deactivate' : 'activate'}`;
-            await axiosApi.put(endpoint);
-            fetchTripDetails();
-            onDialogClose();
-        } catch (error) {
-            if (error.response && error.response.status === 400) {
-                toast({
-                    title: "Error",
-                    description: "Unable to update trip status.",
-                    status: "error",
-                    duration: 5000,
-                    isClosable: true,
-                });
+            const endpoint = `https://localhost:7265/api/Trip/${selectedTrip.tripId}/${selectedTrip.status ? 'deactivate' : 'activate'}`;
+            console.log("Calling endpoint:", endpoint);
+
+            const response = await axiosApi.put(endpoint, null, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log("Response:", response);
+
+            if (response.status === 200 || response.status === 204) {
+                fetchTripDetails();
+                onDialogClose();
             } else {
-                console.error("Error updating trip status:", error);
+                console.error('Failed to update trip status');
+            }
+        } catch (error) {
+            console.error("Error updating trip status:", error);
+            if (error.response) {
+                console.error("Error response:", error.response.data);
             }
         }
     };
+
+
 
     // Function to generate the PDF report
     const generatePDF = () => {
@@ -181,11 +208,10 @@ export default function TripDetails() {
         // Add a table with trip details
         doc.autoTable({
             startY: 40,
-            head: [['Driver\'s NIC', 'Helper\'s NIC', 'Vehicle Reg.No', 'Date', 'Start Time', 'End Time', 'Status']],
+            head: [['Driver\'s NIC', 'Vehicle Reg.No', 'Date', 'Start Time', 'End Time', 'Status']],
             body: currentData.map(trip => [
                 trip.driversNIC,
-                trip.helpersNIC,
-                trip.vehicleRegNo,
+                trip.vehicleRegistrationNo,
                 trip.date,
                 trip.startTime,
                 trip.endTime,
@@ -223,7 +249,7 @@ export default function TripDetails() {
                 >
                     Generate Report
                 </Button>
-                <Link to="/app/AddDriverDetails">
+                <Link to="/app/AddTripDetails">
                     <Button
                         bg={theme.purple}
                         _hover={{ bg: theme.onHoverPurple }}
@@ -232,7 +258,7 @@ export default function TripDetails() {
                         w="200px"
                         mr="50"
                     >
-                        Add New Driver Details
+                        Add New Trip Details
                     </Button>
                 </Link>
             </Box>
@@ -278,9 +304,8 @@ export default function TripDetails() {
                     ) : (
                         currentData.map((trip, index) => (
                             <Tr key={index}>
-                                <Td>{trip.driversNIC}</Td>
-                                <Td>{trip.helpersNIC}</Td>
-                                <Td>{trip.vehicleRegNo}</Td>
+                                <Td>{trip.nic}</Td>
+                                <Td>{trip.vehicleRegistrationNo}</Td>
                                 <Td>{trip.date}</Td>
                                 <Td>{trip.startTime}</Td>
                                 <Td>{trip.endTime}</Td>
@@ -326,14 +351,14 @@ export default function TripDetails() {
                         Are you sure you want to {selectedTrip?.status ? "deactivate" : "activate"} this trip?
                     </AlertDialogBody>
                     <AlertDialogFooter>
-                        <div className="flex flex-row gap-8">
-                            <Button bg="gray.400" _hover={{ bg: "gray.500" }} color="#ffffff" variant="solid" onClick={onDialogClose} ref={cancelRef}>
-                                Cancel
-                            </Button>
-                            <Button colorScheme='red' color="#FFFFFF" onClick={onConfirmDelete}>
-                                {selectedTrip?.status ? "Deactivate" : "Activate"}
-                            </Button>
-                        </div>
+                        <Button ref={cancelRef} onClick={onDialogClose}>Cancel</Button>
+                        <Button
+                            colorScheme={selectedTrip?.status ? "red" : "green"}
+                            onClick={onConfirmDelete}
+                            ml={3}
+                        >
+                            {selectedTrip?.status ? "Deactivate" : "Activate"}
+                        </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

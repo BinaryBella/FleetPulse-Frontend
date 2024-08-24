@@ -148,24 +148,31 @@ export default function FuelRefillDetails() {
         }
     };
 
-    const onClickDelete = async (fuelRefill) => {
+    const onClickDelete = (fuelRefill) => {
+        // Store the fuel refill details to be used for confirmation
         setSelectedFuelRefill(fuelRefill);
         onDialogOpen();
     };
 
     const onConfirmDelete = async () => {
+        if (!selectedFuelRefill) return;
+
         try {
-            if (selectedFuelRefill.status) {
-                await axiosApi.post(`https://localhost:7265/api/FuelRefill/deactivate/${selectedFuelRefill.fuelRefillId}`);
-            } else {
-                await axiosApi.post(`https://localhost:7265/api/FuelRefill/activate/${selectedFuelRefill.fuelRefillId}`);
-            }
+            const endpoint = selectedFuelRefill.status
+                ? `https://localhost:7265/api/FuelRefill/deactivate/${selectedFuelRefill.fuelRefillId}`
+                : `https://localhost:7265/api/FuelRefill/activate/${selectedFuelRefill.fuelRefillId}`;
+
+            await axiosApi.post(endpoint);
+
+            // Refresh the list after the update
             fetchFuelRefill();
             onDialogClose();
         } catch (error) {
             console.error("Error updating fuel refill status:", error);
+            setError("Error updating fuel refill status. Please try again later.");
         }
     };
+
 
     const formatDate = (fuelRefill) => {
         if (!fuelRefill.date) return 'N/A';
@@ -439,30 +446,32 @@ export default function FuelRefillDetails() {
                     activeClassName={"active"}
                 />
             )}
-            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom"
-                         leastDestructiveRef={cancelRef}>
-                <AlertDialogOverlay/>
+
+            <AlertDialog
+                isOpen={isDialogOpen}
+                onClose={onDialogClose}
+                motionPreset="slideInBottom"
+                leastDestructiveRef={cancelRef}
+            >
+                <AlertDialogOverlay />
                 <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
-                    <AlertDialogHeader>{selectedFuelRefill?.status ? "Deactivate" : "Activate"} Fuel Refill
-                        Details</AlertDialogHeader>
+                    <AlertDialogHeader>
+                        {selectedFuelRefill?.status ? "Deactivate" : "Activate"} Fuel Refill
+                    </AlertDialogHeader>
                     <AlertDialogBody>
-                        Are you sure you want
-                        to {selectedFuelRefill?.status ? "deactivate" : "activate"} {selectedFuelRefill?.typeName} Fuel
-                        Refill?
+                        Are you sure you want to {selectedFuelRefill?.status ? "deactivate" : "activate"} this fuel refill?
                     </AlertDialogBody>
                     <AlertDialogFooter>
-                        <div className="flex flex-row gap-8">
-                            <Button bg="gray.400" _hover={{bg: "gray.500"}} color="#ffffff" variant="solid"
-                                    onClick={onDialogClose} ref={cancelRef}>
-                                Cancel
-                            </Button>
-                            <Button colorScheme="red" color="#FFFFFF" onClick={onConfirmDelete}>
-                                {selectedFuelRefill?.status ? "Deactivate" : "Activate"}
-                            </Button>
-                        </div>
+                        <Button ref={cancelRef} onClick={onDialogClose}>
+                            Cancel
+                        </Button>
+                        <Button colorScheme="red" onClick={onConfirmDelete} ml={3}>
+                            {selectedFuelRefill?.status ? "Deactivate" : "Activate"}
+                        </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
 
             {/* Modal for Column Selection */}
             <Modal isOpen={isColumnSelectionOpen} onClose={() => setIsColumnSelectionOpen(false)} isCentered>

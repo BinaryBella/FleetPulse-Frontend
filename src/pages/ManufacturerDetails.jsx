@@ -26,7 +26,6 @@ import {
     AlertDialogFooter,
     AlertDialog,
     useDisclosure,
-    useToast
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
@@ -53,7 +52,6 @@ export default function ManufacturerDetails() {
     const cancelRef = useRef();
     const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
     const itemsPerPage = 10;
-    const toast = useToast();
 
     useEffect(() => {
         fetchManufacturers();
@@ -66,18 +64,28 @@ export default function ManufacturerDetails() {
 
     const onConfirmDelete = async () => {
         try {
-            const endpoint = `https://localhost:7265/api/Manufacture/${selectedManufacturer.ManufactureId}/${selectedManufacturer.status ? 'deactivate' : 'activate'}`;
-            await axiosApi.put(endpoint);
-            fetchManufacturers();
-            onDialogClose();
-            toast({
-                title: `${selectedManufacturer.status ? "Deactivated" : "Activated"} Manufacturer`,
-                status: "success",
-                duration: 3000,
-                isClosable: true,
+            if (!selectedManufacturer || !selectedManufacturer.manufactureId) {
+                console.error('Selected manufacturer or its ID is undefined.');
+                return;
+            }
+
+            const endpoint = `https://localhost:7265/api/Manufacture/${selectedManufacturer.manufactureId}/${selectedManufacturer.status ? 'deactivate' : 'activate'}`;
+
+            const response = await axiosApi.put(endpoint, null, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
+
+            if (response.status === 200 || response.status === 204) {
+                fetchManufacturers();
+                onDialogClose();
+            } else {
+                console.error('Failed to update manufacturer status');
+            }
         } catch (error) {
-            console.error("Error updating manufacturer status:", error);
+            console.error('Error updating manufacturer status:', error);
+
         }
     };
 
@@ -92,7 +100,7 @@ export default function ManufacturerDetails() {
 
     const columns = [
         {
-            accessorKey: 'name',
+            accessorKey: 'manufacturer',
             header: 'Manufacturer Name',
             meta: { isNumeric: false, filter: 'text' }
         },
@@ -115,11 +123,9 @@ export default function ManufacturerDetails() {
                         icon={<IoSettingsSharp />}
                     />
                     <MenuList>
-                        <MenuItem>
-                            <Link to={`/app/EditManufactureDetails/${row.original.id}`}>
-                                Edit
-                            </Link>
-                        </MenuItem>
+                        <Link to={`/app/EditManufactureDetails/${row.original.manufactureId}`}>
+                            <MenuItem>Edit</MenuItem>
+                        </Link>
                         <MenuItem onClick={() => onClickDelete(row.original)}>
                             {row.original.status ? "Deactivate" : "Activate"}
                         </MenuItem>
@@ -234,31 +240,13 @@ export default function ManufacturerDetails() {
                             </Td>
                         </Tr>
                     ) : (
-                        currentData.map((manufacturer, index) => (
+                        currentData.map((row, index) => (
                             <Tr key={index}>
-                                <Td className="custom-table-td">{manufacturer.manufacturer}</Td>
-                                <Td className="custom-table-td">{manufacturer.status ? "Active" : "Inactive"}</Td>
-                                <Td className="custom-table-td">
-                                    <Menu>
-                                        <MenuButton
-                                            color={theme.purple}
-                                            as={IconButton}
-                                            aria-label="profile-options"
-                                            fontSize="20px"
-                                            icon={<IoSettingsSharp />}
-                                        />
-                                        <MenuList>
-                                            <MenuItem>
-                                                <Link to={`/app/EditManufactureDetails/${manufacturer.manufactureId}`}>
-                                                    Edit
-                                                </Link>
-                                            </MenuItem>
-                                            <MenuItem onClick={() => onClickDelete(manufacturer)}>
-                                                {manufacturer.status ? "Deactivate" : "Activate"}
-                                            </MenuItem>
-                                        </MenuList>
-                                    </Menu>
-                                </Td>
+                                {table.getRowModel().rows[index].getVisibleCells().map(cell => (
+                                    <Td key={cell.id}>
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </Td>
+                                ))}
                             </Tr>
                         ))
                     )}
@@ -274,14 +262,20 @@ export default function ManufacturerDetails() {
             <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom" leastDestructiveRef={cancelRef}>
                 <AlertDialogOverlay />
                 <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
-                    <AlertDialogHeader>{selectedManufacturer?.status ? "Deactivate" : "Activate"} Manufacturer</AlertDialogHeader>
+                    <AlertDialogHeader>
+                        {selectedManufacturer?.status ? "Deactivate" : "Activate"} Manufacturer
+                    </AlertDialogHeader>
                     <AlertDialogBody>
                         Are you sure you want to {selectedManufacturer?.status ? "deactivate" : "activate"} this manufacturer?
                     </AlertDialogBody>
                     <AlertDialogFooter>
                         <Button ref={cancelRef} onClick={onDialogClose}>Cancel</Button>
-                        <Button colorScheme="red" onClick={onConfirmDelete} ml={3}>
-                            Confirm
+                        <Button
+                            colorScheme={selectedManufacturer?.status ? "red" : "red"}
+                            onClick={onConfirmDelete}
+                            ml={3}
+                        >
+                            {selectedManufacturer?.status ? "Deactivate" : "Activate"}
                         </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>

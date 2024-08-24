@@ -4,8 +4,8 @@ div[role='tablist'] {
 div[role='tablist'] button {
     border-radius: 5px 5px 0 0;
 }
-.pwd-meter > div > div {
+.pwd-meter {
     height: 3px !important;
     border-radius: 5px !important;
-    width: 10px !important;
+    width: 400px !important;
 }

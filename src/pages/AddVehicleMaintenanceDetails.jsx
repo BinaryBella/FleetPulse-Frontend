@@ -32,6 +32,8 @@ export default function AddVehicleMaintenanceDetails() {
         vehicleRegistrationNo: "",
         maintenanceDate: "",
         VehicleMaintenanceTypeId: "",
+        typeName: "",
+        vehicleId: "",
         cost: "",
         serviceProvider: "",
         replacedParts: "",
@@ -39,24 +41,22 @@ export default function AddVehicleMaintenanceDetails() {
         isActive: false,
     });
 
+
     const fetchVehicleRegNos = async () => {
         try {
             const response = await axiosApi.get("https://localhost:7265/api/Vehicles");
-            setVehicleRegNoDetails(response.data);
-            console.log("Vehicle registration numbers fetched:", response.data); // Detailed logging
+            console.log('Raw API response:', response.data); // Debugging line
+
+            // Map the data to use 'vehicleId' instead of 'id'
+            const mappedData = response.data.map(vehicle => ({
+                id: vehicle.vehicleId, // Use 'vehicleId' from the API response
+                vehicleRegistrationNo: vehicle.vehicleRegistrationNo
+            }));
+
+            console.log('Mapped vehicle registration numbers:', mappedData); // Debugging line
+            setVehicleRegNoDetails(mappedData);
         } catch (error) {
-            if (error.response) {
-                // The request was made and the server responded with a status code that falls out of the range of 2xx
-                console.error("Server responded with an error:", error.response.data);
-                console.error("Status code:", error.response.status);
-                console.error("Headers:", error.response.headers);
-            } else if (error.request) {
-                // The request was made but no response was received
-                console.error("No response received:", error.request);
-            } else {
-                // Something happened in setting up the request that triggered an Error
-                console.error("Error setting up request:", error.message);
-            }
+            console.error("Error fetching vehicle registration numbers:", error);
         }
     };
 
@@ -98,47 +98,54 @@ export default function AddVehicleMaintenanceDetails() {
     }, []);
 
     const breadcrumbs = [
-        { label: "Vehicle", link: "/app/Vehicle" },
+        { label: "Vehicle", link: "/app/VehicleDetails" },
         { label: "Vehicle Maintenance Details", link: "/app/VehicleMaintenanceDetails" },
         { label: id ? "Edit Vehicle Maintenance Details" : "Add Vehicle Maintenance Details", link: id ? `/app/EditVehicleMaintenanceDetails/${id}` : "/app/AddVehicleMaintenanceDetails" },
     ];
 
-    const handleSubmit = async (values) => {
+    const handleSubmit = async (values, { setSubmitting }) => {
         try {
-            const response = await axiosApi.post('https://localhost:7265/api/VehicleMaintenance', {
-                Cost: values.cost,
-                MaintenanceDate: values.maintenanceDate,
-                PartsReplaced: values.replacedParts,
-                ServiceProvider: values.serviceProvider,
-                SpecialNotes: values.specialNotes,
-                Status: values.isActive,
-                VehicleMaintenanceTypeId: values.VehicleMaintenanceTypeId,
-                vehicleRegistrationNo: values.vehicleRegistrationNo,
-                vehicleId: values.vehicleId // Ensure vehicleId is provided correctly
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            const selectedVehicle = vehicleRegNoDetails.find(v => v.vehicleRegistrationNo === values.vehicleRegistrationNo);
+            const selectedMaintenanceType = maintenanceTypeDetails.find(t => t.id === parseInt(values.VehicleMaintenanceTypeId));
 
-            if (response.status === 200) {
-                setSuccessDialogMessage('Vehicle maintenance record added successfully.');
+            if (!values.vehicleId) {
+                throw new Error('Vehicle ID is not set. Please select a valid vehicle.');
+            }
+            const dataToSend = {
+                cost: parseFloat(values.cost),
+                maintenanceDate: values.maintenanceDate,
+                partsReplaced: values.replacedParts,
+                serviceProvider: values.serviceProvider,
+                specialNotes: values.specialNotes,
+                status: values.isActive,
+                typeName: selectedMaintenanceType ? selectedMaintenanceType.typeName : '',
+                vehicleId: values.vehicleId, // Ensure this is correctly set
+                vehicleMaintenanceTypeId: parseInt(values.VehicleMaintenanceTypeId),
+                vehicleRegistrationNo: values.vehicleRegistrationNo
+            };
+
+            console.log('Sending data:', dataToSend); // Debugging statement
+
+
+            const response = id
+                ? await axiosApi.put(`https://localhost:7265/api/VehicleMaintenance/${id}`, dataToSend)
+                : await axiosApi.post('https://localhost:7265/api/VehicleMaintenance', dataToSend);
+
+            if (response.status === 200 || response.status === 201) {
+                setSuccessDialogMessage('Maintenance details saved successfully.');
                 onSuccessDialogOpen();
             } else {
-                throw new Error('Failed to add vehicle maintenance record.');
+                throw new Error('Unexpected response from server.');
             }
+
         } catch (error) {
-            console.error('Error adding vehicle maintenance record:', error);
-            if (error.response && error.response.data && error.response.data.errors && error.response.data.errors.vehicleId) {
-                setDialogMessage(error.response.data.errors.vehicleId[0]);
-            } else if (error instanceof TypeError) {
-                setDialogMessage('Failed to connect to the server.');
-            } else {
-                setDialogMessage(error.message || 'Failed to add vehicle maintenance record.');
-            }
+            setDialogMessage(error.message);
             onDialogOpen();
+        } finally {
+            setSubmitting(false);
         }
     };
+
 
     const handleCancel = () => {
         navigate('/app/VehicleMaintenanceDetails');
@@ -162,37 +169,42 @@ export default function AddVehicleMaintenanceDetails() {
                         <div className="flex flex-col gap-3">
                             <p>Vehicle Registration No</p>
                             <Field name="vehicleRegistrationNo" validate={(value) => {
-                                let error;
-                                if (!value) {
-                                    error = "Vehicle Registration No is required.";
-                                }
-                                return error;
+                                if (!value) return "Vehicle Registration No is required";
+                                return undefined;
                             }}>
-                                {({ field }) => (
-                                    <div>
-                                        <Select
-                                            {...field}
-                                            placeholder='Vehicle Registration No'
-                                            size='md'
-                                            variant='filled'
-                                            borderRadius="md"
-                                            px={3}
-                                            py={2}
-                                            mt={1}
-                                            width="400px"
-                                        >
-                                            {vehicleRegNoDetails.map((option, index) => (
-                                                <option key={index} value={option.id}>
-                                                    {option.vehicleRegistrationNo}
-                                                </option>
-                                            ))}
-                                        </Select>
-                                        {errors.vehicleRegistrationNo && touched.vehicleRegistrationNo && (
-                                            <div className="text-red-500">{errors.vehicleRegistrationNo}</div>
-                                        )}
-                                    </div>
+                                {({field, form}) => (
+                                    <Select
+                                        {...field}
+                                        onChange={(e) => {
+                                            const selectedVehicle = vehicleRegNoDetails.find(v => v.vehicleRegistrationNo === e.target.value);
+                                            if (selectedVehicle) {
+                                                form.setFieldValue('vehicleRegistrationNo', selectedVehicle.vehicleRegistrationNo);
+                                                form.setFieldValue('vehicleId', selectedVehicle.id); // Make sure 'id' is set here
+                                                console.log('Selected vehicle:', selectedVehicle);
+                                            } else {
+                                                console.error('Selected vehicle not found');
+                                            }
+                                        }}
+                                        placeholder='Vehicle Registration No'
+                                        size='md'
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                    >
+                                        {vehicleRegNoDetails.map((option) => (
+                                            <option key={option.id} value={option.vehicleRegistrationNo}>
+                                                {option.vehicleRegistrationNo}
+                                            </option>
+                                        ))}
+                                    </Select>
                                 )}
                             </Field>
+                            {errors.vehicleRegistrationNo && touched.vehicleRegistrationNo && (
+                                <div className="text-red-500">{errors.vehicleRegistrationNo}</div>
+                            )}
                         </div>
                         <div className="flex flex-col gap-3">
                             <p>Vehicle Maintenance Type</p>
@@ -203,13 +215,13 @@ export default function AddVehicleMaintenanceDetails() {
                                 }
                                 return error;
                             }}>
-                                {({ field }) => (
+                                {({field}) => (
                                     <div>
                                         <Select
                                             {...field}
                                             placeholder='Vehicle Maintenance Type'
                                             size='md'
-                                            variant='filled'
+                                            variant="filled"
                                             borderRadius="md"
                                             px={3}
                                             py={2}
@@ -239,7 +251,7 @@ export default function AddVehicleMaintenanceDetails() {
                                 }
                                 return error;
                             }}>
-                                {({ field }) => (
+                                {({field}) => (
                                     <div>
                                         <Input
                                             {...field}
@@ -272,7 +284,7 @@ export default function AddVehicleMaintenanceDetails() {
                                 }
                                 return error;
                             }}>
-                                {({ field }) => (
+                                {({field}) => (
                                     <div>
                                         <Input
                                             {...field}
@@ -302,7 +314,7 @@ export default function AddVehicleMaintenanceDetails() {
                                 }
                                 return error;
                             }}>
-                                {({ field }) => (
+                                {({field}) => (
                                     <div>
                                         <Input
                                             {...field}
@@ -326,7 +338,7 @@ export default function AddVehicleMaintenanceDetails() {
                         <div className="flex flex-col gap-3">
                             <p>Parts Replaced</p>
                             <Field name="replacedParts">
-                                {({ field }) => (
+                                {({field}) => (
                                     <Input
                                         {...field}
                                         type="text"
@@ -345,7 +357,7 @@ export default function AddVehicleMaintenanceDetails() {
                         <div className="flex flex-col gap-3">
                             <p>Special Notes</p>
                             <Field name="specialNotes">
-                                {({ field }) => (
+                                {({field}) => (
                                     <Textarea
                                         {...field}
                                         variant="filled"
@@ -363,7 +375,7 @@ export default function AddVehicleMaintenanceDetails() {
                         <div className="flex flex-col gap-3">
                             <p>Status</p>
                             <Field name="isActive" type="checkbox">
-                                {({ field }) => (
+                                {({field}) => (
                                     <Checkbox
                                         {...field}
                                         colorScheme={theme.colors.brand}
@@ -379,7 +391,7 @@ export default function AddVehicleMaintenanceDetails() {
                         <div className="flex flex-row gap-10">
                             <Button
                                 bg="gray.400"
-                                _hover={{ bg: "gray.500" }}
+                                _hover={{bg: "gray.500"}}
                                 color="#ffffff"
                                 variant="solid"
                                 w="180px"
@@ -390,7 +402,7 @@ export default function AddVehicleMaintenanceDetails() {
                             </Button>
                             <Button
                                 bg={theme.purple}
-                                _hover={{ bg: theme.onHoverPurple }}
+                                _hover={{bg: theme.onHoverPurple}}
                                 color="#ffffff"
                                 variant="solid"
                                 w="180px"
@@ -404,7 +416,7 @@ export default function AddVehicleMaintenanceDetails() {
                 )}
             </Formik>
             <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay />
+                <AlertDialogOverlay/>
                 <AlertDialogContent
                     position="absolute"
                     top="30%"
@@ -421,7 +433,7 @@ export default function AddVehicleMaintenanceDetails() {
             </AlertDialog>
 
             <AlertDialog isOpen={isSuccessDialogOpen} onClose={onSuccessDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay />
+                <AlertDialogOverlay/>
                 <AlertDialogContent
                     position="absolute"
                     top="30%"
@@ -433,7 +445,7 @@ export default function AddVehicleMaintenanceDetails() {
                         {successDialogMessage}
                     </AlertDialogBody>
                     <AlertDialogFooter>
-                        <Button bg={theme.purple} color="#FFFFFF" onClick={handleSuccessDialogClose}>Ok</Button>
+                    <Button bg={theme.purple} color="#FFFFFF" onClick={handleSuccessDialogClose}>Ok</Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
