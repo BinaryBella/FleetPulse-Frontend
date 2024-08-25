@@ -1,31 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import {axiosApi} from "../interceptor.js";
+import { axiosApi } from "../interceptor.js";
 import {
-    Table,
-    Thead,
-    Tbody,
-    Tr,
-    Th,
-    Td,
-    Box,
-    Button,
-    Menu,
-    MenuButton,
-    IconButton,
-    MenuList,
-    MenuItem,
-    Input,
-    chakra,
-    InputGroup,
-    InputLeftElement,
-    Text,
-    AlertDialogOverlay,
-    AlertDialogContent,
-    AlertDialogHeader,
-    AlertDialogBody,
-    AlertDialogFooter,
-    AlertDialog,
-    useDisclosure,
+    Table, Thead, Tbody, Tr, Th, Td, Box, Button, Menu,
+    MenuButton, IconButton, MenuList, MenuItem, Input, chakra,
+    InputGroup, InputLeftElement, Text, AlertDialogOverlay,
+    AlertDialogContent, AlertDialogHeader, AlertDialogBody,
+    AlertDialogFooter, AlertDialog, useDisclosure, useToast,
+    Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody,
+    ModalFooter, Checkbox, Stack
 } from "@chakra-ui/react";
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
@@ -34,15 +16,11 @@ import { TiArrowUnsorted } from "react-icons/ti";
 import theme from "../config/ThemeConfig.jsx";
 import PageHeader from "../components/PageHeader.jsx";
 import Pagination from "../components/Pagination";
-import {
-    useReactTable,
-    getCoreRowModel,
-    getSortedRowModel,
-    getFilteredRowModel
-} from '@tanstack/react-table';
+import { useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table';
 import { flexRender } from '@tanstack/react-table';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import ExcelJS from 'exceljs';
 
 export default function TripDetails() {
     const [tripDetails, setTripDetails] = useState([]);
@@ -50,61 +28,66 @@ export default function TripDetails() {
     const [currentPage, setCurrentPage] = useState(0);
     const [searchInput, setSearchInput] = useState("");
     const [selectedTrip, setSelectedTrip] = useState(null);
+    const [selectedColumns, setSelectedColumns] = useState([]);
+    const [previewData, setPreviewData] = useState([]);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [isColumnSelectionOpen, setIsColumnSelectionOpen] = useState(false);
+
     const cancelRef = useRef();
     const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
     const itemsPerPage = 10;
+    const toast = useToast();
 
     useEffect(() => {
         fetchTripDetails();
     }, []);
 
-
     const fetchTripDetails = async () => {
         try {
             const response = await axiosApi.get("https://localhost:7265/api/Trip");
-            console.log("Fetched trip details:", response.data);
             setTripDetails(response.data);
         } catch (error) {
             console.error("Error fetching trip details:", error);
         }
     };
 
-
     const onClickDelete = (trip) => {
-        console.log("Selected trip:", trip);
         setSelectedTrip(trip);
         onDialogOpen();
     };
 
+    const onConfirmDelete = async () => {
+        try {
+            const endpoint = `https://localhost:7265/api/Trip/${selectedTrip.tripId}/${selectedTrip.status ? 'deactivate' : 'activate'}`;
+            await axiosApi.put(endpoint);
+            fetchTripDetails();
+            onDialogClose();
+        } catch (error) {
+            console.error("Error updating trip status:", error);
+            toast({
+                title: "Error",
+                description: "Failed to update trip status.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
 
     const columns = [
-        { accessorKey: 'nic', header: 'Driver\'s NIC' },
-        { accessorKey: 'vehicleRegistrationNo', header: 'Vehicle Reg.No' },
-        { accessorKey: 'date', header: 'Date' },
-        { accessorKey: 'startTime', header: 'Start Time' },
-        { accessorKey: 'endTime', header: 'End Time' },
+        { accessorKey: 'nic', header: 'Driver\'s NIC', meta: { isNumeric: false, filter: 'text' } },
+        { accessorKey: 'vehicleRegistrationNo', header: 'Vehicle Reg.No', meta: { isNumeric: false, filter: 'text' } },
+        { accessorKey: 'date', header: 'Date', meta: { isNumeric: false, filter: 'text' } },
+        { accessorKey: 'startTime', header: 'Start Time', meta: { isNumeric: false, filter: 'text' } },
+        { accessorKey: 'endTime', header: 'End Time', meta: { isNumeric: false, filter: 'text' } },
+        { accessorKey: 'status', header: 'Status', cell: info => (info.getValue() ? "Active" : "Inactive"), meta: { isNumeric: false, filter: 'boolean' } },
         {
-            accessorKey: 'status',
-            header: 'Status',
-            cell: info => (info.getValue() ? "Active" : "Inactive"),
-        },
-        {
-            id: 'actions',
-            header: 'Actions',
-            cell: ({ row }) => (
+            id: 'actions', header: 'Actions', cell: ({ row }) => (
                 <Menu>
-                    <MenuButton
-                        color={theme.purple}
-                        as={IconButton}
-                        aria-label="profile-options"
-                        fontSize="20px"
-                        icon={<IoSettingsSharp />}
-                    />
+                    <MenuButton color={theme.purple} as={IconButton} aria-label="profile-options" fontSize="20px" icon={<IoSettingsSharp />} />
                     <MenuList>
                         <MenuItem>
-                            <Link to={`/app/EditTripDetails/${row.original.tripId}`}>
-                                Edit
-                            </Link>
+                            <Link to={`/app/EditTripDetails/${row.original.tripId}`}>Edit</Link>
                         </MenuItem>
                         <MenuItem onClick={() => onClickDelete(row.original)}>
                             {row.original.status ? "Deactivate" : "Activate"}
@@ -112,6 +95,7 @@ export default function TripDetails() {
                     </MenuList>
                 </Menu>
             ),
+            meta: { isNumeric: false, filter: null },
             enableSorting: false,
         },
     ];
@@ -150,77 +134,103 @@ export default function TripDetails() {
     const isEmpty = currentData.length === 0;
     const iconStyle = { display: "inline-block", verticalAlign: "middle", marginLeft: "5px" };
 
-
-
-    const onConfirmDelete = async () => {
-        console.log("Confirming delete for trip:", selectedTrip);
-
-        if (!selectedTrip) {
-            console.error("No trip selected.");
-            return;
-        }
-
-        if (!selectedTrip.tripId) {
-            console.error("Selected trip has no tripId:", selectedTrip);
-            return;
-        }
-
-        try {
-            const endpoint = `https://localhost:7265/api/Trip/${selectedTrip.tripId}/${selectedTrip.status ? 'deactivate' : 'activate'}`;
-            console.log("Calling endpoint:", endpoint);
-
-            const response = await axiosApi.put(endpoint, null, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            console.log("Response:", response);
-
-            if (response.status === 200 || response.status === 204) {
-                fetchTripDetails();
-                onDialogClose();
-            } else {
-                console.error('Failed to update trip status');
-            }
-        } catch (error) {
-            console.error("Error updating trip status:", error);
-            if (error.response) {
-                console.error("Error response:", error.response.data);
-            }
-        }
+    const handleGenerateReport = () => {
+        setIsColumnSelectionOpen(true);
     };
 
+    const handleColumnSelection = () => {
+        const selected = columns.filter(col => selectedColumns.includes(col.accessorKey) || col.id === 'actions');
+        setSelectedColumns(selected);
+    };
 
+    const handlePreview = () => {
+        const selected = columns.filter(col =>
+            selectedColumns.includes(col.accessorKey) && col.accessorKey !== 'actions'
+        );
+        setSelectedColumns(selected);
 
-    // Function to generate the PDF report
-    const generatePDF = () => {
-        const doc = new jsPDF();
-
-        // Title
-        doc.setFontSize(18);
-        doc.text('Trip Details Report', 14, 22);
-
-        // Date of report
-        doc.setFontSize(11);
-        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
-
-        // Add a table with trip details
-        doc.autoTable({
-            startY: 40,
-            head: [['Driver\'s NIC', 'Vehicle Reg.No', 'Date', 'Start Time', 'End Time', 'Status']],
-            body: currentData.map(trip => [
-                trip.driversNIC,
-                trip.vehicleRegistrationNo,
-                trip.date,
-                trip.startTime,
-                trip.endTime,
-                trip.status ? 'Active' : 'Inactive'
-            ]),
+        const preview = tripDetails.map(item => {
+            let previewItem = {};
+            selected.forEach(col => {
+                if (col.accessorKey === 'status') {
+                    previewItem[col.accessorKey] = item[col.accessorKey] ? 'Active' : 'Inactive';
+                } else {
+                    previewItem[col.accessorKey] = item[col.accessorKey];
+                }
+            });
+            return previewItem;
         });
 
-        // Save the PDF
-        doc.save('trip_details_report.pdf');
+        setPreviewData(preview);
+        setIsColumnSelectionOpen(false);
+        setIsPreviewOpen(true);
+    };
+
+    const handleCheckboxChange = (accessorKey) => {
+        setSelectedColumns(prev =>
+            prev.includes(accessorKey)
+                ? prev.filter(col => col !== accessorKey)
+                : [...prev, accessorKey]
+        );
+    };
+
+    const exportToPDF = () => {
+        const doc = new jsPDF();
+        const date = new Date();
+        const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+
+        doc.setFontSize(16);
+        const reportTitleY = 10;
+        doc.text("Trip Details Report", doc.internal.pageSize.getWidth() / 2, reportTitleY, { align: "center" });
+
+        doc.setFontSize(10);
+        const creationDateY = reportTitleY + 10;
+        doc.text(`Report created on: ${formattedDate}`, 20, creationDateY);
+
+        doc.autoTable({
+            startY: creationDateY + 10,
+            head: [selectedColumns.map(column => column.header)],
+            body: previewData.map(item =>
+                selectedColumns.map(column => item[column.accessorKey])
+            ),
+        });
+
+        doc.save('trip_details.pdf');
+    };
+
+    const exportToExcel = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Trip Details');
+
+        worksheet.addRow(selectedColumns.map(column => column.header));
+
+        previewData.forEach(item => {
+            worksheet.addRow(selectedColumns.map(column => item[column.accessorKey]));
+        });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'trip_details.xlsx';
+        link.click();
+        URL.revokeObjectURL(link.href);
+    };
+
+    const exportToCSV = () => {
+        const csvContent = [
+            selectedColumns.map(column => column.header).join(','),
+            ...previewData.map(item =>
+                selectedColumns.map(column => item[column.accessorKey]).join(',')
+            )
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'trip_details.csv';
+        link.click();
+        URL.revokeObjectURL(link.href);
     };
 
     return (
@@ -245,7 +255,7 @@ export default function TripDetails() {
                     color="white"
                     variant="solid"
                     width="250px"
-                    // onClick={handleGenerateReport}
+                    onClick={handleGenerateReport}
                 >
                     Generate Report
                 </Button>
@@ -321,7 +331,7 @@ export default function TripDetails() {
                                         />
                                         <MenuList>
                                             <MenuItem>
-                                                <Link to={`/app/EditTripDetails/${trip.id}`}>
+                                                <Link to={`/app/EditTripDetails/${trip.tripId}`}>
                                                     Edit
                                                 </Link>
                                             </MenuItem>
@@ -336,32 +346,139 @@ export default function TripDetails() {
                     )}
                 </Tbody>
             </Table>
-            {!isEmpty && (
-                <Pagination
-                    pageCount={pageCount}
-                    onPageChange={handlePageClick}
-                />
-            )}
 
-            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom" leastDestructiveRef={cancelRef}>
+            {!isEmpty && <Pagination pageCount={pageCount} onPageChange={handlePageClick} />}
+            <AlertDialog
+                isOpen={isDialogOpen}
+                onClose={onDialogClose}
+                motionPreset="slideInBottom"
+                leastDestructiveRef={cancelRef}
+            >
                 <AlertDialogOverlay />
                 <AlertDialogContent position="absolute" top="30%" left="50%" transform="translate(-50%, -50%)">
-                    <AlertDialogHeader>{selectedTrip?.status ? "Deactivate" : "Activate"} Trip</AlertDialogHeader>
+                    <AlertDialogHeader>{selectedTrip?.status ? "Deactivate" : "Activate"} Staff</AlertDialogHeader>
                     <AlertDialogBody>
-                        Are you sure you want to {selectedTrip?.status ? "deactivate" : "activate"} this trip?
+                        Are you sure you want to {selectedTrip?.status ? "deactivate" : "activate"} {selectedTrip?.firstName} {selectedTrip?.lastName}?
                     </AlertDialogBody>
                     <AlertDialogFooter>
-                        <Button ref={cancelRef} onClick={onDialogClose}>Cancel</Button>
                         <Button
-                            colorScheme={selectedTrip?.status ? "red" : "green"}
-                            onClick={onConfirmDelete}
+                            bg="gray.400"
+                            _hover={{ bg: "gray.500" }}
+                            color="#ffffff"
+                            variant="solid"
+                            onClick={onDialogClose}
+                            ref={cancelRef}
                             ml={3}
                         >
+                            Cancel
+                        </Button>
+                        <Button colorScheme="red" color="#FFFFFF" onClick={onConfirmDelete} ml={3}>
                             {selectedTrip?.status ? "Deactivate" : "Activate"}
                         </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Modal for Column Selection */}
+            <Modal isOpen={isColumnSelectionOpen} onClose={() => setIsColumnSelectionOpen(false)} isCentered>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Select Columns for Report</ModalHeader>
+                    <ModalBody>
+                        <Stack spacing={3}>
+                            {columns.map(column => (
+                                column.id !== 'actions' && (
+                                    <Checkbox
+                                        key={column.accessorKey}
+                                        isChecked={selectedColumns.includes(column.accessorKey)}
+                                        onChange={() => handleCheckboxChange(column.accessorKey)}
+                                    >
+                                        {column.header}
+                                    </Checkbox>
+                                )
+                            ))}
+                        </Stack>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button
+                            onClick={handlePreview}
+                            isDisabled={selectedColumns.length === 0}
+                            bg={theme.purple}
+                            _hover={{ bg: theme.onHoverPurple }}
+                            color="white"
+                        >
+                            Preview
+                        </Button>
+                        <Button ml={3} onClick={() => setIsColumnSelectionOpen(false)}>Cancel</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            {/* Modal for Preview */}
+            <Modal
+                isOpen={isPreviewOpen}
+                onClose={() => setIsPreviewOpen(false)}
+                size="6xl"
+                isCentered
+            >
+                <ModalOverlay />
+                <ModalContent maxHeight="80vh">
+                    <ModalHeader>Preview</ModalHeader>
+                    <ModalBody overflowY="auto">
+                        <Table className="custom-table">
+                            <Thead>
+                                <Tr>
+                                    {selectedColumns.map((column) => (
+                                        <Th key={column.accessorKey}>
+                                            {column.header}
+                                        </Th>
+                                    ))}
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                {previewData.length > 0 ? (
+                                    previewData.map((row, rowIndex) => (
+                                        <Tr key={rowIndex}>
+                                            {selectedColumns.map((column) => (
+                                                <Td key={column.accessorKey}>
+                                                    {row[column.accessorKey]}
+                                                </Td>
+                                            ))}
+                                        </Tr>
+                                    ))
+                                ) : (
+                                    <Tr>
+                                        <Td colSpan={selectedColumns.length} textAlign="center">
+                                            No data available
+                                        </Td>
+                                    </Tr>
+                                )}
+                            </Tbody>
+                        </Table>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Menu>
+                            <MenuButton
+                                as={Button}
+                                rightIcon={<TriangleDownIcon />}
+                                bg={theme.purple}
+                                _hover={{ bg: theme.onHoverPurple }}
+                                color="white"
+                                variant="solid"
+                            >
+                                Export
+                            </MenuButton>
+                            <MenuList>
+                                <MenuItem onClick={exportToPDF}>Export to PDF</MenuItem>
+                                <MenuItem onClick={exportToExcel}>Export to Excel</MenuItem>
+                                <MenuItem onClick={exportToCSV}>Export to CSV</MenuItem>
+                            </MenuList>
+                        </Menu>
+                        <Button ml={3} onClick={() => setIsPreviewOpen(false)}>Close</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </div>
     );
 }
+

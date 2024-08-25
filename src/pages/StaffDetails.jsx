@@ -151,19 +151,29 @@ export default function StaffDetails() {
     };
 
     const handlePreview = () => {
-        const selected = columns.filter(col => selectedColumns.includes(col.accessorKey) && col.accessorKey !== 'actions');
+        const selected = columns.filter(col =>
+            selectedColumns.includes(col.accessorKey) && col.accessorKey !== 'actions'
+        );
         setSelectedColumns(selected);
 
-        const preview = staffDetails.map(item =>
-            Object.fromEntries(
-                selected.map(col => [col.accessorKey, item[col.accessorKey]])
-            )
-        );
-        setPreviewData(preview);
+        const preview = staffDetails.map(item => {
+            let previewItem = {};
+            selected.forEach(col => {
+                if (col.accessorKey === 'status') {
+                    // Convert the boolean status to "Active" or "Inactive"
+                    previewItem[col.accessorKey] = item[col.accessorKey] ? 'Active' : 'Inactive';
+                } else {
+                    previewItem[col.accessorKey] = item[col.accessorKey];
+                }
+            });
+            return previewItem;
+        });
 
+        setPreviewData(preview);
         setIsColumnSelectionOpen(false);
         setIsPreviewOpen(true);
     };
+
 
     const handleCheckboxChange = (accessorKey) => {
         setSelectedColumns(prev =>

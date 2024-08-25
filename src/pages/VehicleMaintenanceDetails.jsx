@@ -74,14 +74,17 @@ export default function VehicleMaintenanceDetails() {
     }, []);
 
     const handlePreview = () => {
-        const selected = columns.filter(col =>
-            selectedColumns.includes(col.accessorKey) && col.accessorKey !== 'actions'
-        );
-        setSelectedColumns(selected);
+        // Filter out the "Actions" column from selectedColumns
+        const filteredSelectedColumns = columns
+            .filter(col => selectedColumns.includes(col.accessorKey) && col.accessorKey !== 'actions');
 
+        // Update selectedColumns state with the filtered list
+        setSelectedColumns(filteredSelectedColumns);
+
+        // Prepare preview data without the "Actions" column
         const preview = vehicleMaintenance.map(item =>
             Object.fromEntries(
-                selected.map(col => [col.accessorKey, item[col.accessorKey]])
+                filteredSelectedColumns.map(col => [col.accessorKey, item[col.accessorKey]])
             )
         );
         setPreviewData(preview);
@@ -89,6 +92,8 @@ export default function VehicleMaintenanceDetails() {
         setIsColumnSelectionOpen(false);
         setIsPreviewOpen(true);
     };
+
+
 
     const handleCheckboxChange = (accessorKey) => {
         setSelectedColumns(prev =>
@@ -126,13 +131,13 @@ export default function VehicleMaintenanceDetails() {
         const creationDateY = reportTitleY + 10;
         doc.text(`Report created on: ${formattedDate}`, 20, creationDateY);
 
-        // Generate the table
+        // Generate the table excluding the Actions column
         doc.autoTable({
             startY: creationDateY + 10,
-            head: [selectedColumns.map(column => column.header)],
+            head: [selectedColumns.filter(col => col.accessorKey !== 'actions').map(column => column.header)],
             body: previewData.map(item =>
-                selectedColumns.map(column => {
-                    if (column.accessorKey === 'licenseExpireDate') {
+                selectedColumns.filter(col => col.accessorKey !== 'actions').map(column => {
+                    if (column.accessorKey === 'maintenanceDate') {
                         const date = new Date(item[column.accessorKey]);
                         return date.toLocaleDateString();
                     }
@@ -148,19 +153,19 @@ export default function VehicleMaintenanceDetails() {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Vehicle Maintenance Details");
 
-        // Add headers excluding status and actions, add Special Notes
+        // Add headers excluding Actions
         worksheet.addRow(
             columns
-                .filter(column => column.accessorKey !== 'status' && column.accessorKey !== 'actions')
+                .filter(column => column.accessorKey !== 'actions')
                 .map(column => column.header)
                 .concat('Special Notes')
         );
 
-        // Add data excluding status and actions, add Special Notes
+        // Add data excluding Actions
         vehicleMaintenance.forEach(item => {
             worksheet.addRow(
                 columns
-                    .filter(column => column.accessorKey !== 'status' && column.accessorKey !== 'actions')
+                    .filter(column => column.accessorKey !== 'actions')
                     .map(column => item[column.accessorKey] || 'N/A')
                     .concat(item.specialNotes || 'N/A')
             );
@@ -178,16 +183,17 @@ export default function VehicleMaintenanceDetails() {
         URL.revokeObjectURL(link.href);
     };
 
+
     const exportToCSV = () => {
         const csvContent = [
             columns
-                .filter(column => column.accessorKey !== 'status' && column.accessorKey !== 'actions')
+                .filter(column => column.accessorKey !== 'actions')
                 .map(column => column.header)
                 .concat('Special Notes')
                 .join(","),
             ...vehicleMaintenance.map(item =>
                 columns
-                    .filter(column => column.accessorKey !== 'status' && column.accessorKey !== 'actions')
+                    .filter(column => column.accessorKey !== 'actions')
                     .map(column => item[column.accessorKey] || 'N/A')
                     .concat(item.specialNotes || 'N/A')
                     .join(",")
@@ -201,6 +207,7 @@ export default function VehicleMaintenanceDetails() {
         link.click();
         URL.revokeObjectURL(link.href);
     };
+
 
     const fetchVehicleMaintenance = async () => {
         try {
@@ -529,36 +536,75 @@ export default function VehicleMaintenanceDetails() {
                 </ModalContent>
             </Modal>
 
-            <Modal isOpen={isColumnSelectionOpen} onClose={() => setIsColumnSelectionOpen(false)} isCentered>
+            <Modal
+                isOpen={isPreviewOpen}
+                onClose={() => setIsPreviewOpen(false)}
+                size="6xl"
+                isCentered
+            >
                 <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>Select Columns for Report</ModalHeader>
-                    <ModalBody>
-                        <Stack spacing={3}>
-                            {columns.map(column => (
-                                column.id !== 'actions' && (
-                                    <Checkbox
-                                        key={column.accessorKey}
-                                        isChecked={selectedColumns.includes(column.accessorKey)}
-                                        onChange={() => handleCheckboxChange(column.accessorKey)}
-                                    >
-                                        {column.header}
-                                    </Checkbox>
-                                )
-                            ))}
-                        </Stack>
+                <ModalContent maxHeight="80vh">
+                    <ModalHeader>Preview</ModalHeader>
+                    <ModalBody overflowY="auto">
+                        <Table className="custom-table">
+                            <Thead>
+                                <Tr>
+                                    {selectedColumns.map((column) => (
+                                        column.accessorKey !== 'actions' && (
+                                            <Th key={column.accessorKey}>
+                                                {column.header}
+                                            </Th>
+                                        )
+                                    ))}
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                {previewData.length > 0 ? (
+                                    previewData.map((row, rowIndex) => (
+                                        <Tr key={rowIndex}>
+                                            {selectedColumns.map((column) => (
+                                                column.accessorKey !== 'actions' && (
+                                                    <Td key={column.accessorKey}>
+                                                        {column.accessorKey === 'maintenanceDate'
+                                                            ? formatDate(row)
+                                                            : column.accessorKey === 'status'
+                                                                ? row[column.accessorKey] ? 'Active' : 'Inactive'
+                                                                : row[column.accessorKey]}
+                                                    </Td>
+                                                )
+                                            ))}
+                                        </Tr>
+                                    ))
+                                ) : (
+                                    <Tr>
+                                        <Td colSpan={selectedColumns.length} textAlign="center">
+                                            No data available
+                                        </Td>
+                                    </Tr>
+                                )}
+                            </Tbody>
+                        </Table>
                     </ModalBody>
                     <ModalFooter>
-                        <Button
-                            onClick={handlePreview}
-                            isDisabled={selectedColumns.length === 0}
-                            bg={theme.purple}
-                            _hover={{ bg: theme.onHoverPurple }}
-                            color="white"
-                        >
-                            Preview
-                        </Button>
-                        <Button ml={3} onClick={() => setIsColumnSelectionOpen(false)}>Cancel</Button>
+                        <Menu>
+                            <MenuButton
+                                as={Button}
+                                rightIcon={<ChevronDownIcon />}
+                                bg={theme.purple}
+                                _hover={{bg: theme.onHoverPurple}}
+                                color="white"
+                                variant="solid"
+                                className="w-32"
+                            >
+                                Export
+                            </MenuButton>
+                            <MenuList>
+                                <MenuItem onClick={exportToPDF}>Export to PDF</MenuItem>
+                                <MenuItem onClick={exportToExcel}>Export to Excel</MenuItem>
+                                <MenuItem onClick={exportToCSV}>Export to CSV</MenuItem>
+                            </MenuList>
+                        </Menu>
+                        <Button ml={3} onClick={() => setIsPreviewOpen(false)}>Close</Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

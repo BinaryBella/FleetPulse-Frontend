@@ -157,16 +157,24 @@ export default function HelperDetails() {
     );
     setSelectedColumns(selected);
 
-    const preview = helperDetails.map(item =>
-        Object.fromEntries(
-            selected.map(col => [col.accessorKey, item[col.accessorKey]])
-        )
-    );
-    setPreviewData(preview);
+    const preview = helperDetails.map(item => {
+      let previewItem = {};
+      selected.forEach(col => {
+        if (col.accessorKey === 'status') {
+          // Convert the boolean status to "Active" or "Inactive"
+          previewItem[col.accessorKey] = item[col.accessorKey] ? 'Active' : 'Inactive';
+        } else {
+          previewItem[col.accessorKey] = item[col.accessorKey];
+        }
+      });
+      return previewItem;
+    });
 
+    setPreviewData(preview);
     setIsColumnSelectionOpen(false);
     setIsPreviewOpen(true);
   };
+
 
   const handleCheckboxChange = (accessorKey) => {
     setSelectedColumns(prev =>
