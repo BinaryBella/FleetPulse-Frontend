@@ -52,6 +52,8 @@ import EditVehicleType from "./pages/EditVehicleType.jsx";
 import EditManufactureDetails from "./pages/EditManufactureDetails.jsx";
 import EditDriverDetails from "./pages/EditDriverDetails.jsx";
 import EditTripDetails from "./pages/EditTripDetails.jsx";
+import EditHelperDetails from "./pages/EditHelperDetails.jsx";
+import EditStaffDetails from "./pages/EditStaffDetails.jsx";
 
 export default function App() {
     const [isAdmin, setIsAdmin] = useState(false);
@@ -124,8 +126,10 @@ export default function App() {
                         <Route path="/app/EditFuelRefillDetails/:id" element={<EditFuelRefillDetails />} />
                         <Route path="/app/EditVehicleMaintenanceConfiguration/:id" element={<EditVehicleMaintenanceConfiguration />} />
                         <Route path="/app/EditManufactureDetails/:id" element={<EditManufactureDetails />} />
-                        <Route path="/app/EditDriverDetails/:id" element={<EditDriverDetails />} />
+                        <Route path="/app/EditDriverDetails/:userId" element={<EditDriverDetails />} />
                         <Route path="/app/EditTripDetails/:tripId" element={<EditTripDetails />} />
+                        <Route path="/app/EditHelperDetails/:tripId" element={<EditHelperDetails />} />
+                        <Route path="/app/EditStaffDetails/:tripId" element={<EditStaffDetails />} />
                     </Route>
 
                     {/* Admin-only routes */}

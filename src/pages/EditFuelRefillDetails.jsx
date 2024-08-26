@@ -89,10 +89,10 @@ export default function EditFuelRefillDetails() {
             setInitialValues({
                 vehicleRegistrationNo: data.vehicle?.vehicleRegistrationNo || "",
                 userId: data.userId || "",
-                nic: data.nic || "",
+                nic: data.user?.nic || "",
                 literCount: data.literCount || "",
                 date: data.date.split("T")[0],
-                time: data.time.split("T")[1] || "",
+                time: data.time.slice(0, 5) || "",
                 fType: data.fType || "",
                 cost: data.cost || "",
                 IsActive: data.status || false,
@@ -202,7 +202,7 @@ export default function EditFuelRefillDetails() {
                         <div className="flex flex-col gap-3">
                             <p>User NIC</p>
                             <Field name="nic">
-                                {({ field }) => (
+                                {({field}) => (
                                     <div>
                                         <Input
                                             {...field}
@@ -332,7 +332,7 @@ export default function EditFuelRefillDetails() {
                         <div className="flex flex-col gap-3">
                             <p>Time</p>
                             <Field name="time" validate={validateTime}>
-                                {({ field, form }) => (
+                                {({field, form}) => (
                                     <Input
                                         {...field}
                                         type="time"
@@ -376,7 +376,7 @@ export default function EditFuelRefillDetails() {
                         <div className="flex flex-col gap-3">
                             <p>Status</p>
                             <Field name="IsActive" type="checkbox">
-                                {({ field, form }) => (
+                                {({field, form}) => (
                                     <Checkbox
                                         {...field}
                                         isChecked={field.value}  // Ensure this matches the value from initialValues
