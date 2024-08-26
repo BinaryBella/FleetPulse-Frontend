@@ -24,7 +24,7 @@ export default function ResetPassSuccess() {
                 onSubmit={handleSubmit}
             >
                 {({ handleSubmit }) => (
-                    <form onSubmit={handleSubmit} className="w-1/2">
+                    <form onSubmit={handleSubmit} className="w-2/5">
                         <Stack>
                             <Button
                                 bg={theme.purple}

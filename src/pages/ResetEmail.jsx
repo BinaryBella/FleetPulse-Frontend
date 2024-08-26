@@ -32,6 +32,7 @@ export default function ResetEmail() {
                     try {
                         console.log("Submitting form with values:", values);
                         setLoading(true);
+
                         const response = await axiosApi.post('https://localhost:7265/api/Auth/forgot-password', {
                             email: values.email
                         }, {
@@ -40,29 +41,24 @@ export default function ResetEmail() {
                             }
                         });
 
-                        if (!response.ok) {
-                            throw new Error('Something went wrong');
-                        }
-
-                        const contentType = response.headers.get('content-type');
-                        if (contentType && contentType.indexOf('application/json') !== -1) {
-                            const responseData = await response.json();
-                            console.log("Response data:", responseData);
-                            if (responseData.status) {
-                                navigate(`/auth/ResetPasswordConfirmation`, {state: {email: values.email}});
+                        if (response.status === 200) { // Check if the status code indicates success
+                            console.log("Response data:", response.data);
+                            if (response.data.status) {
+                                navigate(`/auth/ResetPasswordConfirmation`, { state: { email: values.email } });
                             } else {
                                 setFieldError('email', 'Email is not found');
                             }
                         } else {
-                            throw new Error('Unexpected response format');
+                            throw new Error('Unexpected response status');
                         }
                     } catch (error) {
                         console.error('Error:', error.message);
-                    }
-                    finally {
+                        setFieldError('email', 'Something went wrong. Please try again.');
+                    } finally {
                         setLoading(false);
                     }
                 }}
+
             >
                 {({handleSubmit, errors, touched}) => (
                     <form className="w-2/5" onSubmit={handleSubmit}>

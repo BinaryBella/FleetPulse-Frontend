@@ -76,7 +76,7 @@ export default function ResetPasswordConfirmation() {
                 }}
             >
                 {({ handleSubmit, errors, touched }) => (
-                    <form className="w-1/2" onSubmit={handleSubmit}>
+                    <form className="w-2/5" onSubmit={handleSubmit}>
                         <Stack spacing={3}>
                             <FormControl isInvalid={errors.pinValue && touched.pinValue}>
                                 <p className="mb-4">Verification Code</p>

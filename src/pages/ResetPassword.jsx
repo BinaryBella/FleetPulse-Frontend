@@ -94,7 +94,7 @@ export default function ResetPassword() {
                 onSubmit={handleSubmit}
             >
                 {({ handleSubmit, errors, touched, values }) => (
-                    <form onSubmit={handleSubmit} className="w-1/2">
+                    <form onSubmit={handleSubmit} className="w-2/5">
                         <Stack spacing={3}>
                             {error && ( // Display error message if error state is not empty
                                 <Alert status="error" mb={4}>

@@ -24,13 +24,13 @@ import {
 } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
 import { axiosApi } from "../interceptor.js";
-import './AddDriverDetails.css'
+import './AddDriverDetails.css';
 import emailsend from "../assets/images/emailsend.png";
 
 export default function EditDriverDetails() {
     const navigate = useNavigate();
     const { userId } = useParams();
-    const { isOpen, onOpen, onClose } = useDisclosure()
+    const { isOpen, onOpen, onClose } = useDisclosure();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,7 +113,7 @@ export default function EditDriverDetails() {
     const handleErrorModalClose = () => {
         onClose();
         setIsSubmitting(false);
-    }
+    };
 
     const handleSubmit = async (values, actions) => {
         setIsSubmitting(true);
@@ -145,9 +145,9 @@ export default function EditDriverDetails() {
                     initialValues={initialValues}
                     validate={validateForm}
                     onSubmit={handleSubmit}
-                    enableReinitialize
+                    enableReinitialize // Ensure Formik resets initial values when they change
                 >
-                    {({errors, touched, isValid}) => (
+                    {({ errors, touched, isValid }) => (
                         <Form className="grid grid-cols-2 gap-x-12 gap-y-10 mt-8">
                             <div className="flex flex-col gap-3">
                                 <p>First Name</p>
@@ -165,7 +165,7 @@ export default function EditDriverDetails() {
                                 </FormControl>
                             </div>
                             <div className="flex flex-col gap-3">
-                                    <p>Last Name</p>
+                                <p>Last Name</p>
                                 <FormControl isInvalid={errors.lastName && touched.lastName}>
                                     <Field
                                         as={Input}
@@ -180,7 +180,7 @@ export default function EditDriverDetails() {
                                 </FormControl>
                             </div>
                             <div className="flex flex-col gap-3">
-                                    <p>Date of Birth</p>
+                                <p>Date of Birth</p>
                                 <FormControl isInvalid={errors.dateOfBirth && touched.dateOfBirth}>
                                     <Field
                                         as={Input}
@@ -195,7 +195,7 @@ export default function EditDriverDetails() {
                                 </FormControl>
                             </div>
                             <div className="flex flex-col gap-3">
-                                    <p>National Identity Card No</p>
+                                <p>National Identity Card No</p>
                                 <FormControl isInvalid={errors.nic && touched.nic}>
                                     <Field
                                         as={Input}
@@ -210,7 +210,7 @@ export default function EditDriverDetails() {
                                 </FormControl>
                             </div>
                             <div className="flex flex-col gap-3">
-                                    <p>Driver License No</p>
+                                <p>Driver License No</p>
                                 <FormControl isInvalid={errors.driverLicenseNo && touched.driverLicenseNo}>
                                     <Field
                                         as={Input}
@@ -225,7 +225,7 @@ export default function EditDriverDetails() {
                                 </FormControl>
                             </div>
                             <div className="flex flex-col gap-3">
-                                    <p>License Expiry Date</p>
+                                <p>License Expiry Date</p>
                                 <FormControl isInvalid={errors.licenseExpiryDate && touched.licenseExpiryDate}>
                                     <Field
                                         as={Input}
@@ -240,7 +240,7 @@ export default function EditDriverDetails() {
                                 </FormControl>
                             </div>
                             <div className="flex flex-col gap-3">
-                                    <p>Contact Number</p>
+                                <p>Contact Number</p>
                                 <FormControl isInvalid={errors.phoneNo && touched.phoneNo}>
                                     <Field
                                         as={Input}
@@ -255,7 +255,7 @@ export default function EditDriverDetails() {
                                 </FormControl>
                             </div>
                             <div className="flex flex-col gap-3">
-                                    <p>Blood Group</p>
+                                <p>Blood Group</p>
                                 <FormControl isInvalid={errors.bloodGroup && touched.bloodGroup}>
                                     <Field
                                         as={Select}
@@ -278,7 +278,7 @@ export default function EditDriverDetails() {
                                 </FormControl>
                             </div>
                             <div className="flex flex-col gap-3">
-                                    <p>Emergency Contact Number</p>
+                                <p>Emergency Contact Number</p>
                                 <FormControl isInvalid={errors.emergencyContact && touched.emergencyContact}>
                                     <Field
                                         as={Input}
@@ -293,7 +293,7 @@ export default function EditDriverDetails() {
                                 </FormControl>
                             </div>
                             <div className="flex flex-col gap-3">
-                                    <p>Email Address</p>
+                                <p>Email Address</p>
                                 <FormControl isInvalid={errors.emailAddress && touched.emailAddress}>
                                     <Field
                                         as={Input}
@@ -309,7 +309,7 @@ export default function EditDriverDetails() {
                             </div>
                             <div className="flex flex-col gap-3">
                                 <Field name="status">
-                                    {({field}) => (
+                                    {({ field }) => (
                                         <Checkbox
                                             {...field}
                                             colorScheme="purple"
@@ -324,7 +324,7 @@ export default function EditDriverDetails() {
                             <div className="flex justify-end gap-10 mr-10 mb-5 col-span-2">
                                 <Button
                                     bg="gray.400"
-                                    _hover={{bg: "gray.500"}}
+                                    _hover={{ bg: "gray.500" }}
                                     color="#ffffff"
                                     variant="solid"
                                     w="180px"
@@ -335,7 +335,7 @@ export default function EditDriverDetails() {
                                 </Button>
                                 <Button
                                     bg={theme.purple}
-                                    _hover={{bg: theme.onHoverPurple}}
+                                    _hover={{ bg: theme.onHoverPurple }}
                                     color="#ffffff"
                                     variant="solid"
                                     w="180px"
@@ -353,11 +353,11 @@ export default function EditDriverDetails() {
             </Box>
 
             <Modal isOpen={isModalOpen} onClose={handleSuccessModalClose} isCentered size='lg'>
-                <ModalOverlay/>
+                <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Success</ModalHeader>
                     <ModalBody className="text-center">
-                        <img src={emailsend} className='m-auto' alt="email send" width="200"/>
+                        <img src={emailsend} className='m-auto' alt="email send" width="200" />
                         <p>{modalMessage}</p>
                     </ModalBody>
                     <ModalFooter>
