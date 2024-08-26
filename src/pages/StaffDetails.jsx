@@ -277,7 +277,7 @@ export default function StaffDetails() {
                         w="180px"
                         mr="50px"
                     >
-                        Add New Staff
+                        Add New Staff Details
                     </Button>
                 </Link>
             </Box>

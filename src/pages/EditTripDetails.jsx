@@ -1,6 +1,6 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { Formik, Form, Field } from "formik";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
 import {
     Button,
@@ -21,38 +21,32 @@ import {
     Select
 } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
-import {axiosApi} from "../interceptor.js";
+import { axiosApi } from "../interceptor.js";
 
-export default function AddTripDetails() {
+export default function EditTripDetails() {
     const navigate = useNavigate();
+    const { tripId } = useParams();
     const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
     const { isOpen: isSuccessDialogOpen, onOpen: onSuccessDialogOpen, onClose: onSuccessDialogClose } = useDisclosure();
     const [dialogMessage, setDialogMessage] = useState("");
     const [successDialogMessage, setSuccessDialogMessage] = useState("");
     const [vehicleRegNoDetails, setVehicleRegNoDetails] = useState([]);
     const [NICs, setNICs] = useState([]);
+    const [tripDetails, setTripDetails] = useState(null);
+    console.log('tripId:', tripId); // Debugging statement
 
     const breadcrumbs = [
         { label: 'Trips', link: '/app/TripDetails' },
         { label: 'Trip Details', link: '/app/TripDetails' },
-        { label: 'Add Trip Details', link: '/app/AddTripDetails' }
+        { label: 'Edit Trip Details', link: `/app/EditTripDetails/${tripId}` }
     ];
 
     const fetchVehicleRegNos = async () => {
         try {
             const response = await axiosApi.get("https://localhost:7265/api/Vehicles");
             setVehicleRegNoDetails(response.data);
-            console.log("Vehicle registration numbers fetched:", response.data);
         } catch (error) {
-            if (error.response) {
-                console.error("Server responded with an error:", error.response.data);
-                console.error("Status code:", error.response.status);
-                console.error("Headers:", error.response.headers);
-            } else if (error.request) {
-                console.error("No response received:", error.request);
-            } else {
-                console.error("Error setting up request:", error.message);
-            }
+            console.error("Error fetching vehicle registration numbers:", error);
         }
     };
 
@@ -60,15 +54,27 @@ export default function AddTripDetails() {
         try {
             const response = await axiosApi.get("https://localhost:7265/api/Auth/drivers/nics");
             setNICs(response.data);
-            console.log("Driver NICs fetched:", response.data);
         } catch (error) {
             console.error("Error fetching driver NICs:", error);
         }
     };
 
+    const fetchTripDetails = async () => {
+        if (!tripId) {
+            console.error('tripId is undefined');
+            return;
+        }
+        try {
+            const response = await axiosApi.get(`https://localhost:7265/api/Trip/${tripId}`);
+            setTripDetails(response.data);
+        } catch (error) {
+            console.error("Error fetching trip details:", error);
+        }
+    };
+
     const handleSubmit = async (values) => {
         try {
-            const response = await axiosApi.post('https://localhost:7265/api/Trip', {
+            const response = await axiosApi.put(`https://localhost:7265/api/Trip/${tripId}`, {
                 vehicleRegistrationNo: values.vehicleRegistrationNo,
                 nic: values.nic,
                 Date: values.Date,
@@ -84,24 +90,23 @@ export default function AddTripDetails() {
             });
 
             if (response.status === 200) {
-                setSuccessDialogMessage('Trip record added successfully.');
+                setSuccessDialogMessage('Trip record updated successfully.');
                 onSuccessDialogOpen();
             } else {
-                throw new Error('Failed to add trip record.');
+                throw new Error('Failed to update trip record.');
             }
         } catch (error) {
-            console.error('Error adding trip record:', error);
+            console.error('Error updating trip record:', error);
             if (error.response && error.response.data && error.response.data.errors && error.response.data.errors.vehicleId) {
                 setDialogMessage(error.response.data.errors.vehicleId[0]);
             } else if (error instanceof TypeError) {
                 setDialogMessage('Failed to connect to the server.');
             } else {
-                setDialogMessage(error.message || 'Failed to add trip record.');
+                setDialogMessage(error.message || 'Failed to update trip record.');
             }
             onDialogOpen();
         }
     };
-
 
     const handleCancel = () => {
         navigate('/app/TripDetails');
@@ -112,24 +117,36 @@ export default function AddTripDetails() {
         navigate('/app/TripDetails');
     };
 
+
+
     useEffect(() => {
-        fetchVehicleRegNos();
-        fetchDriverNICs();
-    }, []);
+        console.log('tripId:', tripId); // Debugging statement
+        if (tripId) {
+            fetchDriverNICs();
+            fetchTripDetails();
+        } else {
+            console.error('tripId is undefined');
+        }
+    }, [tripId]);
+
+
+    if (!tripDetails) {
+        return <div>Loading...</div>; // Show a loading indicator while fetching trip details
+    }
 
     return (
         <>
-            <PageHeader title="Add Trip Details" breadcrumbs={breadcrumbs} />
+            <PageHeader title="Edit Trip Details" breadcrumbs={breadcrumbs} />
             <Formik
                 initialValues={{
-                    vehicleRegistrationNo: "",
-                    nic: "",
-                    Date: "",
-                    StartTime: "",
-                    EndTime: "",
-                    StartMeterValue: 0,
-                    EndMeterValue: 0,
-                    IsActive: true
+                    vehicleRegistrationNo: tripDetails.vehicleRegistrationNo || "",
+                    nic: tripDetails.nic || "",
+                    Date: tripDetails.Date || "",
+                    StartTime: tripDetails.StartTime || "",
+                    EndTime: tripDetails.EndTime || "",
+                    StartMeterValue: tripDetails.StartMeterValue || 0,
+                    EndMeterValue: tripDetails.EndMeterValue || 0,
+                    IsActive: tripDetails.IsActive || true
                 }}
                 onSubmit={handleSubmit}
             >
@@ -144,7 +161,7 @@ export default function AddTripDetails() {
                                 }
                                 return error;
                             }}>
-                                {({field}) => (
+                                {({ field }) => (
                                     <div>
                                         <Select
                                             {...field}
@@ -202,7 +219,7 @@ export default function AddTripDetails() {
                                 }
                                 return error;
                             }}>
-                                {({field}) => (
+                                {({ field }) => (
                                     <div>
                                         <Input
                                             {...field}
@@ -213,7 +230,6 @@ export default function AddTripDetails() {
                                             py={2}
                                             mt={1}
                                             width="400px"
-                                            placeholder="Date"
                                         />
                                         {errors.Date && touched.Date && (
                                             <div className="text-red-500">{errors.Date}</div>
@@ -231,7 +247,7 @@ export default function AddTripDetails() {
                                 }
                                 return error;
                             }}>
-                                {({field}) => (
+                                {({ field }) => (
                                     <div>
                                         <Input
                                             {...field}
@@ -260,7 +276,7 @@ export default function AddTripDetails() {
                                 }
                                 return error;
                             }}>
-                                {({field}) => (
+                                {({ field }) => (
                                     <div>
                                         <Input
                                             {...field}
@@ -289,7 +305,7 @@ export default function AddTripDetails() {
                                 }
                                 return error;
                             }}>
-                                {({field}) => (
+                                {({ field }) => (
                                     <NumberInput
                                         {...field}
                                         variant="filled"
@@ -308,8 +324,8 @@ export default function AddTripDetails() {
                                             step={0.01}
                                         />
                                         <NumberInputStepper>
-                                            <NumberIncrementStepper/>
-                                            <NumberDecrementStepper/>
+                                            <NumberIncrementStepper />
+                                            <NumberDecrementStepper />
                                         </NumberInputStepper>
                                     </NumberInput>
                                 )}
@@ -324,7 +340,7 @@ export default function AddTripDetails() {
                                 }
                                 return error;
                             }}>
-                                {({field}) => (
+                                {({ field }) => (
                                     <NumberInput
                                         {...field}
                                         variant="filled"
@@ -343,8 +359,8 @@ export default function AddTripDetails() {
                                             step={0.01}
                                         />
                                         <NumberInputStepper>
-                                            <NumberIncrementStepper/>
-                                            <NumberDecrementStepper/>
+                                            <NumberIncrementStepper />
+                                            <NumberDecrementStepper />
                                         </NumberInputStepper>
                                     </NumberInput>
                                 )}
@@ -352,7 +368,7 @@ export default function AddTripDetails() {
                         </div>
                         <div className="flex flex-col gap-3">
                             <Field name="IsActive" type="checkbox">
-                                {({field}) => (
+                                {({ field }) => (
                                     <Checkbox
                                         {...field}
                                         size="lg"
@@ -368,7 +384,7 @@ export default function AddTripDetails() {
                         <div className="flex w-5/6 justify-end gap-10">
                             <Button
                                 bg="gray.400"
-                                _hover={{bg: "gray.500"}}
+                                _hover={{ bg: "gray.500" }}
                                 color="#ffffff"
                                 variant="solid"
                                 w="230px"
@@ -379,7 +395,7 @@ export default function AddTripDetails() {
                             </Button>
                             <Button
                                 bg={theme.purple}
-                                _hover={{bg: theme.onHoverPurple}}
+                                _hover={{ bg: theme.onHoverPurple }}
                                 color="#ffffff"
                                 variant="solid"
                                 w="230px"
@@ -394,7 +410,7 @@ export default function AddTripDetails() {
             </Formik>
 
             <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay/>
+                <AlertDialogOverlay />
                 <AlertDialogContent
                     position="absolute"
                     top="30%"
@@ -412,7 +428,7 @@ export default function AddTripDetails() {
             </AlertDialog>
 
             <AlertDialog isOpen={isSuccessDialogOpen} onClose={handleSuccessDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay/>
+                <AlertDialogOverlay />
                 <AlertDialogContent
                     position="absolute"
                     top="30%"

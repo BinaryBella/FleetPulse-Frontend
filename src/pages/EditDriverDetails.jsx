@@ -1,6 +1,6 @@
-import {useRef, useState} from "react";
-import {Field, Form, Formik} from "formik";
-import {useNavigate} from "react-router-dom";
+import { useRef, useState, useEffect } from "react";
+import { Field, Form, Formik } from "formik";
+import { useNavigate, useParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
 import {
     AlertDialog,
@@ -31,10 +31,10 @@ import {
     Tabs, useDisclosure,
 } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
-import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import PasswordStrengthBar from 'react-password-strength-bar';
 import $ from "jquery";
-import {axiosApi} from "../interceptor.js";
+import { axiosApi } from "../interceptor.js";
 import './AddDriverDetails.css'
 import emailsend from "../assets/images/emailsend.png";
 import PropTypes from "prop-types";
@@ -74,8 +74,9 @@ PasswordField.propTypes = {
     error: PropTypes.string
 };
 
-export default function AddDriverDetails() {
+export default function EditDriverDetails() {
     const navigate = useNavigate();
+    const { driverId } = useParams();
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
@@ -103,6 +104,31 @@ export default function AddDriverDetails() {
         status: true,
     });
 
+    useEffect(() => {
+        const fetchDriverData = async () => {
+            try {
+                const response = await axiosApi.get(`https://localhost:7265/api/Driver/${driverId}`);
+                if (response.status === 200) {
+                    const driverData = response.data;
+                    // Format the date fields
+                    driverData.dateOfBirth = driverData.dateOfBirth ? new Date(driverData.dateOfBirth).toISOString().split('T')[0] : '';
+                    driverData.licenseExpiryDate = driverData.licenseExpiryDate ? new Date(driverData.licenseExpiryDate).toISOString().split('T')[0] : '';
+                    setInitialValues(driverData);
+                    setFormData(driverData);
+                }
+            } catch (error) {
+                console.error("Failed to fetch driver data:", error);
+                setModalMessage(`Failed to fetch driver data: ${error.message}`);
+                onOpen();
+                setIsErrorModalOpen(true);
+            }
+        };
+
+        if (driverId) {
+            fetchDriverData();
+        }
+    }, [driverId]);
+
     const validateContactInfo = (values) => {
         const errors = {};
         const requiredFields = [
@@ -125,13 +151,10 @@ export default function AddDriverDetails() {
         return errors;
     };
 
-
     const validateAccountInfo = (values) => {
         const errors = {};
         if (!values.username) errors.username = 'Username is required';
         if (!values.emailAddress) errors.emailAddress = 'Email is required';
-        if (!values.password) errors.password = 'Password is required';
-        if (!values.confirmPassword) errors.confirmPassword = 'Confirm password is required';
         if (values.password !== values.confirmPassword) {
             errors.confirmPassword = 'Passwords do not match';
         }
@@ -141,7 +164,7 @@ export default function AddDriverDetails() {
     const breadcrumbs = [
         {label: "Driver", link: "/app/DriverDetails"},
         {label: "Driver Details", link: "/app/DriverDetails"},
-        {label: "Add Driver Details", link: "/app/AddDriverDetails"},
+        {label: "Edit Driver Details", link: `/app/EditDriverDetails/${driverId}`},
     ];
 
     const handleSuccessModalClose = () => {
@@ -167,28 +190,22 @@ export default function AddDriverDetails() {
 
     const handleSubmit = async (values, actions) => {
         setIsSubmitting(true);
-        const allValues = Object.keys(values).reduce((merged, key) => {
-            merged[key] = formData[key] || values[key];
-            return merged;
-        }, {});
-
         try {
-            const response = await axiosApi.post('https://localhost:7265/api/Driver', allValues);
-            console.log(response)
+            const response = await axiosApi.put(`https://localhost:7265/api/Driver/${driverId}`, values);
             if (response.status === 200) {
-                if (response.data.status) {
-                    setModalMessage('Driver added successfully. User credentials have been sent!');
-                    setIsModalOpen(true);
-                } else {
-                    setModalMessage(response.data.error);
-                    onOpen();
-                    setIsErrorModalOpen(true);
-                }
+                setModalMessage('Driver updated successfully.');
+                setIsModalOpen(true);
+            } else {
+                setModalMessage(response.data.error || 'Failed to update driver.');
+                onOpen();
+                setIsErrorModalOpen(true);
             }
         } catch (error) {
-            setModalMessage(`Failed to add driver: ${error.message}`);
-            setIsModalOpen(true);
+            setModalMessage(`Failed to update driver: ${error.message}`);
+            onOpen();
+            setIsErrorModalOpen(true);
         }
+        setIsSubmitting(false);
     };
 
     const handleCancel = () => {
@@ -197,7 +214,7 @@ export default function AddDriverDetails() {
 
     return (
         <>
-            <PageHeader title="Add Driver Details" breadcrumbs={breadcrumbs}/>
+            <PageHeader title="Edit Driver Details" breadcrumbs={breadcrumbs}/>
             <Box className="mr-14">
                 <Tabs index={activeTab} onChange={handleTabsChange}>
                     <TabList>
@@ -211,9 +228,9 @@ export default function AddDriverDetails() {
                                 validate={validateContactInfo}
                                 onSubmit={(values) => {
                                     setFormData(prevData => ({ ...prevData, ...values }));
-                                    console.log(formData);
                                     setActiveTab(1);
                                 }}
+                                enableReinitialize
                             >
                                 {({errors, touched, isValid}) => (
                                     <Form className="grid grid-cols-2 gap-x-12 gap-y-10 mt-8">
@@ -246,60 +263,60 @@ export default function AddDriverDetails() {
                                             )}
                                         </div>
                                         <div className="flex flex-col gap-3">
-                                            <p>Last Name</p>
-                                            <Field name="lastName" validate={value => {
-                                                let error;
-                                                if (!value) {
-                                                    error = "Last Name is required.";
-                                                }
-                                                return error;
-                                            }}>
-                                                {({field}) => (
-                                                    <Input
-                                                        {...field}
-                                                        type="text"
-                                                        variant="filled"
-                                                        borderRadius="md"
-                                                        px={3}
-                                                        py={2}
-                                                        mt={1}
-                                                        width="400px"
-                                                        id="lastName"
-                                                        placeholder="Last Name"
-                                                    />
-                                                )}
-                                            </Field>
-                                            {errors.lastName && touched.lastName && (
-                                                <div className="text-red-500">{errors.lastName}</div>
+                                        <p>Last Name</p>
+                                        <Field name="lastName" validate={value => {
+                                            let error;
+                                            if (!value) {
+                                                error = "Last Name is required.";
+                                            }
+                                            return error;
+                                        }}>
+                                            {({field}) => (
+                                                <Input
+                                                    {...field}
+                                                    type="text"
+                                                    variant="filled"
+                                                    borderRadius="md"
+                                                    px={3}
+                                                    py={2}
+                                                    mt={1}
+                                                    width="400px"
+                                                    id="lastName"
+                                                    placeholder="Last Name"
+                                                />
                                             )}
-                                        </div>
-                                        <div className="flex flex-col gap-3">
-                                            <p>Date of Birth</p>
-                                            <Field name="dateOfBirth" validate={value => {
-                                                let error;
-                                                if (!value) {
-                                                    error = "Date of Birth is required.";
-                                                }
-                                                return error;
-                                            }}>
-                                                {({field}) => (
-                                                    <Input
-                                                        {...field}
-                                                        type="date"
-                                                        variant="filled"
-                                                        borderRadius="md"
-                                                        px={3}
-                                                        py={2}
-                                                        mt={1}
-                                                        width="400px"
-                                                        id="dateOfBirth"
-                                                        max={new Date().toISOString().split('T')[0]}
-                                                        placeholder="Date of Birth"
-                                                    />
-                                                )}
-                                            </Field>
-                                            {errors.dateOfBirth && touched.dateOfBirth && (
-                                                <div className="text-red-500">{errors.dateOfBirth}</div>
+                                        </Field>
+                                        {errors.lastName && touched.lastName && (
+                                            <div className="text-red-500">{errors.lastName}</div>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col gap-3">
+                                    <p>Date of Birth</p>
+                                    <Field name="dateOfBirth" validate={value => {
+                                    let error;
+                                    if (!value) {
+                                    error = "Date of Birth is required.";
+                                }
+                                    return error;
+                                }}>
+                                {({field}) => (
+                                    <Input
+                                        {...field}
+                                        type="date"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="dateOfBirth"
+                                        max={new Date().toISOString().split('T')[0]}
+                                        placeholder="Date of Birth"
+                                    />
+                                )}
+                            </Field>
+                            {errors.dateOfBirth && touched.dateOfBirth && (
+                                <div className="text-red-500">{errors.dateOfBirth}</div>
                                             )}
                                         </div>
                                         <div className="flex flex-col gap-3">
@@ -507,6 +524,7 @@ export default function AddDriverDetails() {
                                 initialValues={{...initialValues, ...formData}}
                                 validate={validateAccountInfo}
                                 onSubmit={handleSubmit}
+                                enableReinitialize
                             >
                                 {({errors, touched, values}) => (
                                     <Form className="grid grid-cols-2 gap-x-12 gap-y-10 mt-8">
@@ -609,7 +627,6 @@ export default function AddDriverDetails() {
                 </Tabs>
             </Box>
 
-
             <Modal isOpen={isModalOpen} onClose={onModalClose} isCentered size='lg'>
                 <ModalOverlay/>
                 <ModalContent>
@@ -634,7 +651,6 @@ export default function AddDriverDetails() {
                 isCentered
             >
                 <AlertDialogOverlay />
-
                 <AlertDialogContent>
                     <AlertDialogHeader>Error</AlertDialogHeader>
                     <AlertDialogCloseButton />

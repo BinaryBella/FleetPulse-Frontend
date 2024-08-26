@@ -50,6 +50,8 @@ import NotFound from './pages/NotFound';
 import EditVehicleDetails from "./pages/EditVehicleDetails.jsx";
 import EditVehicleType from "./pages/EditVehicleType.jsx";
 import EditManufactureDetails from "./pages/EditManufactureDetails.jsx";
+import EditDriverDetails from "./pages/EditDriverDetails.jsx";
+import EditTripDetails from "./pages/EditTripDetails.jsx";
 
 export default function App() {
     const [isAdmin, setIsAdmin] = useState(false);
@@ -122,6 +124,8 @@ export default function App() {
                         <Route path="/app/EditFuelRefillDetails/:id" element={<EditFuelRefillDetails />} />
                         <Route path="/app/EditVehicleMaintenanceConfiguration/:id" element={<EditVehicleMaintenanceConfiguration />} />
                         <Route path="/app/EditManufactureDetails/:id" element={<EditManufactureDetails />} />
+                        <Route path="/app/EditDriverDetails/:id" element={<EditDriverDetails />} />
+                        <Route path="/app/EditTripDetails/:tripId" element={<EditTripDetails />} />
                     </Route>
 
                     {/* Admin-only routes */}

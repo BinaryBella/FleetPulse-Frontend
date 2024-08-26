@@ -277,7 +277,7 @@ export default function HelperDetails() {
                 variant='solid'
                 marginRight='50'
             >
-              Add New Helper
+              Add New Helper Details
             </Button>
           </Link>
           </Box>
