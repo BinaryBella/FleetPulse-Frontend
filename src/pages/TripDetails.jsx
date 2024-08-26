@@ -5,7 +5,7 @@ import {
     MenuButton, IconButton, MenuList, MenuItem, Input, chakra,
     InputGroup, InputLeftElement, Text, AlertDialogOverlay,
     AlertDialogContent, AlertDialogHeader, AlertDialogBody,
-    AlertDialogFooter, AlertDialog, useDisclosure, useToast,
+    AlertDialogFooter, AlertDialog, useDisclosure,
     Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody,
     ModalFooter, Checkbox, Stack
 } from "@chakra-ui/react";
@@ -36,7 +36,6 @@ export default function TripDetails() {
     const cancelRef = useRef();
     const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
     const itemsPerPage = 10;
-    const toast = useToast();
 
     useEffect(() => {
         fetchTripDetails();
@@ -58,21 +57,29 @@ export default function TripDetails() {
 
     const onConfirmDelete = async () => {
         try {
-            const endpoint = `https://localhost:7265/api/Trip/${selectedTrip.tripId}/${selectedTrip.status ? 'deactivate' : 'activate'}`;
-            await axiosApi.put(endpoint);
+            const action = selectedTrip.status ? 'deactivate' : 'activate';
+            const endpoint = `https://localhost:7265/api/Trip/${action}/${selectedTrip.tripId}`;
+
+            // Log to debug
+            console.log("Trip ID:", selectedTrip.tripId);
+            console.log("Status:", selectedTrip.status);
+            console.log("Endpoint URL:", endpoint);
+
+            // Make sure tripId is valid
+            if (!selectedTrip.tripId) {
+                throw new Error("Invalid trip ID");
+            }
+
+            const response = await axiosApi.put(endpoint);
+
             fetchTripDetails();
             onDialogClose();
         } catch (error) {
             console.error("Error updating trip status:", error);
-            toast({
-                title: "Error",
-                description: "Failed to update trip status.",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
-        }
+
+       }
     };
+
 
     const columns = [
         { accessorKey: 'nic', header: 'Driver\'s NIC', meta: { isNumeric: false, filter: 'text' } },
@@ -348,37 +355,25 @@ export default function TripDetails() {
             </Table>
 
             {!isEmpty && <Pagination pageCount={pageCount} onPageChange={handlePageClick} />}
-            <AlertDialog
-                isOpen={isDialogOpen}
-                onClose={onDialogClose}
-                motionPreset="slideInBottom"
-                leastDestructiveRef={cancelRef}
-            >
-                <AlertDialogOverlay />
-                <AlertDialogContent position="absolute" top="30%" left="50%" transform="translate(-50%, -50%)">
-                    <AlertDialogHeader>{selectedTrip?.status ? "Deactivate" : "Activate"} Staff</AlertDialogHeader>
-                    <AlertDialogBody>
-                        Are you sure you want to {selectedTrip?.status ? "deactivate" : "activate"} {selectedTrip?.firstName} {selectedTrip?.lastName}?
-                    </AlertDialogBody>
-                    <AlertDialogFooter>
-                        <Button
-                            bg="gray.400"
-                            _hover={{ bg: "gray.500" }}
-                            color="#ffffff"
-                            variant="solid"
-                            onClick={onDialogClose}
-                            ref={cancelRef}
-                            ml={3}
-                        >
-                            Cancel
-                        </Button>
-                        <Button colorScheme="red" color="#FFFFFF" onClick={onConfirmDelete} ml={3}>
-                            {selectedTrip?.status ? "Deactivate" : "Activate"}
-                        </Button>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
 
+            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} leastDestructiveRef={cancelRef}>
+                <AlertDialogOverlay>
+                    <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
+                        <AlertDialogHeader>
+                            {selectedTrip?.status ? "Deactivate" : "Activate"} Trip
+                        </AlertDialogHeader>
+                        <AlertDialogBody>
+                            Are you sure you want to {selectedTrip?.status ? "deactivate" : "activate"} this trip?
+                        </AlertDialogBody>
+                        <AlertDialogFooter>
+                            <Button ref={cancelRef} onClick={onDialogClose}>Cancel</Button>
+                            <Button colorScheme={selectedTrip?.status ? "red" : "red"} onClick={onConfirmDelete} ml={3}>
+                                {selectedTrip?.status ? "Deactivate" : "Activate"}
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
             {/* Modal for Column Selection */}
             <Modal isOpen={isColumnSelectionOpen} onClose={() => setIsColumnSelectionOpen(false)} isCentered>
                 <ModalOverlay />

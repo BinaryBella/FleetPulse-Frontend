@@ -155,23 +155,31 @@ export default function FuelRefillDetails() {
     };
 
     const onConfirmDelete = async () => {
-        if (!selectedFuelRefill) return;
-
         try {
-            const endpoint = selectedFuelRefill.status
-                ? `https://localhost:7265/api/FuelRefill/deactivate/${selectedFuelRefill.fuelRefillId}`
-                : `https://localhost:7265/api/FuelRefill/activate/${selectedFuelRefill.fuelRefillId}`;
+            if (!selectedFuelRefill || !selectedFuelRefill.fuelRefillId) {
+                console.error('Selected fuel Refill or its ID is undefined.');
+                return;
+            }
 
-            await axiosApi.post(endpoint);
+            const endpoint = `https://localhost:7265/api/FuelRefill/${selectedFuelRefill.status ? 'deactivate' : 'activate'}/${selectedFuelRefill.fuelRefillId}`;
 
-            // Refresh the list after the update
-            fetchFuelRefill();
-            onDialogClose();
+            const response = await axiosApi.put(endpoint, null, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.status === 200 || response.status === 204) {
+                fetchFuelRefill();
+                onDialogClose();
+            } else {
+                console.error('Failed to update fuel Refill status');
+            }
         } catch (error) {
-            console.error("Error updating fuel refill status:", error);
-            setError("Error updating fuel refill status. Please try again later.");
+            console.error('Error updating fuel Refill status:', error);
         }
     };
+
 
 
     const formatDate = (fuelRefill) => {
@@ -447,29 +455,23 @@ export default function FuelRefillDetails() {
                 />
             )}
 
-            <AlertDialog
-                isOpen={isDialogOpen}
-                onClose={onDialogClose}
-                motionPreset="slideInBottom"
-                leastDestructiveRef={cancelRef}
-            >
-                <AlertDialogOverlay />
-                <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
-                    <AlertDialogHeader>
-                        {selectedFuelRefill?.status ? "Deactivate" : "Activate"} Fuel Refill
-                    </AlertDialogHeader>
-                    <AlertDialogBody>
-                        Are you sure you want to {selectedFuelRefill?.status ? "deactivate" : "activate"} this fuel refill?
-                    </AlertDialogBody>
-                    <AlertDialogFooter>
-                        <Button ref={cancelRef} onClick={onDialogClose}>
-                            Cancel
-                        </Button>
-                        <Button colorScheme="red" onClick={onConfirmDelete} ml={3}>
-                            {selectedFuelRefill?.status ? "Deactivate" : "Activate"}
-                        </Button>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
+            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} leastDestructiveRef={cancelRef}>
+                <AlertDialogOverlay>
+                    <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
+                        <AlertDialogHeader>
+                            {selectedFuelRefill?.status ? "Deactivate" : "Activate"} Fuel Refill
+                        </AlertDialogHeader>
+                        <AlertDialogBody>
+                            Are you sure you want to {selectedFuelRefill?.status ? "deactivate" : "activate"} this Fuel Refill?
+                        </AlertDialogBody>
+                        <AlertDialogFooter>
+                            <Button ref={cancelRef} onClick={onDialogClose}>Cancel</Button>
+                            <Button colorScheme={selectedFuelRefill?.status ? "red" : "red"} onClick={onConfirmDelete} ml={3}>
+                                {selectedFuelRefill?.status ? "Deactivate" : "Activate"}
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
             </AlertDialog>
 
 

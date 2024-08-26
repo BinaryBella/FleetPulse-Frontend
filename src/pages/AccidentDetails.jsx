@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   Table, Thead, Tbody, Tr, Th, Td, Box, Button, Menu,
   MenuButton, IconButton, MenuList, MenuItem, Input, chakra,
-  InputGroup, InputLeftElement, Text, useToast, AlertDialog,
+  InputGroup, InputLeftElement, Text,  AlertDialog,
   AlertDialogOverlay, AlertDialogContent, AlertDialogHeader,
   AlertDialogBody, AlertDialogFooter, useDisclosure, Modal,
   ModalOverlay, ModalContent, ModalHeader, ModalBody,
@@ -40,7 +40,7 @@ export default function AccidentDetails() {
   const cancelRef = useRef();
   const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
   const itemsPerPage = 10;
-  const toast = useToast();
+
 
   useEffect(() => {
     fetchAccidentDetails();
@@ -138,7 +138,6 @@ export default function AccidentDetails() {
       let previewItem = {};
       selected.forEach(col => {
         if (col.accessorKey === 'status') {
-          // Convert the boolean status to "Active" or "Inactive"
           previewItem[col.accessorKey] = item[col.accessorKey] ? 'Active' : 'Inactive';
         } else {
           previewItem[col.accessorKey] = item[col.accessorKey];
@@ -229,26 +228,33 @@ export default function AccidentDetails() {
     onDialogOpen();
   };
 
+
   const onConfirmDelete = async () => {
     try {
-      const endpoint = `https://localhost:7265/api/AccidentDetails/${selectedAccident.id}/${selectedAccident.isActive ? 'deactivate' : 'activate'}`;
-      await axiosApi.put(endpoint);
-      fetchAccidentDetails();
-      onDialogClose();
-    } catch (error) {
-      if (error.response && error.response.status === 400) {
-        toast({
-          title: "Error",
-          description: "Unable to update accident status.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      } else {
-        console.error("Error updating accident status:", error);
+      if (!selectedAccident || !selectedAccident.accidentId) {
+        console.error('Selected accident or its ID is undefined.');
+        return;
       }
+
+      const endpoint = `https://localhost:7265/api/Accidents/${selectedAccident.accidentId}/${selectedAccident.status ? 'deactivate' : 'activate'}`;
+
+      const response = await axiosApi.put(endpoint, null, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 200 || response.status === 204) {
+        fetchAccidentDetails();
+        onDialogClose();
+      } else {
+        console.error('Failed to update accident status');
+      }
+    } catch (error) {
+      console.error('Error updating accident status:', error);
     }
   };
+
 
   return (
       <div className="main-content">
@@ -390,25 +396,25 @@ export default function AccidentDetails() {
             />
         )}
 
-        <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom" leastDestructiveRef={cancelRef}>
-          <AlertDialogOverlay />
-          <AlertDialogContent position="absolute" top="30%" left="50%" transform="translate(-50%, -50%)">
-            <AlertDialogHeader>{selectedAccident?.isActive ? "Deactivate" : "Activate"} Accident</AlertDialogHeader>
-            <AlertDialogBody>
-              Are you sure you want to {selectedAccident?.isActive ? "deactivate" : "activate"} this accident?
-            </AlertDialogBody>
-            <AlertDialogFooter>
-              <div className="flex flex-row gap-8">
-                <Button bg="gray.400" _hover={{ bg: "gray.500" }} color="#ffffff" variant="solid" onClick={onDialogClose} ref={cancelRef}>
-                  Cancel
+        <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} leastDestructiveRef={cancelRef}>
+          <AlertDialogOverlay>
+            <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
+              <AlertDialogHeader>
+                {selectedAccident?.status ? "Deactivate" : "Activate"} Vehicle
+              </AlertDialogHeader>
+              <AlertDialogBody>
+                Are you sure you want to {selectedAccident?.status ? "deactivate" : "activate"} this accident?
+              </AlertDialogBody>
+              <AlertDialogFooter>
+                <Button ref={cancelRef} onClick={onDialogClose}>Cancel</Button>
+                <Button colorScheme={selectedAccident?.status ? "red" : "red"} onClick={onConfirmDelete} ml={3}>
+                  {selectedAccident?.status ? "Deactivate" : "Activate"}
                 </Button>
-                <Button colorScheme='red' color="#FFFFFF" onClick={onConfirmDelete}>
-                  {selectedAccident?.isActive ? "Deactivate" : "Activate"}
-                </Button>
-              </div>
-            </AlertDialogFooter>
-          </AlertDialogContent>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
         </AlertDialog>
+
 
         {/* Modal for Column Selection */}
         <Modal isOpen={isColumnSelectionOpen} onClose={() => setIsColumnSelectionOpen(false)} isCentered>
@@ -484,7 +490,7 @@ export default function AccidentDetails() {
                         </Td>
                       </Tr>
                   )}
-                </Tbody>
+                  </Tbody>
               </Table>
             </ModalBody>
             <ModalFooter>

@@ -71,16 +71,18 @@ export default function EditMaintenance() {
             try {
                 const response = await axiosApi.get(`https://localhost:7265/api/VehicleMaintenance/${id}`);
                 const maintenance = response.data;
-                console.log(maintenance);
+                console.log("maintenance data", maintenance);
+                const selectedVehicle = vehicleRegNoDetails.find(v => v.id === maintenance.vehicleId);
+
                 setInitialValues({
-                    vehicleRegistrationNo: maintenance.vehicleRegistrationNo || "",
+                    vehicleRegistrationNo: selectedVehicle ? selectedVehicle.vehicleRegistrationNo : "",
                     maintenanceDate: formatDate(maintenance.maintenanceDate) || "",
                     VehicleMaintenanceTypeId: maintenance.vehicleMaintenanceTypeId || "",
                     cost: maintenance.cost || "",
                     serviceProvider: maintenance.serviceProvider || "",
                     replacedParts: maintenance.partsReplaced || "",
                     specialNotes: maintenance.specialNotes || "",
-                    isActive: maintenance.isActive || false,
+                    isActive: Boolean(maintenance.status),
                     vehicleId: maintenance.vehicleId || ""
                 });
             } catch (error) {
@@ -102,8 +104,11 @@ export default function EditMaintenance() {
     useEffect(() => {
         fetchVehicleMaintenanceTypes();
         fetchVehicleRegNos();
+    }, []);
+
+    useEffect(() => {
         fetchVehicleMaintenanceDetails();
-    }, [id]);
+    }, [id, vehicleRegNoDetails]);
 
     const breadcrumbs = [
         { label: "Vehicle", link: "/app/VehicleDetails" },
@@ -163,9 +168,10 @@ export default function EditMaintenance() {
                         <div className="flex flex-col gap-3">
                             <p>Vehicle Registration No</p>
                             <Field name="vehicleRegistrationNo">
-                                {({field, form}) => (
+                                {({ field, form }) => (
                                     <Select
                                         {...field}
+                                        value={field.value || ''}
                                         onChange={(e) => {
                                             const selectedVehicle = vehicleRegNoDetails.find(v => v.vehicleRegistrationNo === e.target.value);
                                             if (selectedVehicle) {
@@ -199,7 +205,7 @@ export default function EditMaintenance() {
                         <div className="flex flex-col gap-3">
                             <p>Vehicle Maintenance Type</p>
                             <Field name="VehicleMaintenanceTypeId">
-                                {({field}) => (
+                                {({ field }) => (
                                     <Select
                                         {...field}
                                         placeholder='Vehicle Maintenance Type'
@@ -226,7 +232,7 @@ export default function EditMaintenance() {
                         <div className="flex flex-col gap-3">
                             <p>Maintenance Date</p>
                             <Field name="maintenanceDate">
-                                {({field}) => (
+                                {({ field }) => (
                                     <Input
                                         {...field}
                                         type="date"
@@ -246,7 +252,7 @@ export default function EditMaintenance() {
                         <div className="flex flex-col gap-3">
                             <p>Cost</p>
                             <Field name="cost">
-                                {({field}) => (
+                                {({ field }) => (
                                     <div>
                                         <Input
                                             {...field}
@@ -269,7 +275,7 @@ export default function EditMaintenance() {
                         <div className="flex flex-col gap-3">
                             <p>Service Provider</p>
                             <Field name="serviceProvider">
-                                {({field}) => (
+                                {({ field }) => (
                                     <div>
                                         <Input
                                             {...field}
@@ -292,7 +298,7 @@ export default function EditMaintenance() {
                         <div className="flex flex-col gap-3">
                             <p>Parts Replaced</p>
                             <Field name="replacedParts">
-                                {({field}) => (
+                                {({ field }) => (
                                     <Input
                                         {...field}
                                         type="text"
@@ -310,7 +316,7 @@ export default function EditMaintenance() {
                         <div className="flex flex-col gap-3">
                             <p>Special Notes</p>
                             <Field name="specialNotes">
-                                {({field}) => (
+                                {({ field }) => (
                                     <Textarea
                                         {...field}
                                         variant="filled"
@@ -327,9 +333,11 @@ export default function EditMaintenance() {
                         <div className="flex flex-col gap-3">
                             <p>Status</p>
                             <Field name="isActive" type="checkbox">
-                                {({field}) => (
+                                {({ field, form }) => (
                                     <Checkbox
                                         {...field}
+                                        isChecked={field.value}  // Add this line
+                                        onChange={(e) => form.setFieldValue('isActive', e.target.checked)}  // Add this line
                                         colorScheme={theme.colors.brand}
                                         size="lg"
                                         mt={1}
@@ -343,7 +351,7 @@ export default function EditMaintenance() {
                         <div className="flex flex-row gap-10">
                             <Button
                                 bg="gray.400"
-                                _hover={{bg: "gray.500"}}
+                                _hover={{ bg: "gray.500" }}
                                 color="#ffffff"
                                 variant="solid"
                                 w="180px"
@@ -354,7 +362,7 @@ export default function EditMaintenance() {
                             </Button>
                             <Button
                                 bg={theme.purple}
-                                _hover={{bg: theme.onHoverPurple}}
+                                _hover={{ bg: theme.onHoverPurple }}
                                 color="#ffffff"
                                 variant="solid"
                                 w="180px"
@@ -368,7 +376,7 @@ export default function EditMaintenance() {
                 )}
             </Formik>
             <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay/>
+                <AlertDialogOverlay />
                 <AlertDialogContent
                     position="absolute"
                     top="30%"
@@ -385,7 +393,7 @@ export default function EditMaintenance() {
             </AlertDialog>
 
             <AlertDialog isOpen={isSuccessDialogOpen} onClose={onSuccessDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay/>
+                <AlertDialogOverlay />
                 <AlertDialogContent
                     position="absolute"
                     top="30%"

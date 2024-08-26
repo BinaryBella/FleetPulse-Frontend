@@ -65,6 +65,7 @@ export default function EditFuelRefillDetails() {
         }
     };
 
+
     const fetchVehicleRegNos = async () => {
         try {
             const response = await axiosApi.get("https://localhost:7265/api/Vehicles");
@@ -83,19 +84,18 @@ export default function EditFuelRefillDetails() {
         try {
             const response = await axiosApi.get(`https://localhost:7265/api/FuelRefill/${id}`);
             const data = response.data;
-            console.log('Fetched Fuel Refill Data:', data); // Log the fetched data
+            console.log('Fetched Fuel Refill Data:', data);
 
-            // Update initial values with the fetched data
             setInitialValues({
-                vehicleRegistrationNo: data.vehicleRegistrationNo || "",
+                vehicleRegistrationNo: data.vehicle?.vehicleRegistrationNo || "",
                 userId: data.userId || "",
                 nic: data.nic || "",
                 literCount: data.literCount || "",
-                date: data.date.split("T")[0], // Adjust date format
-                time: data.time || "",
+                date: data.date.split("T")[0],
+                time: data.time.split("T")[1] || "",
                 fType: data.fType || "",
                 cost: data.cost || "",
-                IsActive: data.isActive || false,
+                IsActive: data.status || false,
             });
         } catch (error) {
             console.error("Error fetching fuel refill details:", error);
@@ -170,8 +170,9 @@ export default function EditFuelRefillDetails() {
 
     useEffect(() => {
         fetchVehicleRegNos();
-        fetchFuelRefillDetails(); // Fetch the existing fuel refill details
+        fetchFuelRefillDetails();
     }, []);
+
 
     const handleCancel = () => {
         navigate('/app/FuelRefillDetails');
@@ -196,237 +197,228 @@ export default function EditFuelRefillDetails() {
                 enableReinitialize={true}
                 onSubmit={handleSubmit}
             >
-                {({ errors, touched, isSubmitting, setFieldValue }) => {
-                    return (
-                        <Form className="grid grid-cols-2 gap-10 mt-8">
-                            {/* Form fields (same as in AddFuelRefillDetails but pre-populated) */}
-                            <div className="flex flex-col gap-3">
-                                <p>User NIC</p>
-                                <Field name="nic" validate={(value) => {
-                                    let error;
-                                    if (!value) {
-                                        error = "NIC is required.";
-                                    } else if (!/^[0-9]{9}[vVxX]$|^[0-9]{12}$/.test(value)) {
-                                        error = "Invalid NIC format.";
-                                    }
-                                    return error;
-                                }}>
-                                    {({field}) => (
-                                        <div>
-                                            <Input
-                                                {...field}
-                                                type="text"
-                                                variant="filled"
-                                                borderRadius="md"
-                                                px={3}
-                                                py={2}
-                                                mt={1}
-                                                width="400px"
-                                                id="nic"
-                                                placeholder="NIC"
-                                            />
-                                            {errors.nic && touched.nic && (
-                                                <div className="text-red-500">{errors.nic}</div>
-                                            )}
-                                        </div>
-                                    )}
-                                </Field>
-                            </div>
-                            <div className="flex flex-col gap-3">
-                                <Field name="vehicleRegistrationNo" validate={(value) => {
-                                    if (!value) return "Vehicle Registration No is required";
-                                    return undefined;
-                                }}>
-                                    {({field, form}) => (
-                                        <Select
+                {({ errors, touched, isSubmitting, setFieldValue }) => (
+                    <Form className="grid grid-cols-2 gap-10 mt-8">
+                        <div className="flex flex-col gap-3">
+                            <p>User NIC</p>
+                            <Field name="nic">
+                                {({ field }) => (
+                                    <div>
+                                        <Input
                                             {...field}
-                                            onChange={(e) => {
-                                                const selectedVehicle = vehicleRegNoDetails.find(v => v.vehicleRegistrationNo === e.target.value);
-                                                if (selectedVehicle) {
-                                                    form.setFieldValue('vehicleRegistrationNo', selectedVehicle.vehicleRegistrationNo);
-                                                    form.setFieldValue('vehicleId', selectedVehicle.id); // Ensure 'vehicleId' is set
-                                                }
-                                            }}
-                                            placeholder='Select Vehicle Registration No'
-                                            size='md'
+                                            type="text"
                                             variant="filled"
                                             borderRadius="md"
                                             px={3}
                                             py={2}
                                             mt={1}
                                             width="400px"
-                                        >
-                                            <option value="" disabled>Select Vehicle Registration No</option>
-                                            {vehicleRegNoDetails.map((option) => (
-                                                <option key={option.vehicleRegistrationNo}
-                                                        value={option.vehicleRegistrationNo}>
-                                                    {option.vehicleRegistrationNo}
-                                                </option>
-                                            ))}
-                                        </Select>
-                                    )}
-                                </Field>
-                            </div>
-                                <div className="flex flex-col gap-3">
-                                    <p>Fuel Type</p>
-                                    <Field name="fType">
-                                        {({field}) => (
-                                            <Select
-                                                {...field}
-                                                placeholder="Select fuel type"
-                                                size="md"
-                                                variant="filled"
-                                                borderRadius="md"
-                                                px={3}
-                                                py={2}
-                                                mt={1}
-                                                width="400px"
-                                            >
-                                                <option value="Petrol">Petrol</option>
-                                                <option value="Diesel">Diesel</option>
-                                                <option value="Electric">Electric</option>
-                                            </Select>
+                                            id="nic"
+                                            placeholder="NIC"
+                                        />
+                                        {errors.nic && touched.nic && (
+                                            <div className="text-red-500">{errors.nic}</div>
                                         )}
-                                    </Field>
-                                    {errors.fType && touched.fType && (
-                                        <div className="text-red-500">{errors.fType}</div>
-                                    )}
-                                </div>
-                                <div className="flex flex-col gap-3">
-                                    <p>Liter Count</p>
-                                    <Field name="literCount" validate={(value) => {
-                                        if (!value) return "Liter count is required";
-                                        if (!/^[0-9]+$/.test(value)) return "Liter count must be a number";
-                                        return undefined;
-                                    }}>
-                                        {({field}) => (
-                                            <div>
-                                                <Input
-                                                    {...field}
-                                                    type="number"
-                                                    variant="filled"
-                                                    borderRadius="md"
-                                                    px={3}
-                                                    py={2}
-                                                    mt={1}
-                                                    width="400px"
-                                                    id="literCount"
-                                                    placeholder="Liter Count"
-                                                />
-                                                {errors.literCount && touched.literCount && (
-                                                    <div className="text-red-500">{errors.literCount}</div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </Field>
-                                </div>
-                                <div className="flex flex-col gap-3">
-                                    <p>Date</p>
-                                    <Field name="date" validate={(value) => {
-                                        if (!value) return "Date is required";
-                                        return undefined;
-                                    }}>
-                                        {({field}) => (
-                                            <div>
-                                                <Input
-                                                    {...field}
-                                                    type="date"
-                                                    variant="filled"
-                                                    borderRadius="md"
-                                                    px={3}
-                                                    py={2}
-                                                    mt={1}
-                                                    width="400px"
-                                                    id="date"
-                                                    placeholder="Date"
-                                                />
-                                                {errors.date && touched.date && (
-                                                    <div className="text-red-500">{errors.date}</div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </Field>
-                                </div>
-                                <div className="flex flex-col gap-3">
-                                    <p>Time</p>
-                                    <Field name="time" validate={validateTime}>
-                                        {({field}) => (
-                                            <div>
-                                                <Input
-                                                    {...field}
-                                                    type="time"
-                                                    variant="filled"
-                                                    borderRadius="md"
-                                                    px={3}
-                                                    py={2}
-                                                    mt={1}
-                                                    width="400px"
-                                                    id="time"
-                                                    placeholder="Time"
-                                                    onChange={(e) => handleTimeChange(e, setFieldValue)}
-                                                />
-                                                {errors.time && touched.time && (
-                                                    <div className="text-red-500">{errors.time}</div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </Field>
-                                </div>
-                                <div className="flex flex-col gap-3">
-                                    <p>Cost</p>
-                                    <Field name="cost" validate={(value) => {
-                                        if (!value) return "Cost is required";
-                                        if (!/^[0-9]+$/.test(value)) return "Cost must be a number";
-                                        return undefined;
-                                    }}>
-                                        {({field}) => (
-                                            <div>
-                                                <Input
-                                                    {...field}
-                                                    type="number"
-                                                    variant="filled"
-                                                    borderRadius="md"
-                                                    px={3}
-                                                    py={2}
-                                                    mt={1}
-                                                    width="400px"
-                                                    id="cost"
-                                                    placeholder="Cost"
-                                                />
-                                                {errors.cost && touched.cost && (
-                                                    <div className="text-red-500">{errors.cost}</div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </Field>
-                                </div>
-                                <div className="flex flex-col gap-3">
-                                    <p>Active Status</p>
-                                    <Field name="IsActive" type="checkbox">
-                                        {({field}) => (
-                                            <Checkbox {...field} colorScheme={theme.primaryColor} id="IsActive">
-                                                Is Active
-                                            </Checkbox>
-                                        )}
-                                    </Field>
-                                </div>
-                                <div className="flex col-span-2 mt-10 gap-4">
-                                    <Button
-                                        type="submit"
-                                        colorScheme={theme.primaryColor}
-                                        disabled={isSubmitting}
+                                    </div>
+                                )}
+                            </Field>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <p>Vehicle Registration No</p>
+                            <Field name="vehicleRegistrationNo">
+                                {({field, form}) => (
+                                    <Select
+                                        {...field}
+                                        onChange={(e) => {
+                                            const selectedVehicle = vehicleRegNoDetails.find(v => v.vehicleRegistrationNo === e.target.value);
+                                            if (selectedVehicle) {
+                                                form.setFieldValue('vehicleRegistrationNo', selectedVehicle.vehicleRegistrationNo);
+                                                form.setFieldValue('vehicleId', selectedVehicle.id); // Ensure 'vehicleId' is set
+                                            }
+                                        }}
+                                        placeholder='Select Vehicle Registration No'
+                                        size='md'
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
                                     >
-                                        Update Fuel Refill
-                                    </Button>
-                                    <Button onClick={handleCancel} disabled={isSubmitting}>
-                                        Cancel
-                                    </Button>
-                                </div>
-                        </Form>
-                );
-                }}
-                </Formik>
-                    <AlertDialog
+                                        <option value="" disabled>Select Vehicle Registration No</option>
+                                        {vehicleRegNoDetails.map((option) => (
+                                            <option key={option.vehicleRegistrationNo}
+                                                    value={option.vehicleRegistrationNo}>
+                                                {option.vehicleRegistrationNo}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                )}
+                            </Field>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <p>Fuel Type</p>
+                            <Field name="fType">
+                                {({field}) => (
+                                    <Select
+                                        {...field}
+                                        placeholder="Select fuel type"
+                                        size="md"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                    >
+                                        <option value="Petrol">Petrol</option>
+                                        <option value="Diesel">Diesel</option>
+                                        <option value="Electric">Electric</option>
+                                    </Select>
+                                )}
+                            </Field>
+                            {errors.fType && touched.fType && (
+                                <div className="text-red-500">{errors.fType}</div>
+                            )}
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <p>Liter Count</p>
+                            <Field name="literCount">
+                                {({field}) => (
+                                    <div>
+                                        <Input
+                                            {...field}
+                                            type="number"
+                                            variant="filled"
+                                            borderRadius="md"
+                                            px={3}
+                                            py={2}
+                                            mt={1}
+                                            width="400px"
+                                            id="literCount"
+                                            placeholder="Liter Count"
+                                        />
+                                        {errors.literCount && touched.literCount && (
+                                            <div className="text-red-500">{errors.literCount}</div>
+                                        )}
+                                    </div>
+                                )}
+                            </Field>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <p>Date</p>
+                            <Field name="date">
+                                {({field}) => (
+                                    <div>
+                                        <Input
+                                            {...field}
+                                            type="date"
+                                            variant="filled"
+                                            borderRadius="md"
+                                            px={3}
+                                            py={2}
+                                            mt={1}
+                                            width="400px"
+                                            id="date"
+                                            placeholder="Date"
+                                        />
+                                        {errors.date && touched.date && (
+                                            <div className="text-red-500">{errors.date}</div>
+                                        )}
+                                    </div>
+                                )}
+                            </Field>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <p>Time</p>
+                            <Field name="time" validate={validateTime}>
+                                {({ field, form }) => (
+                                    <Input
+                                        {...field}
+                                        type="time"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                        id="time"
+                                        placeholder="Time"
+                                        onChange={(e) => handleTimeChange(e, form.setFieldValue)}
+                                    />
+                                )}
+                            </Field>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <p>Cost</p>
+                            <Field name="cost">
+                                {({field}) => (
+                                    <div>
+                                        <Input
+                                            {...field}
+                                            type="number"
+                                            variant="filled"
+                                            borderRadius="md"
+                                            px={3}
+                                            py={2}
+                                            mt={1}
+                                            width="400px"
+                                            id="cost"
+                                            placeholder="Cost"
+                                        />
+                                        {errors.cost && touched.cost && (
+                                            <div className="text-red-500">{errors.cost}</div>
+                                        )}
+                                    </div>
+                                )}
+                            </Field>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <p>Status</p>
+                            <Field name="IsActive" type="checkbox">
+                                {({ field, form }) => (
+                                    <Checkbox
+                                        {...field}
+                                        isChecked={field.value}  // Ensure this matches the value from initialValues
+                                        onChange={(e) => form.setFieldValue('IsActive', e.target.checked)}
+                                        colorScheme={theme.colors.brand}
+                                        size="lg"
+                                        mt={1}
+                                    >
+                                        Active
+                                    </Checkbox>
+                                )}
+                            </Field>
+                        </div>
+                        <div></div>
+                        <div className="flex flex-row gap-10">
+                            <Button
+                                bg="gray.400"
+                                _hover={{bg: "gray.500"}}
+                                color="#ffffff"
+                                variant="solid"
+                                w="180px"
+                                marginTop="10"
+                                onClick={handleCancel}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                bg={theme.purple}
+                                _hover={{bg: theme.onHoverPurple}}
+                                color="#ffffff"
+                                variant="solid"
+                                w="180px"
+                                marginTop="10"
+                                type="submit"
+                            >
+                                Save
+                            </Button>
+                        </div>
+                    </Form>
+                )}
+            </Formik>
+            <AlertDialog
                 isOpen={isDialogOpen}
                 leastDestructiveRef={undefined}
                 onClose={onDialogClose}
