@@ -18,7 +18,7 @@ import {
     AlertDialogHeader,
     AlertDialogBody,
     AlertDialogFooter,
-    Select
+    Select,
 } from "@chakra-ui/react";
 import theme from "../config/ThemeConfig.jsx";
 import { axiosApi } from "../interceptor.js";
@@ -33,13 +33,15 @@ export default function EditTripDetails() {
     const [vehicleRegNoDetails, setVehicleRegNoDetails] = useState([]);
     const [NICs, setNICs] = useState([]);
     const [tripDetails, setTripDetails] = useState(null);
-    console.log('tripId:', tripId); // Debugging statement
 
-    const breadcrumbs = [
-        { label: 'Trips', link: '/app/TripDetails' },
-        { label: 'Trip Details', link: '/app/TripDetails' },
-        { label: 'Edit Trip Details', link: `/app/EditTripDetails/${tripId}` }
-    ];
+    useEffect(() => {
+        if (tripId) {
+            fetchDriverNICs();
+            fetchTripDetails();
+            fetchVehicleRegNos();
+        }
+    }, [tripId]);
+
 
     const fetchVehicleRegNos = async () => {
         try {
@@ -52,7 +54,8 @@ export default function EditTripDetails() {
 
     const fetchDriverNICs = async () => {
         try {
-            const response = await axiosApi.get("https://localhost:7265/api/Auth/drivers/nics");
+            const response = await axiosApi.get("https://localhost:7265/api/Driver");
+            console.log("Driver NICs fetched:", response.data); // Debugging line
             setNICs(response.data);
         } catch (error) {
             console.error("Error fetching driver NICs:", error);
@@ -60,34 +63,22 @@ export default function EditTripDetails() {
     };
 
     const fetchTripDetails = async () => {
-        if (!tripId) {
-            console.error('tripId is undefined');
-            return;
-        }
         try {
             const response = await axiosApi.get(`https://localhost:7265/api/Trip/${tripId}`);
-            setTripDetails(response.data);
+            const data = response.data;
+            data.date = data.date.split('T')[0];
+            setTripDetails(data);
+            console.log("Trip details fetched:", data); // Debugging line
         } catch (error) {
             console.error("Error fetching trip details:", error);
+            setDialogMessage("Failed to fetch trip details.");
+            onDialogOpen();
         }
     };
 
-    const handleSubmit = async (values) => {
+    const handleSubmit = async (values, { setFieldError }) => {
         try {
-            const response = await axiosApi.put(`https://localhost:7265/api/Trip/${tripId}`, {
-                vehicleRegistrationNo: values.vehicleRegistrationNo,
-                nic: values.nic,
-                Date: values.Date,
-                StartTime: values.StartTime,
-                EndTime: values.EndTime,
-                StartMeterValue: values.StartMeterValue,
-                EndMeterValue: values.EndMeterValue,
-                IsActive: values.IsActive
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            const response = await axiosApi.put(`https://localhost:7265/api/Trip/${tripId}`, values);
 
             if (response.status === 200) {
                 setSuccessDialogMessage('Trip record updated successfully.');
@@ -97,12 +88,11 @@ export default function EditTripDetails() {
             }
         } catch (error) {
             console.error('Error updating trip record:', error);
-            if (error.response && error.response.data && error.response.data.errors && error.response.data.errors.vehicleId) {
-                setDialogMessage(error.response.data.errors.vehicleId[0]);
-            } else if (error instanceof TypeError) {
-                setDialogMessage('Failed to connect to the server.');
+            if (error.response && error.response.data && error.response.data.message) {
+                const errorMessage = error.response.data.message;
+                setDialogMessage(errorMessage);
             } else {
-                setDialogMessage(error.message || 'Failed to update trip record.');
+                setDialogMessage('Failed to update trip record.');
             }
             onDialogOpen();
         }
@@ -117,80 +107,78 @@ export default function EditTripDetails() {
         navigate('/app/TripDetails');
     };
 
-
-
-    useEffect(() => {
-        console.log('tripId:', tripId); // Debugging statement
-        if (tripId) {
-            fetchDriverNICs();
-            fetchTripDetails();
-        } else {
-            console.error('tripId is undefined');
-        }
-    }, [tripId]);
-
+    const breadcrumbs = [
+        { label: "Trip", link: "/app/TripDetails" },
+        { label: "Trip Details", link: "/app/TripDetails" },
+        { label: "Edit Trip Details", link: "/app/EditTripDetails" },
+    ];
 
     if (!tripDetails) {
-        return <div>Loading...</div>; // Show a loading indicator while fetching trip details
+        return <div>Loading...</div>;
     }
 
     return (
         <>
             <PageHeader title="Edit Trip Details" breadcrumbs={breadcrumbs} />
+
             <Formik
                 initialValues={{
-                    vehicleRegistrationNo: tripDetails.vehicleRegistrationNo || "",
-                    nic: tripDetails.nic || "",
-                    Date: tripDetails.Date || "",
-                    StartTime: tripDetails.StartTime || "",
-                    EndTime: tripDetails.EndTime || "",
-                    StartMeterValue: tripDetails.StartMeterValue || 0,
-                    EndMeterValue: tripDetails.EndMeterValue || 0,
-                    IsActive: tripDetails.IsActive || true
+                    vehicleId: tripDetails.vehicleId || "",
+                    userId: tripDetails.userId || "",
+                    date: tripDetails.date || "",
+                    startTime: tripDetails.startTime || "",
+                    endTime: tripDetails.endTime || "",
+                    startMeterValue: tripDetails.startMeterValue || 0,
+                    endMeterValue: tripDetails.endMeterValue || 0,
+                    status: tripDetails.status || true,
                 }}
                 onSubmit={handleSubmit}
+                validate={(values) => {
+                    const errors = {};
+                    if (!values.vehicleId) {
+                        errors.vehicleId = "Vehicle is required.";
+                    }
+                    if (!values.userId) {
+                        errors.userId = "Driver is required.";
+                    }
+                    if (!values.date) {
+                        errors.date = "Date is required.";
+                    }
+                    return errors;
+                }}
             >
                 {({ errors, touched }) => (
                     <Form className="grid grid-cols-2 gap-10 mt-8">
                         <div className="flex flex-col gap-3">
                             <p>Vehicle Registration No</p>
-                            <Field name="vehicleRegistrationNo" validate={(value) => {
-                                let error;
-                                if (!value) {
-                                    error = "Vehicle Registration No is required.";
-                                }
-                                return error;
-                            }}>
-                                {({ field }) => (
-                                    <div>
-                                        <Select
-                                            {...field}
-                                            placeholder='Vehicle Registration No'
-                                            size='md'
-                                            variant='filled'
-                                            borderRadius="md"
-                                            px={3}
-                                            py={2}
-                                            mt={1}
-                                            width="400px"
-                                        >
-                                            {vehicleRegNoDetails.map((option, index) => (
-                                                <option key={index} value={option.id}>
-                                                    {option.vehicleRegistrationNo}
-                                                </option>
-                                            ))}
-                                        </Select>
-                                        {errors.vehicleRegistrationNo && touched.vehicleRegistrationNo && (
-                                            <div className="text-red-500">{errors.vehicleRegistrationNo}</div>
-                                        )}
-                                    </div>
+                            <Field name="vehicleId">
+                                {({field}) => (
+                                    <Select
+                                        {...field}
+                                        placeholder="Vehicle Registration No"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                    >
+                                        {vehicleRegNoDetails.map((option, index) => (
+                                            <option key={`${option.vehicleId}-${index}`} value={option.vehicleId}>
+                                                {option.vehicleRegistrationNo}
+                                            </option>
+                                        ))}
+                                    </Select>
                                 )}
                             </Field>
+                            {errors.vehicleId && touched.vehicleId && (
+                                <div className="text-red-500">{errors.vehicleId}</div>
+                            )}
                         </div>
-                        <Field name="nic">
-                            {({ field }) => (
-                                <div className="flex flex-col gap-3">
-                                    <p>Driver NIC</p>
+                        <div className="flex flex-col gap-3">
+                            <p>Driver NIC</p>
+                            <Field name="userId">
+                                {({field}) => (
                                     <Select
                                         {...field}
                                         variant="filled"
@@ -199,133 +187,101 @@ export default function EditTripDetails() {
                                         py={2}
                                         mt={1}
                                         width="400px"
-                                        placeholder="NIC"
+                                        placeholder="Driver NIC"
                                     >
-                                        {NICs.map((nic) => (
-                                            <option key={nic} value={nic}>
-                                                {nic}
+                                        {NICs.map((nic, index) => (
+                                            <option key={`${nic.userId}-${index}`} value={nic.userId}>
+                                                {nic.nic}
                                             </option>
                                         ))}
                                     </Select>
-                                </div>
-                            )}
-                        </Field>
-                        <div className="flex flex-col gap-3">
-                            <p>Date</p>
-                            <Field name="Date" validate={(value) => {
-                                let error;
-                                if (!value) {
-                                    error = "Date is required.";
-                                }
-                                return error;
-                            }}>
-                                {({ field }) => (
-                                    <div>
-                                        <Input
-                                            {...field}
-                                            type="date"
-                                            variant="filled"
-                                            borderRadius="md"
-                                            px={3}
-                                            py={2}
-                                            mt={1}
-                                            width="400px"
-                                        />
-                                        {errors.Date && touched.Date && (
-                                            <div className="text-red-500">{errors.Date}</div>
-                                        )}
-                                    </div>
                                 )}
                             </Field>
+                            {errors.userId && touched.userId && (
+                                <div className="text-red-500">{errors.userId}</div>
+                            )}
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <p>Date</p>
+                            <Field name="date">
+                                {({field}) => (
+                                    <Input
+                                        {...field}
+                                        type="date"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                    />
+                                )}
+                            </Field>
+                            {errors.date && touched.date && (
+                                <div className="text-red-500">{errors.date}</div>
+                            )}
                         </div>
                         <div className="flex flex-col gap-3">
                             <p>Start Time</p>
-                            <Field name="StartTime" validate={(value) => {
-                                let error;
-                                if (!value) {
-                                    error = "Start time is required.";
-                                }
-                                return error;
-                            }}>
-                                {({ field }) => (
-                                    <div>
-                                        <Input
-                                            {...field}
-                                            type="time"
-                                            variant="filled"
-                                            borderRadius="md"
-                                            px={3}
-                                            py={2}
-                                            mt={1}
-                                            width="400px"
-                                            placeholder="Start Time"
-                                        />
-                                        {errors.StartTime && touched.StartTime && (
-                                            <div className="text-red-500">{errors.StartTime}</div>
-                                        )}
-                                    </div>
+                            <Field name="startTime">
+                                {({field}) => (
+                                    <Input
+                                        {...field}
+                                        type="time"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                    />
                                 )}
                             </Field>
+                            {errors.startTime && touched.startTime && (
+                                <div className="text-red-500">{errors.startTime}</div>
+                            )}
                         </div>
                         <div className="flex flex-col gap-3">
                             <p>End Time</p>
-                            <Field name="EndTime" validate={(value) => {
-                                let error;
-                                if (!value) {
-                                    error = "End time is required.";
-                                }
-                                return error;
-                            }}>
-                                {({ field }) => (
-                                    <div>
-                                        <Input
-                                            {...field}
-                                            type="time"
-                                            variant="filled"
-                                            borderRadius="md"
-                                            px={3}
-                                            py={2}
-                                            mt={1}
-                                            width="400px"
-                                            placeholder="End Time"
-                                        />
-                                        {errors.EndTime && touched.EndTime && (
-                                            <div className="text-red-500">{errors.EndTime}</div>
-                                        )}
-                                    </div>
+                            <Field name="endTime">
+                                {({field}) => (
+                                    <Input
+                                        {...field}
+                                        type="time"
+                                        variant="filled"
+                                        borderRadius="md"
+                                        px={3}
+                                        py={2}
+                                        mt={1}
+                                        width="400px"
+                                    />
                                 )}
                             </Field>
+                            {errors.endTime && touched.endTime && (
+                                <div className="text-red-500">{errors.endTime}</div>
+                            )}
                         </div>
                         <div className="flex flex-col gap-3">
                             <p>Start Meter Value</p>
-                            <Field name="StartMeterValue" validate={(value) => {
-                                let error;
-                                if (value < 0) {
-                                    error = "Start meter value must be 0 or greater.";
-                                }
-                                return error;
-                            }}>
-                                {({ field }) => (
+                            <Field name="startMeterValue">
+                                {({field}) => (
                                     <NumberInput
                                         {...field}
                                         variant="filled"
-                                        defaultValue={0}
                                         min={0}
                                         width="400px"
                                         mt={1}
                                     >
                                         <NumberInputField
-                                            {...field}
                                             borderRadius="md"
                                             px={3}
                                             py={2}
-                                            mt={1}
                                             placeholder="00.00"
                                             step={0.01}
                                         />
                                         <NumberInputStepper>
-                                            <NumberIncrementStepper />
-                                            <NumberDecrementStepper />
+                                            <NumberIncrementStepper/>
+                                            <NumberDecrementStepper/>
                                         </NumberInputStepper>
                                     </NumberInput>
                                 )}
@@ -333,42 +289,33 @@ export default function EditTripDetails() {
                         </div>
                         <div className="flex flex-col gap-3">
                             <p>End Meter Value</p>
-                            <Field name="EndMeterValue" validate={(value) => {
-                                let error;
-                                if (value < 0) {
-                                    error = "End meter value must be 0 or greater.";
-                                }
-                                return error;
-                            }}>
-                                {({ field }) => (
+                            <Field name="endMeterValue">
+                                {({field}) => (
                                     <NumberInput
                                         {...field}
                                         variant="filled"
-                                        defaultValue={0}
                                         min={0}
                                         width="400px"
                                         mt={1}
                                     >
                                         <NumberInputField
-                                            {...field}
                                             borderRadius="md"
                                             px={3}
                                             py={2}
-                                            mt={1}
                                             placeholder="00.00"
                                             step={0.01}
                                         />
                                         <NumberInputStepper>
-                                            <NumberIncrementStepper />
-                                            <NumberDecrementStepper />
+                                            <NumberIncrementStepper/>
+                                            <NumberDecrementStepper/>
                                         </NumberInputStepper>
                                     </NumberInput>
                                 )}
                             </Field>
                         </div>
                         <div className="flex flex-col gap-3">
-                            <Field name="IsActive" type="checkbox">
-                                {({ field }) => (
+                            <Field name="status">
+                                {({field}) => (
                                     <Checkbox
                                         {...field}
                                         size="lg"
@@ -384,7 +331,7 @@ export default function EditTripDetails() {
                         <div className="flex w-5/6 justify-end gap-10">
                             <Button
                                 bg="gray.400"
-                                _hover={{ bg: "gray.500" }}
+                                _hover={{bg: "gray.500"}}
                                 color="#ffffff"
                                 variant="solid"
                                 w="230px"
@@ -395,7 +342,7 @@ export default function EditTripDetails() {
                             </Button>
                             <Button
                                 bg={theme.purple}
-                                _hover={{ bg: theme.onHoverPurple }}
+                                _hover={{bg: theme.onHoverPurple}}
                                 color="#ffffff"
                                 variant="solid"
                                 w="230px"
@@ -410,7 +357,7 @@ export default function EditTripDetails() {
             </Formik>
 
             <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay />
+                <AlertDialogOverlay/>
                 <AlertDialogContent
                     position="absolute"
                     top="30%"
@@ -418,11 +365,11 @@ export default function EditTripDetails() {
                     transform="translate(-50%, -50%)"
                 >
                     <AlertDialogHeader>Error</AlertDialogHeader>
-                    <AlertDialogBody>
-                        {dialogMessage}
-                    </AlertDialogBody>
+                    <AlertDialogBody>{dialogMessage}</AlertDialogBody>
                     <AlertDialogFooter>
-                        <Button bg={theme.purple} color="#FFFFFF" onClick={onDialogClose}>Close</Button>
+                        <Button bg={theme.purple} color="#FFFFFF" onClick={onDialogClose}>
+                            Close
+                        </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -436,11 +383,11 @@ export default function EditTripDetails() {
                     transform="translate(-50%, -50%)"
                 >
                     <AlertDialogHeader>Success</AlertDialogHeader>
-                    <AlertDialogBody>
-                        {successDialogMessage}
-                    </AlertDialogBody>
+                    <AlertDialogBody>{successDialogMessage}</AlertDialogBody>
                     <AlertDialogFooter>
-                        <Button bg={theme.purple} color="#FFFFFF" onClick={handleSuccessDialogClose}>Ok</Button>
+                        <Button bg={theme.purple} color="#FFFFFF" onClick={handleSuccessDialogClose}>
+                            Ok
+                        </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
