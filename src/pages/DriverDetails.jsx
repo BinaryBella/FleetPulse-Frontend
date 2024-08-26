@@ -64,7 +64,19 @@ export default function DriverDetails() {
         { accessorKey: 'lastName', header: 'Last Name', meta: { isNumeric: false, filter: 'text' } },
         { accessorKey: 'nic', header: 'NIC', meta: { isNumeric: false, filter: 'text' } },
         { accessorKey: 'driverLicenseNo', header: 'License No', meta: { isNumeric: false, filter: 'text' } },
-        { accessorKey: 'licenseExpiryDate', header: 'License Exp Date', meta: { isNumeric: false, filter: 'text' } },
+        {
+            accessorKey: 'licenseExpiryDate',
+            header: 'License Exp Date',
+            cell: info => {
+                const dateString = info.getValue();
+                if (dateString) {
+                    const dateOnly = dateString.split('T')[0];
+                    return dateOnly;
+                }
+                return '';
+            },
+            meta: { isNumeric: false, filter: 'text' }
+        },
         { accessorKey: 'phoneNo', header: 'Phone No', meta: { isNumeric: false, filter: 'text' } },
         { accessorKey: 'emergencyContact', header: 'Emergency Contact', meta: { isNumeric: false, filter: 'text' } },
         {

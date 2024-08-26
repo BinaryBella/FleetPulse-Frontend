@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { axiosApi } from "../interceptor.js";
 import {
     Table, Thead, Tbody, Tr, Th, Td, Box, Button, Menu,
@@ -45,6 +45,7 @@ export default function TripDetails() {
         try {
             const response = await axiosApi.get("https://localhost:7265/api/Trip");
             setTripDetails(response.data);
+            console.log(response.data);
         } catch (error) {
             console.error("Error fetching trip details:", error);
         }
@@ -84,10 +85,43 @@ export default function TripDetails() {
     const columns = [
         { accessorKey: 'nic', header: 'Driver\'s NIC', meta: { isNumeric: false, filter: 'text' } },
         { accessorKey: 'vehicleRegistrationNo', header: 'Vehicle Reg.No', meta: { isNumeric: false, filter: 'text' } },
-        { accessorKey: 'date', header: 'Date', meta: { isNumeric: false, filter: 'text' } },
-        { accessorKey: 'startTime', header: 'Start Time', meta: { isNumeric: false, filter: 'text' } },
-        { accessorKey: 'endTime', header: 'End Time', meta: { isNumeric: false, filter: 'text' } },
-        { accessorKey: 'status', header: 'Status', cell: info => (info.getValue() ? "Active" : "Inactive"), meta: { isNumeric: false, filter: 'boolean' } },
+        {
+            accessorKey: 'date',
+            header: 'Date',
+            cell: info => {
+                const dateString = info.getValue();
+                if (dateString) {
+                    const dateOnly = dateString.split('T')[0];
+                    return dateOnly;
+                }
+                return '';
+            },
+            meta: { isNumeric: false, filter: 'text' }
+        },
+        {
+            accessorKey: 'startTime',
+            header: 'Start Time',
+            meta: { isNumeric: false, filter: 'text' },
+            cell: ({ getValue }) => {
+                const timeValue = new Date(getValue());
+                return timeValue.toLocaleTimeString();
+            }
+        },
+        {
+            accessorKey: 'endTime',
+            header: 'End Time',
+            meta: { isNumeric: false, filter: 'text' },
+            cell: ({ getValue }) => {
+                const timeValue = new Date(getValue());
+                return timeValue.toLocaleTimeString();
+            }
+        },
+        {
+            accessorKey: 'status',
+            header: 'Status',
+            cell: info => (info.getValue() ? "Active" : "Inactive"),
+            meta: { isNumeric: false, filter: 'boolean' }
+        },
         {
             id: 'actions', header: 'Actions', cell: ({ row }) => (
                 <Menu>
@@ -106,6 +140,7 @@ export default function TripDetails() {
             enableSorting: false,
         },
     ];
+
 
     const table = useReactTable({
         data: tripDetails,
@@ -323,7 +358,7 @@ export default function TripDetails() {
                             <Tr key={index}>
                                 <Td>{trip.nic}</Td>
                                 <Td>{trip.vehicleRegistrationNo}</Td>
-                                <Td>{trip.date}</Td>
+                                <Td>{trip.date ? trip.date.split('T')[0] : ''}</Td>
                                 <Td>{trip.startTime}</Td>
                                 <Td>{trip.endTime}</Td>
                                 <Td>{trip.status ? "Active" : "Inactive"}</Td>
