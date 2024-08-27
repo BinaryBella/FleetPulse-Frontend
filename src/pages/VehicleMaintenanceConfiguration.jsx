@@ -29,7 +29,7 @@ const VehicleMaintenanceConfiguration = () => {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axiosApi.get('https://localhost:7265/api/Vehicle');
+            const response = await axiosApi.get('https://localhost:7265/api/Vehicles');
             setVehicleRegNoDetails(response.data);
             console.log(response.data);
         } catch (error) {
@@ -70,7 +70,7 @@ const VehicleMaintenanceConfiguration = () => {
 
             // Create the payload with the necessary fields
             const payload = {
-                id: parseInt(values.vehicleRegistrationNo),
+                vehicleId: parseInt(values.vehicleRegistrationNo),
                 vehicleRegistrationNo: selectedVehicle ? selectedVehicle.vehicleRegistrationNo : '',
                 vehicleMaintenanceTypeId: parseInt(values.maintenanceType),
                 typeName: selectedMaintenanceType ? selectedMaintenanceType.typeName : '',
@@ -160,7 +160,7 @@ const VehicleMaintenanceConfiguration = () => {
                                             width="100%"
                                         >
                                             {vehicleRegNoDetails.map((option, index) => (
-                                                <option key={index} value={option.id}>
+                                                <option key={index} value={option.vehicleId}>
                                                     {option.vehicleRegistrationNo}
                                                 </option>
                                             ))}

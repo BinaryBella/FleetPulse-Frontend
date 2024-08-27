@@ -94,7 +94,7 @@ export default function DriverDetails() {
                                 icon={<IoSettingsSharp />} />
                     <MenuList>
                         <MenuItem>
-                            <Link to={`/app/EditDriverDetails/${row.original.id}`}>Edit</Link>
+                            <Link to={`/app/EditDriverDetails/${row.original.userId}`}>Edit</Link>
                         </MenuItem>
                         <MenuItem>
                             <Link to={`/app/ResetPasswordDriverHelper/${row.original.id}`}>Reset Password</Link>

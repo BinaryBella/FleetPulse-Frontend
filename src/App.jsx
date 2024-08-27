@@ -127,9 +127,9 @@ export default function App() {
                         <Route path="/app/EditVehicleMaintenanceConfiguration/:id" element={<EditVehicleMaintenanceConfiguration />} />
                         <Route path="/app/EditManufactureDetails/:id" element={<EditManufactureDetails />} />
                         <Route path="/app/EditDriverDetails/:userId" element={<EditDriverDetails />} />
+                        <Route path="/app/EditHelperDetails/:userId" element={<EditHelperDetails />} />
+                        <Route path="/app/EditStaffDetails/:userId" element={<EditStaffDetails />} />
                         <Route path="/app/EditTripDetails/:tripId" element={<EditTripDetails />} />
-                        <Route path="/app/EditHelperDetails/:tripId" element={<EditHelperDetails />} />
-                        <Route path="/app/EditStaffDetails/:tripId" element={<EditStaffDetails />} />
                     </Route>
 
                     {/* Admin-only routes */}

@@ -25,7 +25,6 @@ import {
 import theme from "../config/ThemeConfig.jsx";
 import { axiosApi } from "../interceptor.js";
 import './AddDriverDetails.css';
-import emailsend from "../assets/images/emailsend.png";
 
 export default function EditDriverDetails() {
     const navigate = useNavigate();
@@ -49,8 +48,15 @@ export default function EditDriverDetails() {
         status: true,
     });
 
+
     useEffect(() => {
         const fetchDriverData = async () => {
+            if (!userId) {
+                setModalMessage("Invalid user ID. Please try again.");
+                onOpen();
+                return;
+            }
+
             try {
                 const response = await axiosApi.get(`https://localhost:7265/api/Driver/${userId}`);
                 if (response.status === 200) {
@@ -69,8 +75,11 @@ export default function EditDriverDetails() {
 
         if (userId) {
             fetchDriverData();
+        } else {
+            setModalMessage("Invalid user ID. Please try again.");
+            onOpen();
         }
-    }, [userId]);
+    }, [userId, onOpen]);
 
     const validateForm = (values) => {
         const errors = {};
@@ -356,8 +365,7 @@ export default function EditDriverDetails() {
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Success</ModalHeader>
-                    <ModalBody className="text-center">
-                        <img src={emailsend} className='m-auto' alt="email send" width="200" />
+                    <ModalBody>
                         <p>{modalMessage}</p>
                     </ModalBody>
                     <ModalFooter>
