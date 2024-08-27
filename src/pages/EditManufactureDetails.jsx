@@ -30,6 +30,7 @@ export default function EditManufactureDetails() {
     });
 
     const breadcrumbs = [
+        { label: "Vehicle", link: "/app/VehicleDetails" },
         { label: 'Manufacturer', link: '/app/ManufacturerDetails' },
         { label: 'Edit Manufacturer Details', link: `/app/EditManufactureDetails/${id}` }
     ];

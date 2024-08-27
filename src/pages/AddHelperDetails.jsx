@@ -137,7 +137,7 @@ export default function AddDriverDetails() {
   const breadcrumbs = [
     {label: "Helper", link: "/app/HelperDetails"},
     {label: "Helper Details", link: "/app/HelperDetails"},
-    {label: "Add Helper Details", link: "/app/AddDriverDetails"},
+    {label: "Add Helper Details", link: "/app/AddHelperDetails"},
   ];
 
   const handleSuccessModalClose = () => {

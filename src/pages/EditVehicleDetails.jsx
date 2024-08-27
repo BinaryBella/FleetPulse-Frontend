@@ -20,7 +20,7 @@ export default function EditVehicleDetails() {
     const breadcrumbs = [
         { label: "Vehicle", link: "/app/VehicleDetails" },
         { label: "Vehicle Details", link: "/app/VehicleDetails" },
-        { label: "Edit Vehicle Details", link: "/app/EditVehicleDetails" },
+        { label: "Edit Vehicle Details", link: `/app/EditVehicleDetails/${id}` },
     ];
 
     useEffect(() => {

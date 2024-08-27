@@ -110,7 +110,7 @@ export default function EditTripDetails() {
     const breadcrumbs = [
         { label: "Trip", link: "/app/TripDetails" },
         { label: "Trip Details", link: "/app/TripDetails" },
-        { label: "Edit Trip Details", link: "/app/EditTripDetails" },
+        { label: "Edit Trip Details", link:  `/app/EditTripDetails/${tripId}` },
     ];
 
     if (!tripDetails) {

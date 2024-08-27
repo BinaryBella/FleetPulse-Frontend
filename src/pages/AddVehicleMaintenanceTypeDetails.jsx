@@ -15,7 +15,7 @@ export default function AddVehicleMaintenanceTypeDetails() {
     const [successDialogMessage, setSuccessDialogMessage] = useState("");
 
     const breadcrumbs = [
-        {label: 'Vehicle', link: '/app/Vehicle'},
+        {label: 'Vehicle', link: '/app/VehicleDetails'},
         {label: 'Vehicle Maintenance type Details', link: '/app/VehicleMaintenanceTypeDetails'},
         {label: 'Add Vehicle Maintenance Type Details', link: '/app/AddVehicleMaintenanceTypeDetails'}
     ];

@@ -30,7 +30,7 @@ export default function EditVehicleType() {
     const breadcrumbs = [
         { label: 'Vehicle', link: '/app/VehicleDetails' },
         { label: 'Vehicle Type Details', link: '/app/VehicleTypeDetails' },
-        { label: 'Edit Vehicle Type Details', link: '/app/EditVehicleType' }
+        { label: "Edit Vehicle Type Details", link:  `/app/EditVehicleType/${id}` },
     ];
 
     useEffect(() => {

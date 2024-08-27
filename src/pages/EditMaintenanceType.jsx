@@ -74,6 +74,12 @@ export default function EditMaintenanceType() {
         }
     };
 
+    const breadcrumbs = [
+        { label: "Vehicle", link: "/app/VehicleDetails" },
+        { label: "Vehicle Maintenance Type Details", link: "/app/VehicleMaintenanceTypeDetails" },
+        { label: "Edit Vehicle Maintenance Type Details", link: `/app/EditMaintenanceType/${id}` },
+    ];
+
 
     const handleCancel = () => {
         navigate('/app/VehicleMaintenanceTypeDetails');
@@ -86,7 +92,7 @@ export default function EditMaintenanceType() {
 
     return (
         <>
-            <PageHeader title="Edit Vehicle Maintenance Type Details" />
+            <PageHeader title="Edit Vehicle Maintenance Type Details" breadcrumbs={breadcrumbs} />
             <Formik
                 enableReinitialize
                 initialValues={initialValues}

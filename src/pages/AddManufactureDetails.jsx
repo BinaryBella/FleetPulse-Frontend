@@ -26,7 +26,8 @@ export default function AddManufactureDetails() {
     const [successDialogMessage, setSuccessDialogMessage] = useState("");
 
     const breadcrumbs = [
-        {label: 'Manufacturer', link: '/app/ManufacturerDetails'},
+        { label: "Vehicle", link: "/app/VehicleDetails" },
+        {label: 'Manufacturer Details', link: '/app/ManufacturerDetails'},
         {label: 'Add Manufacturer Details', link: '/app/AddManufactureDetails'}
     ];
 
