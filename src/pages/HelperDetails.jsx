@@ -356,8 +356,7 @@ export default function HelperDetails() {
                                                 }
                                             }}>Edit</MenuItem>
                                             <MenuItem>
-                                                <Link to={`/app/ResetPasswordHelper?username=${helper.userName}`}>Reset
-                                                    Password</Link>
+                                                <Link to={`/app/ResetPasswordDriverHelper?username=${helper.userName}`}>Reset Password</Link>
                                             </MenuItem>
                                             <MenuItem
                                                 onClick={() => onClickInactive(helper)}>{helper.status ? 'Deactivate' : 'Activate'}</MenuItem>
