@@ -24,7 +24,7 @@ import {axiosApi} from "../interceptor.js";
 import './AddDriverDetails.css';
 
 export default function EditStaffDetails() {
-    const {id} = useParams(); // Get the ID from the URL
+    const { userId } = useParams();
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const cancelRef = useRef();
@@ -45,7 +45,7 @@ export default function EditStaffDetails() {
     useEffect(() => {
         async function fetchHelperDetails() {
             try {
-                const response = await axiosApi.get(`https://localhost:7265/api/Staff/${id}`);
+                const response = await axiosApi.get(`https://localhost:7265/api/Staff/${userId}`);
                 if (response.status === 200) {
                     setInitialValues(response.data);
                 }
@@ -60,7 +60,7 @@ export default function EditStaffDetails() {
         }
 
         fetchHelperDetails();
-    }, [id, onOpen]);
+    }, [userId, onOpen]);
 
 
     const validateForm = (values) => {
@@ -86,15 +86,18 @@ export default function EditStaffDetails() {
     const handleSubmit = async (values, actions) => {
         setIsSubmitting(true);
         try {
-            const response = await axiosApi.put(`https://localhost:7265/api/Staff/${id}`, values);
+            const response = await axiosApi.put(`https://localhost:7265/api/Staff/${userId}`, values);
             if (response.status === 200) {
                 setModalMessage('Staff details updated successfully!');
-                setIsSubmitting(false);
                 navigate("/app/StaffDetails");
+            } else {
+                setModalMessage('Failed to update staff details.');
+                onOpen();
             }
         } catch (error) {
             setModalMessage(`Failed to update staff details: ${error.message}`);
             onOpen();
+        } finally {
             setIsSubmitting(false);
         }
     };
@@ -108,7 +111,7 @@ export default function EditStaffDetails() {
             <PageHeader title="Edit Staff Details" breadcrumbs={[
                 {label: "Staff", link: "/app/StaffDetails"},
                 {label: "Staff Details", link: "/app/StaffDetails"},
-                {label: "Edit Staff Details", link: "/app/EditStaffDetails"},
+                {label: "Edit Staff Details", link: `/app/EditStaffDetails/${userId}`},
             ]}/>
             <Box className="mr-14">
                 <Formik

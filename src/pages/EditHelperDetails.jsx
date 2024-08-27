@@ -24,7 +24,7 @@ import {axiosApi} from "../interceptor.js";
 import './AddDriverDetails.css';
 
 export default function EditHelperDetails() {
-    const {id} = useParams(); // Get the ID from the URL
+    const { userId } = useParams();
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const cancelRef = useRef();
@@ -43,25 +43,36 @@ export default function EditHelperDetails() {
     });
 
     useEffect(() => {
-        async function fetchHelperDetails() {
+        const fetchHelperData = async () => {
+            if (!userId) {
+                setModalMessage("Invalid user ID. Please try again.");
+                onOpen();
+                return;
+            }
+
             try {
-                const response = await axiosApi.get(`https://localhost:7265/api/Helper/${id}`);
+                const response = await axiosApi.get(`https://localhost:7265/api/Helper/${userId}`);
                 if (response.status === 200) {
-                    setInitialValues(response.data);
+                    const helperData = response.data;
+                    // Format the date fields
+                    helperData.dateOfBirth = helperData.dateOfBirth ? new Date(helperData.dateOfBirth).toISOString().split('T')[0] : '';
+                    helperData.licenseExpiryDate = helperData.licenseExpiryDate ? new Date(helperData.licenseExpiryDate).toISOString().split('T')[0] : '';
+                    setInitialValues(helperData);
                 }
             } catch (error) {
-                if (error.response && error.response.status === 400) {
-                    setModalMessage('Invalid request. Please check the helper ID and try again.');
-                } else {
-                    setModalMessage(`Failed to fetch helper details: ${error.message}`);
-                }
+                console.error("Failed to fetch driver data:", error);
+                setModalMessage(`Failed to fetch driver data: ${error.message}`);
                 onOpen();
             }
+        };
+
+        if (userId) {
+            fetchHelperData();
+        } else {
+            setModalMessage("Invalid user ID. Please try again.");
+            onOpen();
         }
-
-        fetchHelperDetails();
-    }, [id, onOpen]);
-
+    }, [userId, onOpen]);
 
     const validateForm = (values) => {
         const errors = {};
@@ -86,18 +97,22 @@ export default function EditHelperDetails() {
     const handleSubmit = async (values, actions) => {
         setIsSubmitting(true);
         try {
-            const response = await axiosApi.put(`https://localhost:7265/api/Helper/${id}`, values);
+            const response = await axiosApi.put(`https://localhost:7265/api/Helper/${userId}`, values);
             if (response.status === 200) {
                 setModalMessage('Helper details updated successfully!');
-                setIsSubmitting(false);
                 navigate("/app/HelperDetails");
+            } else {
+                setModalMessage('Failed to update helper details.');
+                onOpen();
             }
         } catch (error) {
             setModalMessage(`Failed to update helper details: ${error.message}`);
             onOpen();
+        } finally {
             setIsSubmitting(false);
         }
     };
+
 
     const handleCancel = () => {
         navigate("/app/HelperDetails");
@@ -117,7 +132,7 @@ export default function EditHelperDetails() {
                     validate={validateForm}
                     onSubmit={handleSubmit}
                 >
-                    {({errors, touched, isValid}) => (
+                    {({errors, touched, isValid, values, setFieldValue}) => (
                         <Form className="grid grid-cols-2 gap-x-12 gap-y-10 mt-8">
                             <div className="flex flex-col gap-3">
                                 <p>First Name</p>
@@ -233,7 +248,7 @@ export default function EditHelperDetails() {
                                 </FormControl>
                             </div>
                             <div className="flex flex-col gap-3">
-                                    <p>Email Address</p>
+                                <p>Email Address</p>
                                 <FormControl isInvalid={errors.emailAddress && touched.emailAddress}>
                                     <Field
                                         as={Input}
@@ -254,7 +269,8 @@ export default function EditHelperDetails() {
                                             {...field}
                                             colorScheme="purple"
                                             size="lg"
-                                            isChecked={initialValues.status}
+                                            isChecked={values.status}
+                                            onChange={(e) => setFieldValue('status', e.target.checked)}
                                         >
                                             Active
                                         </Checkbox>
