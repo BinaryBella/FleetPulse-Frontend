@@ -1,4 +1,4 @@
-import {useRef, useState} from "react";
+import React, {useRef, useState} from "react";
 import {Field, Form, Formik} from "formik";
 import {useNavigate} from "react-router-dom";
 import PageHeader from "../components/PageHeader.jsx";
@@ -33,7 +33,6 @@ import {
 import theme from "../config/ThemeConfig.jsx";
 import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
 import PasswordStrengthBar from 'react-password-strength-bar';
-import $ from "jquery";
 import {axiosApi} from "../interceptor.js";
 import './AddDriverDetails.css'
 import emailsend from "../assets/images/emailsend.png";
@@ -153,10 +152,6 @@ export default function AddDriverDetails() {
         setIsModalOpen(false);
         setIsSubmitting(false);
         onClose();
-    }
-
-    const onClickNext = () => {
-        setActiveTab(1);
     }
 
     const handleTabsChange = (index) => {

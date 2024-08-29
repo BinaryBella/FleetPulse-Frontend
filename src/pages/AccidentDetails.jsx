@@ -294,7 +294,7 @@ export default function AccidentDetails() {
                 w="200px"
                 mr="50px"
             >
-              Add New Accident details
+              Add New Accident
             </Button>
           </Link>
         </Box>
