@@ -1,8 +1,9 @@
 import './App.css';
-import { useEffect, useState } from "react";
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider, Box, Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react";
 import { NotificationProvider } from './context/NotificationContext';
+import PropTypes from 'prop-types';
 import MainLayout from './layouts/MainLayout';
 import AnonymousLayout from './layouts/AnonymousLayout';
 import NotificationHandler from './components/NotificationHandler';
@@ -56,6 +57,48 @@ import EditHelperDetails from "./pages/EditHelperDetails.jsx";
 import EditStaffDetails from "./pages/EditStaffDetails.jsx";
 import EditAccidentDetails from './pages/EditAccidentDetails.jsx';
 
+
+const RefreshContext = createContext();
+const LoadingContext = createContext();
+
+export const useGlobalRefresh = () => useContext(RefreshContext);
+export const useLoading = () => useContext(LoadingContext);
+
+const RefreshProvider = ({ children }) => {
+    const [isLoading, setIsLoading] = useState(false);
+
+    const refreshPage = useCallback(() => {
+        setIsLoading(true);
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    }, []);
+
+
+
+
+    return (
+        <RefreshContext.Provider value={refreshPage}>
+            <LoadingContext.Provider value={isLoading}>
+                {isLoading ? (
+                    <Box padding="6" boxShadow="lg" bg="white">
+                        <SkeletonCircle size="10" />
+                        <SkeletonText mt="4" noOfLines={4} spacing="4" skeletonHeight="2" />
+                        <Skeleton height="20px" mt="4" />
+                        <Skeleton height="20px" mt="4" />
+                    </Box>
+                ) : (
+                    children
+                )}
+            </LoadingContext.Provider>
+        </RefreshContext.Provider>
+    );
+};
+
+RefreshProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+};
+
 export default function App() {
     const [isAdmin, setIsAdmin] = useState(false);
 
@@ -74,9 +117,11 @@ export default function App() {
         }
     }, []);
 
-    return (
+
+        return (
         <ChakraProvider>
             <NotificationProvider>
+                <RefreshProvider>
                 <NotificationHandler />
                 <Routes>
                     {/* Public routes */}
@@ -161,6 +206,7 @@ export default function App() {
                         }
                     />
                 </Routes>
+                </RefreshProvider>
             </NotificationProvider>
         </ChakraProvider>
     );
