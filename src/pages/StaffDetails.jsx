@@ -345,8 +345,9 @@ export default function StaffDetails() {
                                                 <Link to={`/app/EditStaffDetails/${staff.userId}`}>Edit</Link>
                                             </MenuItem>
                                             <MenuItem>
-                                                <Link to={`/app/ResetPasswordDriverHelper?username=${staff.userName}`}>Reset Password</Link>
-                                            </MenuItem>
+                                                <Link to={`/app/ResetPasswordDriverHelper?username=${staff.userName}&emailAddress=${staff.emailAddress}`}>
+                                                    Reset Password
+                                                </Link>                                            </MenuItem>
                                             <MenuItem onClick={() => onClickDelete(staff)}>
                                                 {staff.status ? "Deactivate" : "Activate"}
                                             </MenuItem>

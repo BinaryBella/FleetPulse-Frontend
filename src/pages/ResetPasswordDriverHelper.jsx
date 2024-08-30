@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
     Button,
     Input,
@@ -24,8 +24,9 @@ import Password from "../assets/images/Password.png";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import PasswordStrengthBar from 'react-password-strength-bar';
 import { useNavigate, useLocation } from "react-router-dom";
-import {axiosApi} from "../interceptor.js";
+import axios from "axios";
 import PropTypes from 'prop-types';
+import {axiosApi} from "../interceptor.js";
 
 const PasswordField = ({ fieldId, label, showPassword, handleShowPassword, placeholder, error }) => (
     <FormControl isInvalid={!!error}>
@@ -66,7 +67,6 @@ PasswordField.propTypes = {
 };
 
 export default function ResetPasswordDriverHelper() {
-    const [error, setError] = useState('');
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [resetPasswordResponse, setResetPasswordResponse] = useState("");
@@ -76,7 +76,7 @@ export default function ResetPasswordDriverHelper() {
     const location = useLocation();
     const query = new URLSearchParams(location.search);
     const username = query.get('username');
-    const emailAddress = query.get('emailAddress') || '';
+    const emailAddress = query.get('emailAddress') || ''; // Default to empty string if not found
 
     const handleShowPassword = (setter) => () => setter(prev => !prev);
 
@@ -124,7 +124,7 @@ export default function ResetPasswordDriverHelper() {
                     <Formik
                         onSubmit={handleSubmit}
                         initialValues={{
-                            emailAddress: emailAddress,
+                            emailAddress: emailAddress, // Initialize with emailAddress from URL
                             newPassword: "",
                             confirmPassword: ""
                         }}
@@ -158,6 +158,7 @@ export default function ResetPasswordDriverHelper() {
                                     size="sm"
                                     borderRadius="md"
                                     value={values.emailAddress}
+                                    isReadOnly
                                 />
                                 <PasswordField
                                     fieldId="newPassword"
@@ -176,10 +177,10 @@ export default function ResetPasswordDriverHelper() {
                                     placeholder="Confirm Password"
                                     error={errors.confirmPassword}
                                 />
-                                {error && (
+                                {errors.emailAddress && (
                                     <Alert status="error">
                                         <AlertIcon />
-                                        {error}
+                                        {errors.emailAddress}
                                     </Alert>
                                 )}
                                 <div className="flex gap-4 mt-10">

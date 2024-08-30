@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import {useEffect, useRef, useState, useMemo} from "react";
 import {
     Table, Thead, Tbody, Tr, Th, Td, Box, Button, Menu, MenuButton,
     IconButton, MenuList, MenuItem, Input, InputGroup, InputLeftElement,
@@ -6,14 +6,14 @@ import {
     AlertDialogFooter, AlertDialog, Checkbox, Modal, ModalOverlay, ModalContent,
     ModalHeader, ModalBody, ModalFooter, useDisclosure, Stack, Text
 } from "@chakra-ui/react";
-import { ChevronDownIcon, TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
-import { Link } from "react-router-dom";
-import { TiArrowUnsorted } from "react-icons/ti";
-import { IoSearchOutline, IoSettingsSharp } from "react-icons/io5";
+import {ChevronDownIcon, TriangleDownIcon, TriangleUpIcon} from "@chakra-ui/icons";
+import {Link} from "react-router-dom";
+import {TiArrowUnsorted} from "react-icons/ti";
+import {IoSearchOutline, IoSettingsSharp} from "react-icons/io5";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import ExcelJS from 'exceljs';
-import { axiosApi } from "../interceptor.js";
+import {axiosApi} from "../interceptor.js";
 import PageHeader from "../components/PageHeader.jsx";
 import Pagination from "../components/Pagination";
 import theme from "../config/ThemeConfig.jsx";
@@ -32,8 +32,8 @@ export default function DriverDetails() {
     const [previewData, setPreviewData] = useState([]);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isColumnSelectionOpen, setIsColumnSelectionOpen] = useState(false);
-    const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
-    const { isOpen, onOpen, onClose } = useDisclosure(); // for 'More Details' Modal
+    const {isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose} = useDisclosure();
+    const {isOpen, onOpen, onClose} = useDisclosure(); // for 'More Details' Modal
     const cancelRef = useRef();
     const itemsPerPage = 10;
 
@@ -50,20 +50,20 @@ export default function DriverDetails() {
         }
     };
 
-    const handlePageClick = ({ selected }) => {
+    const handlePageClick = ({selected}) => {
         setCurrentPage(selected);
     };
 
     const breadcrumbs = [
-        { label: "Driver", link: "/app/DriverDetails" },
-        { label: "Driver Details", link: "/app/DriverDetails" },
+        {label: "Driver", link: "/app/DriverDetails"},
+        {label: "Driver Details", link: "/app/DriverDetails"},
     ];
 
     const columns = useMemo(() => [
-        { accessorKey: 'firstName', header: 'First Name', meta: { isNumeric: false, filter: 'text' } },
-        { accessorKey: 'lastName', header: 'Last Name', meta: { isNumeric: false, filter: 'text' } },
-        { accessorKey: 'nic', header: 'NIC', meta: { isNumeric: false, filter: 'text' } },
-        { accessorKey: 'driverLicenseNo', header: 'License No', meta: { isNumeric: false, filter: 'text' } },
+        {accessorKey: 'firstName', header: 'First Name', meta: {isNumeric: false, filter: 'text'}},
+        {accessorKey: 'lastName', header: 'Last Name', meta: {isNumeric: false, filter: 'text'}},
+        {accessorKey: 'nic', header: 'NIC', meta: {isNumeric: false, filter: 'text'}},
+        {accessorKey: 'driverLicenseNo', header: 'License No', meta: {isNumeric: false, filter: 'text'}},
         {
             accessorKey: 'licenseExpiryDate',
             header: 'License Exp Date',
@@ -75,29 +75,31 @@ export default function DriverDetails() {
                 }
                 return '';
             },
-            meta: { isNumeric: false, filter: 'text' }
+            meta: {isNumeric: false, filter: 'text'}
         },
-        { accessorKey: 'phoneNo', header: 'Phone No', meta: { isNumeric: false, filter: 'text' } },
-        { accessorKey: 'emergencyContact', header: 'Emergency Contact', meta: { isNumeric: false, filter: 'text' } },
+        {accessorKey: 'phoneNo', header: 'Phone No', meta: {isNumeric: false, filter: 'text'}},
+        {accessorKey: 'emergencyContact', header: 'Emergency Contact', meta: {isNumeric: false, filter: 'text'}},
         {
             accessorKey: 'status',
             header: 'Status',
             cell: info => (info.getValue() ? "Active" : "Inactive"),
-            meta: { isNumeric: false, filter: 'boolean' }
-        },
-        {
+            meta: {isNumeric: false, filter: 'boolean'}
+        }, {
             id: 'actions',
             header: 'Actions',
-            cell: ({ row }) => (
+            cell: ({row}) => (
                 <Menu>
                     <MenuButton color={theme.purple} as={IconButton} aria-label="profile-options" fontSize="20px"
-                                icon={<IoSettingsSharp />} />
+                                icon={<IoSettingsSharp/>}/>
                     <MenuList>
                         <MenuItem>
                             <Link to={`/app/EditDriverDetails/${row.original.userId}`}>Edit</Link>
                         </MenuItem>
                         <MenuItem>
-                            <Link to={`/app/ResetPasswordDriverHelper/${row.original.id}`}>Reset Password</Link>
+                            <Link
+                                to={`/app/ResetPasswordDriverHelper?username=${row.original.userName}&emailAddress=${row.original.emailAddress}`}>
+                                Reset Password
+                            </Link>
                         </MenuItem>
                         <MenuItem onClick={() => onClickMoreDetails(row.original)}>More Details</MenuItem>
                         <MenuItem
@@ -105,15 +107,15 @@ export default function DriverDetails() {
                     </MenuList>
                 </Menu>
             ),
-            meta: { isNumeric: false, filter: null },
+            meta: {isNumeric: false, filter: null},
             enableSorting: false,
         }
-    ], []);
+    ], [])
 
     const table = useReactTable({
         data: driverDetails,
         columns,
-        state: { sorting, globalFilter: searchInput },
+        state: {sorting, globalFilter: searchInput},
         onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -133,7 +135,7 @@ export default function DriverDetails() {
     const currentData = sortedData.slice(startOffset, endOffset);
     const pageCount = Math.ceil(table.getFilteredRowModel().rows.length / itemsPerPage);
     const isEmpty = currentData.length === 0;
-    const iconStyle = { display: "inline-block", verticalAlign: "middle", marginLeft: "5px" };
+    const iconStyle = {display: "inline-block", verticalAlign: "middle", marginLeft: "5px"};
 
     const onClickDelete = (driver) => {
         setSelectedDriver(driver);
@@ -211,7 +213,7 @@ export default function DriverDetails() {
 
         doc.setFontSize(16);
         const reportTitleY = imgHeight + 10;
-        doc.text("Driver Details Report", pageWidth / 2, reportTitleY, { align: "center" });
+        doc.text("Driver Details Report", pageWidth / 2, reportTitleY, {align: "center"});
 
         doc.setFontSize(12);
         const additionalInfoY = reportTitleY + 10;
@@ -241,9 +243,9 @@ export default function DriverDetails() {
             header: column.header,
             key: column.accessorKey,
         })).concat([
-            { header: "Email", key: "emailAddress" },
-            { header: "Blood Group", key: "bloodGroup" },
-            { header: "Date of Birth", key: "dateOfBirth" }
+            {header: "Email", key: "emailAddress"},
+            {header: "Blood Group", key: "bloodGroup"},
+            {header: "Date of Birth", key: "dateOfBirth"}
         ]);
 
         const date = new Date();
@@ -251,18 +253,18 @@ export default function DriverDetails() {
 
         worksheet.mergeCells('A1:E1');
         worksheet.getCell('A1').value = "Driver Details Report";
-        worksheet.getCell('A1').font = { size: 16, bold: true };
-        worksheet.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell('A1').font = {size: 16, bold: true};
+        worksheet.getCell('A1').alignment = {vertical: 'middle', horizontal: 'center'};
 
         worksheet.mergeCells('A2:E2');
         worksheet.getCell('A2').value = `Report Date: ${formattedDate}`;
-        worksheet.getCell('A2').font = { size: 12, bold: true };
-        worksheet.getCell('A2').alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell('A2').font = {size: 12, bold: true};
+        worksheet.getCell('A2').alignment = {vertical: 'middle', horizontal: 'center'};
 
         worksheet.mergeCells('A3:E3');
         worksheet.getCell('A3').value = "Generated by: Your App Name";
-        worksheet.getCell('A3').font = { size: 12, bold: true };
-        worksheet.getCell('A3').alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell('A3').font = {size: 12, bold: true};
+        worksheet.getCell('A3').alignment = {vertical: 'middle', horizontal: 'center'};
 
         previewData.forEach(item => {
             worksheet.addRow(selectedColumns.map(column => item[column.accessorKey]).concat(
@@ -273,7 +275,7 @@ export default function DriverDetails() {
         });
 
         const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const blob = new Blob([buffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = 'driver_details.xlsx';
@@ -298,7 +300,7 @@ export default function DriverDetails() {
             )
         ].join('\n');
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = 'driver_details.csv';
@@ -308,11 +310,11 @@ export default function DriverDetails() {
 
     return (
         <div className="main-content">
-            <PageHeader title="Driver Details" breadcrumbs={breadcrumbs} />
+            <PageHeader title="Driver Details" breadcrumbs={breadcrumbs}/>
             <Box mb="20px" mt="50px" display="flex" alignItems="center" gap="20px">
                 <InputGroup>
                     <InputLeftElement pointerEvents="none">
-                        <IoSearchOutline />
+                        <IoSearchOutline/>
                     </InputLeftElement>
                     <Input
                         placeholder="Search"
@@ -324,7 +326,7 @@ export default function DriverDetails() {
                 </InputGroup>
                 <Button
                     bg={theme.purple}
-                    _hover={{ bg: theme.onHoverPurple }}
+                    _hover={{bg: theme.onHoverPurple}}
                     color="white"
                     variant="solid"
                     width="250px"
@@ -335,7 +337,7 @@ export default function DriverDetails() {
                 <Link to="/app/AddDriverDetails">
                     <Button
                         bg={theme.purple}
-                        _hover={{ bg: theme.onHoverPurple }}
+                        _hover={{bg: theme.onHoverPurple}}
                         color="white"
                         variant="solid"
                         w="200px"
@@ -359,13 +361,13 @@ export default function DriverDetails() {
                                     {flexRender(header.column.columnDef.header, header.getContext())}
                                     {header.column.getIsSorted() ? (
                                         header.column.getIsSorted() === 'desc' ? (
-                                            <TriangleDownIcon style={iconStyle} />
+                                            <TriangleDownIcon style={iconStyle}/>
                                         ) : (
-                                            <TriangleUpIcon style={iconStyle} />
+                                            <TriangleUpIcon style={iconStyle}/>
                                         )
                                     ) : (
                                         header.column.columnDef.header !== 'Actions' && (
-                                            <TiArrowUnsorted style={iconStyle} />
+                                            <TiArrowUnsorted style={iconStyle}/>
                                         )
                                     )}
                                 </Th>
@@ -424,7 +426,7 @@ export default function DriverDetails() {
 
             {/* Modal for Column Selection */}
             <Modal isOpen={isColumnSelectionOpen} onClose={() => setIsColumnSelectionOpen(false)} isCentered>
-                <ModalOverlay />
+                <ModalOverlay/>
                 <ModalContent>
                     <ModalHeader>Select Columns for Report</ModalHeader>
                     <ModalBody>
@@ -447,7 +449,7 @@ export default function DriverDetails() {
                             onClick={handlePreview}
                             isDisabled={selectedColumns.length === 0}
                             bg={theme.purple}
-                            _hover={{ bg: theme.onHoverPurple }}
+                            _hover={{bg: theme.onHoverPurple}}
                             color="white"
                         >
                             Preview
@@ -464,7 +466,7 @@ export default function DriverDetails() {
                 size="6xl"
                 isCentered
             >
-                <ModalOverlay />
+                <ModalOverlay/>
                 <ModalContent maxHeight="80vh">
                     <ModalHeader>Preview</ModalHeader>
                     <ModalBody overflowY="auto">
@@ -511,9 +513,9 @@ export default function DriverDetails() {
                         <Menu>
                             <MenuButton
                                 as={Button}
-                                rightIcon={<ChevronDownIcon />}
+                                rightIcon={<ChevronDownIcon/>}
                                 bg={theme.purple}
-                                _hover={{ bg: theme.onHoverPurple }}
+                                _hover={{bg: theme.onHoverPurple}}
                                 color="white"
                                 variant="solid"
                                 className="w-32"
@@ -533,7 +535,7 @@ export default function DriverDetails() {
 
             {/* Modal for More Details */}
             <Modal isOpen={isOpen} onClose={onClose} isCentered>
-                <ModalOverlay />
+                <ModalOverlay/>
                 <ModalContent>
                     <ModalHeader>Driver Details</ModalHeader>
                     <ModalBody>
@@ -550,7 +552,7 @@ export default function DriverDetails() {
                     </ModalBody>
                     <ModalFooter>
                         <Button bg={theme.purple}
-                                _hover={{ bg: theme.onHoverPurple }}
+                                _hover={{bg: theme.onHoverPurple}}
                                 color="white"
                                 variant="solid" mr={3} onClick={onClose}>
                             Close

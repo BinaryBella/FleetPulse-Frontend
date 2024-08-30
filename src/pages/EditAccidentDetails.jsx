@@ -21,20 +21,12 @@ import theme from "../config/ThemeConfig.jsx";
 import { axiosApi } from "../interceptor.js";
 
 export default function EditAccidentDetails() {
-  const { id } = useParams(); // Get the accident ID from the URL
+  const { id } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const {
-    isOpen: isDialogOpen,
-    onOpen: onDialogOpen,
-    onClose: onDialogClose,
-  } = useDisclosure();
-  const {
-    isOpen: isSuccessDialogOpen,
-    onOpen: onSuccessDialogOpen,
-    onClose: onSuccessDialogClose,
-  } = useDisclosure();
+  const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
+  const { isOpen: isSuccessDialogOpen, onOpen: onSuccessDialogOpen, onClose: onSuccessDialogClose } = useDisclosure();
   const [dialogMessage, setDialogMessage] = useState("");
   const [successDialogMessage, setSuccessDialogMessage] = useState("");
   const [vehicleRegNoDetails, setVehicleRegNoDetails] = useState([]);
@@ -47,26 +39,14 @@ export default function EditAccidentDetails() {
   ];
 
   useEffect(() => {
-    console.log("Accident ID:", id); // Debugging line
-
-    if (id) {
-      fetchVehicleRegNos();
-      fetchDriverNICs();
-      fetchAccidentDetails(); // This should be called after the dropdown data is fetched
-    } else {
-      setDialogMessage("Invalid accident ID.");
-      onDialogOpen();
-    }
+    fetchAccidentDetails();
+    fetchVehicleRegNos();
+    fetchDriverNICs();
   }, [id]);
 
   const validateAccidentInfo = (values) => {
     const errors = {};
-    const requiredFields = [
-      "vehicleRegistrationNo",
-      "venue",
-      "dateTime",
-      "driverNIC",
-    ];
+    const requiredFields = ["vehicleRegistrationNo", "venue", "dateTime", "nic"];
     requiredFields.forEach((field) => {
       if (!values[field]) {
         errors[field] = `${field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1").trim()} is required`;
@@ -87,8 +67,11 @@ export default function EditAccidentDetails() {
   const fetchAccidentDetails = async () => {
     try {
       const response = await axiosApi.get(`https://localhost:7265/api/Accidents/${id}`);
-      setFormData(response.data);
-      console.log("data in accident",response.data);
+      setFormData({
+        ...response.data,
+        vehicleRegistrationNo: response.data.vehicleRegistrationNo || "", // Handle null value
+        nic: response.data.nic || "", // Handle null value
+      });
     } catch (error) {
       console.error("Error fetching accident details:", error);
       setDialogMessage("Failed to fetch accident details.");
@@ -153,7 +136,7 @@ export default function EditAccidentDetails() {
               onSubmit={handleSubmit}
               validate={validateAccidentInfo}
           >
-            {({ errors, touched, isValid }) => (
+            {({ errors, touched, values, handleChange, handleBlur, isValid, dirty }) => (
                 <Form>
                   <div className="grid grid-cols-2 gap-10 mt-8">
                     <Field name="dateTime">
@@ -213,10 +196,12 @@ export default function EditAccidentDetails() {
                                 py={2}
                                 mt={1}
                                 width="400px"
-                                value={formData.vehicleRegistrationNo} // Ensure the correct value is used
+                                value={values.vehicleRegistrationNo} // Bind value to Formik's state
+                                onChange={handleChange} // Update Formik's state on change
+                                onBlur={handleBlur}
                             >
                               {vehicleRegNoDetails.map((option) => (
-                                  <option key={option.id} value={option.vehicleRegistrationNo}>
+                                  <option key={option.vehicleId} value={option.vehicleRegistrationNo}>
                                     {option.vehicleRegistrationNo}
                                   </option>
                               ))}
@@ -227,7 +212,7 @@ export default function EditAccidentDetails() {
                           </div>
                       )}
                     </Field>
-                    <Field name="driverNIC">
+                    <Field name="nic">
                       {({ field }) => (
                           <div className="flex flex-col gap-3">
                             <p>Driver NIC</p>
@@ -240,6 +225,9 @@ export default function EditAccidentDetails() {
                                 mt={1}
                                 width="400px"
                                 placeholder="NIC"
+                                value={values.nic} // Bind value to Formik's state
+                                onChange={handleChange} // Update Formik's state on change
+                                onBlur={handleBlur}
                             >
                               {NICs.map((nic) => (
                                   <option key={nic} value={nic}>
@@ -247,7 +235,7 @@ export default function EditAccidentDetails() {
                                   </option>
                               ))}
                             </Select>
-                            {errors.driverNIC && touched.driverNIC && (
+                            {errors.nic && touched.nic && (
                                 <div className="text-red-500">Driver NIC is required.</div>
                             )}
                           </div>
