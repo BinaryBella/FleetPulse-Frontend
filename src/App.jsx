@@ -131,7 +131,7 @@ export default function App() {
                         <Route path="/app/EditHelperDetails/:userId" element={<EditHelperDetails />} />
                         <Route path="/app/EditStaffDetails/:userId" element={<EditStaffDetails />} />
                         <Route path="/app/EditTripDetails/:tripId" element={<EditTripDetails />} />
-                        <Route path="/app/EditAccidentDetails/:accidentId" element={<EditAccidentDetails />} />
+                        <Route path="/app/EditAccidentDetails/:id" element={<EditAccidentDetails />} />
                     </Route>
 
                     {/* Admin-only routes */}

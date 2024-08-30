@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Formik, Form, Field } from 'formik';
+import {useEffect, useState} from 'react';
+import {useParams, useNavigate} from 'react-router-dom';
+import {Formik, Form, Field} from 'formik';
 import {
     Select,
     Button,
@@ -13,16 +14,15 @@ import {
     Checkbox
 } from '@chakra-ui/react';
 import {axiosApi} from "../interceptor.js";
-import { useNavigate, useParams } from 'react-router-dom';
 import PageHeader from '../components/PageHeader.jsx';
 import theme from '../config/ThemeConfig.jsx';
 import Maintenance from "../assets/images/maintenance.png";
 
 const EditVehicleMaintenanceConfiguration = () => {
-    const { id } = useParams();
+    const {id} = useParams();
     const navigate = useNavigate();
-    const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
-    const { isOpen: isSuccessDialogOpen, onOpen: onSuccessDialogOpen, onClose: onSuccessDialogClose } = useDisclosure();
+    const {isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose} = useDisclosure();
+    const {isOpen: isSuccessDialogOpen, onOpen: onSuccessDialogOpen, onClose: onSuccessDialogClose} = useDisclosure();
     const [dialogMessage, setDialogMessage] = useState('');
     const [successDialogMessage, setSuccessDialogMessage] = useState('');
     const [maintenanceTypeDetails, setMaintenanceTypeDetails] = useState([]);
@@ -36,12 +36,11 @@ const EditVehicleMaintenanceConfiguration = () => {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axiosApi.get('https://localhost:7265/api/Vehicle');
+            const response = await axiosApi.get('https://localhost:7265/api/Vehicles');
             setVehicleRegNoDetails(response.data);
-            console.log(response.data);
         } catch (error) {
             console.error('Error fetching vehicle registration numbers:', error);
-            setVehicleRegNoDetails([]); // Set to empty array in case of an error
+            setVehicleRegNoDetails([]);
         }
     };
 
@@ -57,15 +56,16 @@ const EditVehicleMaintenanceConfiguration = () => {
     const fetchMaintenanceConfiguration = async () => {
         try {
             const response = await axiosApi.get(`https://localhost:7265/api/VehicleMaintenanceConfiguration/${id}`);
-            const data = response.data;
             setInitialValues({
-                vehicleRegistrationNo: data.vehicleId.toString(),
-                maintenanceType: data.vehicleMaintenanceTypeId.toString(),
-                duration: data.duration,
-                isActive: data.status,
+                vehicleRegistrationNo: response.data.vehicleId.toString(),
+                maintenanceType: response.data.vehicleMaintenanceTypeId.toString(),
+                duration: response.data.duration,
+                isActive: response.data.status,
             });
         } catch (error) {
             console.error('Error fetching maintenance configuration:', error);
+            setDialogMessage('Failed to fetch maintenance configuration.');
+            onDialogOpen();
         }
     };
 
@@ -73,45 +73,57 @@ const EditVehicleMaintenanceConfiguration = () => {
         fetchVehicleMaintenanceTypes();
         fetchVehicleRegNos();
         fetchMaintenanceConfiguration();
-    }, []);
+    }, [id]);
 
     const breadcrumbs = [
-        { label: 'Vehicle', link: '/app/Vehicle' },
-        { label: 'Vehicle Maintenance Configuration', link: '/app/VehicleMaintenanceConfigurationTable' },
-        { label: 'Edit Vehicle Maintenance Configuration', link: `/app/EditVehicleMaintenanceConfiguration/${id}` }
+        {label: 'Vehicle', link: '/app/Vehicle'},
+        {label: 'Vehicle Maintenance Configuration', link: '/app/VehicleMaintenanceConfigurationTable'},
+        {label: 'Edit Vehicle Maintenance Configuration', link: `/app/VehicleMaintenanceConfiguration/edit/${id}`}
     ];
 
     const handleSubmit = async (values) => {
         try {
-            const selectedVehicle = vehicleRegNoDetails.find(vehicle => vehicle.VehicleId === parseInt(values.vehicleRegistrationNo));
+            const selectedVehicle = vehicleRegNoDetails.find(vehicle => vehicle.vehicleId === parseInt(values.vehicleRegistrationNo));
             const selectedMaintenanceType = maintenanceTypeDetails.find(type => type.id === parseInt(values.maintenanceType));
 
             const payload = {
-                id: id,
-                vehicleId: parseInt(values.vehicleRegistrationNo),
-                vehicleRegistrationNo: selectedVehicle ? selectedVehicle.VehicleRegistrationNo : '',
-                vehicleMaintenanceTypeId: parseInt(values.maintenanceType),
+                id: parseInt(id),
+                vehicleId: selectedVehicle ? selectedVehicle.vehicleId : null,
+                vehicleRegistrationNo: selectedVehicle ? selectedVehicle.vehicleRegistrationNo : '',
+                vehicleMaintenanceTypeId: selectedMaintenanceType ? selectedMaintenanceType.id : null,
                 typeName: selectedMaintenanceType ? selectedMaintenanceType.typeName : '',
                 duration: values.duration,
                 status: values.isActive
             };
 
-            const response = await axiosApi.put(`https://localhost:7265/api/VehicleMaintenanceConfiguration/${id}`, payload, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            console.log('Update Payload:', payload);
 
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || 'Failed to update maintenance configuration');
-            }
+            const response = await axiosApi.put(`https://localhost:7265/api/VehicleMaintenanceConfiguration/${id}`, payload);
 
-            setSuccessDialogMessage('Maintenance Configuration updated successfully');
+            console.log('Update Response:', response);
+
+            // If we reach this point, it means the request was successful
+            setSuccessDialogMessage('Maintenance configuration updated successfully');
             onSuccessDialogOpen();
         } catch (error) {
-            console.error("Error during submission:", error);
-            setDialogMessage(error.message || 'Failed to update maintenance configuration.');
+            console.error('Update Error:', error);
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                if (error.response.status === 400) {
+                    setDialogMessage('Invalid data submitted. Please check your inputs.');
+                } else if (error.response.status === 404) {
+                    setDialogMessage('Maintenance configuration not found. It may have been deleted.');
+                } else {
+                    setDialogMessage(error.response.data.message || 'An error occurred while updating the configuration.');
+                }
+            } else if (error.request) {
+                // The request was made but no response was received
+                setDialogMessage('No response received from server. Please try again later.');
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                setDialogMessage('An error occurred while sending the update request.');
+            }
             onDialogOpen();
         }
     };
@@ -127,11 +139,11 @@ const EditVehicleMaintenanceConfiguration = () => {
 
     return (
         <>
-            <PageHeader title="Edit Vehicle Maintenance Configuration" breadcrumbs={breadcrumbs} />
+            <PageHeader title="Edit Vehicle Maintenance Configuration" breadcrumbs={breadcrumbs}/>
 
             <Formik
-                initialValues={initialValues}
                 enableReinitialize
+                initialValues={initialValues}
                 onSubmit={handleSubmit}
                 validate={(values) => {
                     const errors = {};
@@ -147,25 +159,25 @@ const EditVehicleMaintenanceConfiguration = () => {
                     return errors;
                 }}
             >
-                {({ errors, touched }) => (
+                {({errors, touched}) => (
                     <Form className="flex justify-between vertical-container">
                         <div className="flex flex-col gap-6 mt-5 w-1/4">
                             <p>Vehicle Registration No</p>
                             <Field name="vehicleRegistrationNo">
-                                {({ field }) => (
+                                {({field}) => (
                                     <div>
                                         <Select
                                             {...field}
-                                            placeholder="Select Vehicle Registration No"
+                                            placeholder="Vehicle Registration No"
                                             variant="filled"
                                             borderRadius="md"
-                                            size="sm"
+                                            size="md"
                                             width="100%"
-                                            value={field.value}  // Set value here
-                                            onChange={field.onChange}  // Ensure onChange is handled correctly
+                                            value={field.value}
                                         >
-                                            {vehicleRegNoDetails.map((option) => (
-                                                <option key={option.id} value={option.id}>
+                                            {vehicleRegNoDetails.map((option, index) => (
+                                                <option key={index}
+                                                        value={option.vehicleId}>
                                                     {option.vehicleRegistrationNo}
                                                 </option>
                                             ))}
@@ -178,14 +190,14 @@ const EditVehicleMaintenanceConfiguration = () => {
                             </Field>
                             <p>Vehicle Maintenance Type</p>
                             <Field name="maintenanceType">
-                                {({ field }) => (
+                                {({field}) => (
                                     <div>
                                         <Select
                                             {...field}
                                             placeholder="Vehicle Maintenance Type"
                                             variant="filled"
                                             borderRadius="md"
-                                            size="sm"
+                                            size="md"
                                             width="100%"
                                         >
                                             {maintenanceTypeDetails.map((option, index) => (
@@ -202,14 +214,14 @@ const EditVehicleMaintenanceConfiguration = () => {
                             </Field>
                             <p>Duration</p>
                             <Field name="duration">
-                                {({ field }) => (
+                                {({field}) => (
                                     <div>
                                         <Select
                                             {...field}
                                             placeholder="Duration"
                                             variant="filled"
                                             borderRadius="md"
-                                            size="sm"
+                                            size="md"
                                             width="100%"
                                         >
                                             <option value="weekly">Weekly</option>
@@ -225,12 +237,12 @@ const EditVehicleMaintenanceConfiguration = () => {
                                 )}
                             </Field>
                             <Field name="isActive">
-                                {({ field, form }) => (
+                                {({field, form}) => (
                                     <div>
                                         <Checkbox
                                             {...field}
                                             size='lg'
-                                            defaultChecked={field.value}
+                                            isChecked={field.value}
                                             onChange={e => form.setFieldValue(field.name, e.target.checked)}
                                         >
                                             Is Active
@@ -244,10 +256,10 @@ const EditVehicleMaintenanceConfiguration = () => {
                             <div className="flex gap-4 mt-10">
                                 <Button
                                     bg="gray.400"
-                                    _hover={{ bg: 'gray.500' }}
+                                    _hover={{bg: 'gray.500'}}
                                     color="#ffffff"
                                     variant="solid"
-                                    size="sm"
+                                    size="md"
                                     width="50%"
                                     onClick={handleCancel}
                                 >
@@ -255,26 +267,26 @@ const EditVehicleMaintenanceConfiguration = () => {
                                 </Button>
                                 <Button
                                     bg={theme.purple}
-                                    _hover={{ bg: theme.onHoverPurple }}
+                                    _hover={{bg: theme.onHoverPurple}}
                                     color="#ffffff"
                                     variant="solid"
-                                    size="sm"
+                                    size="md"
                                     width="50%"
                                     type="submit"
                                 >
-                                    Save
+                                    Update
                                 </Button>
                             </div>
                         </div>
                         <div className="flex items-end">
-                            <img src={Maintenance} alt="Edit Vehicle Maintenance" width="400" height="400" className="mr-14" />
+                            <img src={Maintenance} alt="Change Password" width="400" height="400" className="mr-14"/>
                         </div>
                     </Form>
                 )}
             </Formik>
 
             <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay />
+                <AlertDialogOverlay/>
                 <AlertDialogContent
                     position="absolute"
                     top="30%"
@@ -291,8 +303,8 @@ const EditVehicleMaintenanceConfiguration = () => {
                 </AlertDialogContent>
             </AlertDialog>
 
-            <AlertDialog isOpen={isSuccessDialogOpen} onClose={handleSuccessDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay />
+            <AlertDialog isOpen={isSuccessDialogOpen} onClose={onSuccessDialogClose} motionPreset="slideInBottom">
+                <AlertDialogOverlay/>
                 <AlertDialogContent
                     position="absolute"
                     top="30%"

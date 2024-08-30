@@ -1,12 +1,38 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  Table, Thead, Tbody, Tr, Th, Td, Box, Button, Menu,
-  MenuButton, IconButton, MenuList, MenuItem, Input, chakra,
-  InputGroup, InputLeftElement, Text,  AlertDialog,
-  AlertDialogOverlay, AlertDialogContent, AlertDialogHeader,
-  AlertDialogBody, AlertDialogFooter, useDisclosure, Modal,
-  ModalOverlay, ModalContent, ModalHeader, ModalBody,
-  ModalFooter, Checkbox, Stack
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Box,
+  Button,
+  Menu,
+  MenuButton,
+  IconButton,
+  MenuList,
+  MenuItem,
+  Input,
+  chakra,
+  InputGroup,
+  InputLeftElement,
+  Text,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogBody,
+  AlertDialogFooter,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Checkbox,
+  Stack,
 } from "@chakra-ui/react";
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
@@ -16,13 +42,18 @@ import theme from "../config/ThemeConfig.jsx";
 import PageHeader from "../components/PageHeader.jsx";
 import Pagination from "../components/Pagination";
 import {
-  useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
 } from "@tanstack/react-table";
 import { flexRender } from "@tanstack/react-table";
 import { axiosApi } from "../interceptor.js";
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import ExcelJS from 'exceljs';
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import ExcelJS from "exceljs";
+import { PhotoProvider, PhotoView } from "react-photo-view";
+import "react-photo-view/dist/react-photo-view.css";
 
 export default function AccidentDetails() {
   const [accidentDetails, setAccidentDetails] = useState([]);
@@ -36,11 +67,21 @@ export default function AccidentDetails() {
   const [isColumnSelectionOpen, setIsColumnSelectionOpen] = useState(false);
   const [isSpecialNotesOpen, setIsSpecialNotesOpen] = useState(false);
   const [specialNotesContent, setSpecialNotesContent] = useState("");
+  const [accidentPhotos, setAccidentPhotos] = useState([]);
+
 
   const cancelRef = useRef();
-  const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
+  const {
+    isOpen: isDialogOpen,
+    onOpen: onDialogOpen,
+    onClose: onDialogClose,
+  } = useDisclosure();
+  const {
+    isOpen: isPhotoDialogOpen,
+    onOpen: onPhotoDialogOpen,
+    onClose: onPhotoDialogClose,
+  } = useDisclosure();
   const itemsPerPage = 10;
-
 
   useEffect(() => {
     fetchAccidentDetails();
@@ -48,7 +89,9 @@ export default function AccidentDetails() {
 
   const fetchAccidentDetails = async () => {
     try {
-      const response = await axiosApi.get("https://localhost:7265/api/Accidents");
+      const response = await axiosApi.get(
+          "https://localhost:7265/api/Accidents"
+      );
       setAccidentDetails(response.data);
       console.log(response.data);
     } catch (error) {
@@ -57,30 +100,84 @@ export default function AccidentDetails() {
   };
 
   const columns = [
-    { accessorKey: "vehicleRegistrationNo", header: "Vehicle Reg No", meta: {isNumeric: false, filter: "text"} },
-    { accessorKey: "date", header: "Date", meta: { isNumeric: false, filter: "text" } },
-    { accessorKey: "time", header: "Time", meta: { isNumeric: false, filter: "text" } },
-    { accessorKey: "venue", header: "Venue", meta: { isNumeric: false, filter: "text" } },
-    { accessorKey: "driverInjuredStatus", header: "Driver Injured", meta: { isNumeric: false, filter: "text" } },
-    { accessorKey: "helperInjuredStatus", header: "Helper Injured", meta: { isNumeric: false, filter: "text" } },
-    { accessorKey: "vehicleDamagedStatus", header: "Vehicle Damaged", meta: { isNumeric: false, filter: "text" } },
-    { accessorKey: "driversNic", header: "Driver's NIC", meta: { isNumeric: false, filter: "text" } },
-    { accessorKey: "loss", header: "Loss", meta: { isNumeric: false, filter: "text" } },
-    { accessorKey: "status", header: "Status", meta: { isNumeric: false, filter: "text" } },
     {
-      id: "actions", header: "Actions", cell: ({ row }) => (
+      accessorKey: "vehicleRegistrationNo",
+      header: "Vehicle Reg No",
+      meta: { isNumeric: false, filter: "text" },
+    },
+    {
+      accessorKey: "date",
+      header: "Date",
+      meta: { isNumeric: false, filter: "text" },
+    },
+    {
+      accessorKey: "time",
+      header: "Time",
+      meta: { isNumeric: false, filter: "text" },
+    },
+    {
+      accessorKey: "venue",
+      header: "Venue",
+      meta: { isNumeric: false, filter: "text" },
+    },
+    {
+      accessorKey: "driverInjuredStatus",
+      header: "Driver Injured",
+      meta: { isNumeric: false, filter: "text" },
+    },
+    {
+      accessorKey: "helperInjuredStatus",
+      header: "Helper Injured",
+      meta: { isNumeric: false, filter: "text" },
+    },
+    {
+      accessorKey: "vehicleDamagedStatus",
+      header: "Vehicle Damaged",
+      meta: { isNumeric: false, filter: "text" },
+    },
+    {
+      accessorKey: "driversNic",
+      header: "Driver's NIC",
+      meta: { isNumeric: false, filter: "text" },
+    },
+    {
+      accessorKey: "loss",
+      header: "Loss",
+      meta: { isNumeric: false, filter: "text" },
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      meta: { isNumeric: false, filter: "text" },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
           <Menu>
-            <MenuButton color={theme.purple} as={IconButton} aria-label="profile-options" fontSize="15px" icon={<IoSettingsSharp />} />
+            <MenuButton
+                color={theme.purple}
+                as={IconButton}
+                aria-label="profile-options"
+                fontSize="15px"
+                icon={<IoSettingsSharp />}
+            />
             <MenuList>
               <MenuItem>
-                <Link to={`/app/EditAccidentDetails/${row.original.accidentId}`}>Edit</Link>
+                <Link to={`/app/EditAccidentDetails/${row.original.accidentId}`}>
+                  Edit
+                </Link>
               </MenuItem>
               <MenuItem onClick={() => onClickDelete(row.original)}>
                 {row.original.status ? "Deactivate" : "Activate"}
               </MenuItem>
-                <MenuItem onClick={() => onClickMoreDetails(row.original)}>More Details</MenuItem>
+              <MenuItem onClick={() => onClickMoreDetails(row.original)}>
+                More Details
+              </MenuItem>
               <MenuItem>
-                <Link to={`/app/ViewPhotos/${row.original.accidentId}`}>View Photos</Link>
+                <Link to={`/app/ViewPhotos/${row.original.accidentId}`}>
+                  View Photos
+                </Link>
               </MenuItem>
             </MenuList>
           </Menu>
@@ -113,32 +210,44 @@ export default function AccidentDetails() {
 
   const startOffset = currentPage * itemsPerPage;
   const endOffset = startOffset + itemsPerPage;
-  const sortedData = table.getRowModel().rows.map(row => row.original);
+  const sortedData = table.getRowModel().rows.map((row) => row.original);
   const currentData = sortedData.slice(startOffset, endOffset);
-  const pageCount = Math.ceil(table.getFilteredRowModel().rows.length / itemsPerPage);
+  const pageCount = Math.ceil(
+      table.getFilteredRowModel().rows.length / itemsPerPage
+  );
   const isEmpty = currentData.length === 0;
-  const iconStyle = { display: "inline-block", verticalAlign: "middle", marginLeft: "3.75px" };
+  const iconStyle = {
+    display: "inline-block",
+    verticalAlign: "middle",
+    marginLeft: "3.75px",
+  };
 
   const handleGenerateReport = () => {
     setIsColumnSelectionOpen(true);
   };
 
   const handleColumnSelection = () => {
-    const selected = columns.filter(col => selectedColumns.includes(col.accessorKey) || col.id === 'actions');
+    const selected = columns.filter(
+        (col) => selectedColumns.includes(col.accessorKey) || col.id === "actions"
+    );
     setSelectedColumns(selected);
   };
 
   const handlePreview = () => {
-    const selected = columns.filter(col =>
-        selectedColumns.includes(col.accessorKey) && col.accessorKey !== 'actions'
+    const selected = columns.filter(
+        (col) =>
+            selectedColumns.includes(col.accessorKey) &&
+            col.accessorKey !== "actions"
     );
     setSelectedColumns(selected);
 
-    const preview = accidentDetails.map(item => {
+    const preview = accidentDetails.map((item) => {
       let previewItem = {};
-      selected.forEach(col => {
-        if (col.accessorKey === 'status') {
-          previewItem[col.accessorKey] = item[col.accessorKey] ? 'Active' : 'Inactive';
+      selected.forEach((col) => {
+        if (col.accessorKey === "status") {
+          previewItem[col.accessorKey] = item[col.accessorKey]
+              ? "Active"
+              : "Inactive";
         } else {
           previewItem[col.accessorKey] = item[col.accessorKey];
         }
@@ -152,15 +261,17 @@ export default function AccidentDetails() {
   };
 
   const handleCheckboxChange = (accessorKey) => {
-    setSelectedColumns(prev =>
+    setSelectedColumns((prev) =>
         prev.includes(accessorKey)
-            ? prev.filter(col => col !== accessorKey)
+            ? prev.filter((col) => col !== accessorKey)
             : [...prev, accessorKey]
     );
   };
 
   const onClickSpecialNotes = (accident) => {
-    setSpecialNotesContent(accident.specialNotes || "No special notes available.");
+    setSpecialNotesContent(
+        accident.specialNotes || "No special notes available."
+    );
     setIsSpecialNotesOpen(true);
   };
 
@@ -171,7 +282,12 @@ export default function AccidentDetails() {
 
     doc.setFontSize(16);
     const reportTitleY = 10;
-    doc.text("Accident Details Report", doc.internal.pageSize.getWidth() / 2, reportTitleY, { align: "center" });
+    doc.text(
+        "Accident Details Report",
+        doc.internal.pageSize.getWidth() / 2,
+        reportTitleY,
+        { align: "center" }
+    );
 
     doc.setFontSize(10);
     const creationDateY = reportTitleY + 10;
@@ -179,46 +295,50 @@ export default function AccidentDetails() {
 
     doc.autoTable({
       startY: creationDateY + 10,
-      head: [selectedColumns.map(column => column.header)],
-      body: previewData.map(item =>
-          selectedColumns.map(column => item[column.accessorKey])
+      head: [selectedColumns.map((column) => column.header)],
+      body: previewData.map((item) =>
+          selectedColumns.map((column) => item[column.accessorKey])
       ),
     });
 
-    doc.save('accident_details.pdf');
+    doc.save("accident_details.pdf");
   };
 
   const exportToExcel = async () => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Accident Details');
+    const worksheet = workbook.addWorksheet("Accident Details");
 
-    worksheet.addRow(selectedColumns.map(column => column.header));
+    worksheet.addRow(selectedColumns.map((column) => column.header));
 
-    previewData.forEach(item => {
-      worksheet.addRow(selectedColumns.map(column => item[column.accessorKey]));
+    previewData.forEach((item) => {
+      worksheet.addRow(
+          selectedColumns.map((column) => item[column.accessorKey])
+      );
     });
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const link = document.createElement('a');
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = 'accident_details.xlsx';
+    link.download = "accident_details.xlsx";
     link.click();
     URL.revokeObjectURL(link.href);
   };
 
   const exportToCSV = () => {
     const csvContent = [
-      selectedColumns.map(column => column.header).join(','),
-      ...previewData.map(item =>
-          selectedColumns.map(column => item[column.accessorKey]).join(',')
-      )
-    ].join('\n');
+      selectedColumns.map((column) => column.header).join(","),
+      ...previewData.map((item) =>
+          selectedColumns.map((column) => item[column.accessorKey]).join(",")
+      ),
+    ].join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = 'accident_details.csv';
+    link.download = "accident_details.csv";
     link.click();
     URL.revokeObjectURL(link.href);
   };
@@ -228,41 +348,73 @@ export default function AccidentDetails() {
     onDialogOpen();
   };
 
+  const onViewPhotos = async (accident) => {
+    try {
+      const response = await axiosApi.get(`https://localhost:7265/api/accidents/photos/${accident.accidentId}`);
+      if (response.data && response.data.data) {
+        const base64Photos = response.data.data.map(byteArray => {
+          console.log(byteArray);
+          return `data:image/jpeg;base64,${byteArray.photo}`;
+        });
+        console.log(base64Photos);
+
+        setAccidentPhotos(base64Photos);
+        onPhotoDialogOpen();
+      } else {
+        console.error('No photos received from the API');
+        setAccidentPhotos([]);
+      }
+    } catch (error) {
+      console.error('Error fetching accident photos:', error);
+      setAccidentPhotos([]);
+    }
+  };
 
   const onConfirmDelete = async () => {
     try {
       if (!selectedAccident || !selectedAccident.accidentId) {
-        console.error('Selected accident or its ID is undefined.');
+        console.error("Selected accident or its ID is undefined.");
         return;
       }
 
-      const endpoint = `https://localhost:7265/api/Accidents/${selectedAccident.accidentId}/${selectedAccident.status ? 'deactivate' : 'activate'}`;
+      const endpoint = `https://localhost:7265/api/Accidents/${
+          selectedAccident.accidentId
+      }/${selectedAccident.status ? "deactivate" : "activate"}`;
 
       const response = await axiosApi.put(endpoint, null, {
         headers: {
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       });
 
       if (response.status === 200 || response.status === 204) {
         fetchAccidentDetails();
         onDialogClose();
       } else {
-        console.error('Failed to update accident status');
+        console.error("Failed to update accident status");
       }
     } catch (error) {
-      console.error('Error updating accident status:', error);
+      console.error("Error updating accident status:", error);
     }
   };
 
-
   return (
       <div className="main-content">
-        <PageHeader title="Accident Details" breadcrumbs={[
-          { label: "Accidents", link: "/app/AccidentDetails" },
-          { label: "Accident Details", link: "/app/AccidentDetails" },
-        ]} />
-        <Box mb="15px" mt="37.5px" display="flex" alignItems="center" gap="15px" marginBottom="7.5px">
+        <PageHeader
+            title="Accident Details"
+            breadcrumbs={[
+              { label: "Accident", link: "/app/AccidentDetails" },
+              { label: "Accident Details", link: "/app/AccidentDetails" },
+            ]}
+        />
+        <Box
+            mb="15px"
+            mt="37.5px"
+            display="flex"
+            alignItems="center"
+            gap="15px"
+            marginBottom="7.5px"
+        >
           <InputGroup>
             <InputLeftElement pointerEvents="none">
               <IoSearchOutline />
@@ -301,9 +453,9 @@ export default function AccidentDetails() {
 
         <Table className="custom-table" size="sm">
           <Thead>
-            {table.getHeaderGroups().map(headerGroup => (
+            {table.getHeaderGroups().map((headerGroup) => (
                 <Tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => {
+                  {headerGroup.headers.map((header) => {
                     const meta = header.column.columnDef.meta;
                     return (
                         <Th
@@ -313,17 +465,29 @@ export default function AccidentDetails() {
                             className="custom-table-th"
                             fontSize="0.75rem"
                         >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                          )}
                           {header.column.getCanSort() && (
                               <chakra.span pl="3">
                                 {header.column.getIsSorted() ? (
                                     header.column.getIsSorted() === "desc" ? (
-                                        <TriangleDownIcon aria-label="sorted descending" style={iconStyle} />
+                                        <TriangleDownIcon
+                                            aria-label="sorted descending"
+                                            style={iconStyle}
+                                        />
                                     ) : (
-                                        <TriangleUpIcon aria-label="sorted ascending" style={iconStyle} />
+                                        <TriangleUpIcon
+                                            aria-label="sorted ascending"
+                                            style={iconStyle}
+                                        />
                                     )
                                 ) : (
-                                    <TiArrowUnsorted aria-label="unsorted" style={iconStyle} />
+                                    <TiArrowUnsorted
+                                        aria-label="unsorted"
+                                        style={iconStyle}
+                                    />
                                 )}
                               </chakra.span>
                           )}
@@ -351,12 +515,20 @@ export default function AccidentDetails() {
                         <Td fontSize="0.75rem">{date}</Td>
                         <Td fontSize="0.75rem">{time}</Td>
                         <Td fontSize="0.75rem">{accident.venue}</Td>
-                        <Td fontSize="0.75rem">{accident.driverInjuredStatus ? 'Yes' : 'No'}</Td>
-                        <Td fontSize="0.75rem">{accident.helperInjuredStatus ? 'Yes' : 'No'}</Td>
-                        <Td fontSize="0.75rem">{accident.vehicleDamagedStatus ? 'Yes' : 'No'}</Td>
+                        <Td fontSize="0.75rem">
+                          {accident.driverInjuredStatus ? "Yes" : "No"}
+                        </Td>
+                        <Td fontSize="0.75rem">
+                          {accident.helperInjuredStatus ? "Yes" : "No"}
+                        </Td>
+                        <Td fontSize="0.75rem">
+                          {accident.vehicleDamagedStatus ? "Yes" : "No"}
+                        </Td>
                         <Td fontSize="0.75rem">{accident.nic}</Td>
                         <Td fontSize="0.75rem">{accident.loss}</Td>
-                        <Td fontSize="0.75rem">{accident.status ? 'Active' : 'Inactive'}</Td>
+                        <Td fontSize="0.75rem">
+                          {accident.status ? "Active" : "Inactive"}
+                        </Td>
                         <Td fontSize="0.75rem">
                           <Menu>
                             <MenuButton
@@ -368,7 +540,11 @@ export default function AccidentDetails() {
                             />
                             <MenuList>
                               <MenuItem>
-                                <Link to={`/app/EditAccidentDetails/${accident.accidentId}`}>Edit</Link>
+                                <Link
+                                    to={`/app/EditAccidentDetails/${accident.accidentId}`}
+                                >
+                                  Edit
+                                </Link>
                               </MenuItem>
                               <MenuItem onClick={() => onClickDelete(accident)}>
                                 {accident.status ? "Deactivate" : "Activate"}
@@ -376,8 +552,8 @@ export default function AccidentDetails() {
                               <MenuItem onClick={() => onClickSpecialNotes(accident)}>
                                 Special Notes
                               </MenuItem>
-                              <MenuItem>
-                                <Link to={`/app/ViewPhotos/${accident.accidentId}`}>View Photos</Link>
+                              <MenuItem onClick={() => onViewPhotos(accident)}>
+                                View Photos
                               </MenuItem>
                             </MenuList>
                           </Menu>
@@ -396,18 +572,35 @@ export default function AccidentDetails() {
             />
         )}
 
-        <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} leastDestructiveRef={cancelRef}>
+        <AlertDialog
+            isOpen={isDialogOpen}
+            onClose={onDialogClose}
+            leastDestructiveRef={cancelRef}
+        >
           <AlertDialogOverlay>
-            <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
+            <AlertDialogContent
+                position="absolute"
+                top="30%"
+                left="35%"
+                transform="translate(-50%, -50%)"
+            >
               <AlertDialogHeader>
                 {selectedAccident?.status ? "Deactivate" : "Activate"} Vehicle
               </AlertDialogHeader>
               <AlertDialogBody>
-                Are you sure you want to {selectedAccident?.status ? "deactivate" : "activate"} this accident?
+                Are you sure you want to{" "}
+                {selectedAccident?.status ? "deactivate" : "activate"} this
+                accident?
               </AlertDialogBody>
               <AlertDialogFooter>
-                <Button ref={cancelRef} onClick={onDialogClose}>Cancel</Button>
-                <Button colorScheme={selectedAccident?.status ? "red" : "red"} onClick={onConfirmDelete} ml={3}>
+                <Button ref={cancelRef} onClick={onDialogClose}>
+                  Cancel
+                </Button>
+                <Button
+                    colorScheme={selectedAccident?.status ? "red" : "red"}
+                    onClick={onConfirmDelete}
+                    ml={3}
+                >
                   {selectedAccident?.status ? "Deactivate" : "Activate"}
                 </Button>
               </AlertDialogFooter>
@@ -415,25 +608,29 @@ export default function AccidentDetails() {
           </AlertDialogOverlay>
         </AlertDialog>
 
-
         {/* Modal for Column Selection */}
-        <Modal isOpen={isColumnSelectionOpen} onClose={() => setIsColumnSelectionOpen(false)} isCentered>
+        <Modal
+            isOpen={isColumnSelectionOpen}
+            onClose={() => setIsColumnSelectionOpen(false)}
+            isCentered
+        >
           <ModalOverlay />
           <ModalContent>
             <ModalHeader>Select Columns for Report</ModalHeader>
             <ModalBody>
               <Stack spacing={3}>
-                {columns.map(column => (
-                    column.id !== 'actions' && (
-                        <Checkbox
-                            key={column.accessorKey}
-                            isChecked={selectedColumns.includes(column.accessorKey)}
-                            onChange={() => handleCheckboxChange(column.accessorKey)}
-                        >
-                          {column.header}
-                        </Checkbox>
-                    )
-                ))}
+                {columns.map(
+                    (column) =>
+                        column.id !== "actions" && (
+                            <Checkbox
+                                key={column.accessorKey}
+                                isChecked={selectedColumns.includes(column.accessorKey)}
+                                onChange={() => handleCheckboxChange(column.accessorKey)}
+                            >
+                              {column.header}
+                            </Checkbox>
+                        )
+                )}
               </Stack>
             </ModalBody>
             <ModalFooter>
@@ -446,7 +643,9 @@ export default function AccidentDetails() {
               >
                 Preview
               </Button>
-              <Button ml={3} onClick={() => setIsColumnSelectionOpen(false)}>Cancel</Button>
+              <Button ml={3} onClick={() => setIsColumnSelectionOpen(false)}>
+                Cancel
+              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
@@ -466,9 +665,7 @@ export default function AccidentDetails() {
                 <Thead>
                   <Tr>
                     {selectedColumns.map((column) => (
-                        <Th key={column.accessorKey}>
-                          {column.header}
-                        </Th>
+                        <Th key={column.accessorKey}>{column.header}</Th>
                     ))}
                   </Tr>
                 </Thead>
@@ -490,7 +687,7 @@ export default function AccidentDetails() {
                         </Td>
                       </Tr>
                   )}
-                  </Tbody>
+                </Tbody>
               </Table>
             </ModalBody>
             <ModalFooter>
@@ -511,13 +708,19 @@ export default function AccidentDetails() {
                   <MenuItem onClick={exportToCSV}>Export to CSV</MenuItem>
                 </MenuList>
               </Menu>
-              <Button ml={3} onClick={() => setIsPreviewOpen(false)}>Close</Button>
+              <Button ml={3} onClick={() => setIsPreviewOpen(false)}>
+                Close
+              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
 
         {/* Modal for More Details */}
-        <Modal isOpen={isSpecialNotesOpen} onClose={() => setIsSpecialNotesOpen(false)} isCentered>
+        <Modal
+            isOpen={isSpecialNotesOpen}
+            onClose={() => setIsSpecialNotesOpen(false)}
+            isCentered
+        >
           <ModalOverlay />
           <ModalContent>
             <ModalHeader>Special Notes</ModalHeader>
@@ -538,6 +741,37 @@ export default function AccidentDetails() {
           </ModalContent>
         </Modal>
 
+        <Modal
+            closeOnOverlayClick={false}
+            isOpen={isPhotoDialogOpen}
+            onClose={onPhotoDialogClose}
+            isCentered={true}
+            size="xl"
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Accident Photos</ModalHeader>
+            <ModalBody pb={6}>
+              <PhotoProvider>
+                <Box display="flex" flexWrap="wrap" justifyContent="center" gap={2}>
+                  {accidentPhotos.map((photo, index) => (
+                      <PhotoView key={index} src={photo}>
+                        <img
+                            src={photo}
+                            alt={`Accident photo ${index + 1}`}
+                            style={{ width: '100px', height: '100px', objectFit: 'cover', cursor: 'pointer' }}
+                        />
+                      </PhotoView>
+                  ))}
+                </Box>
+              </PhotoProvider>
+              {accidentPhotos.length === 0 && <p>No photos available for this accident.</p>}
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={onPhotoDialogClose}>Close</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </div>
   );
 }

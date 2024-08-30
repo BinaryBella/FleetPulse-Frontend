@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Formik, Form, Field } from 'formik';
+import {useEffect, useState} from 'react';
+import {Formik, Form, Field} from 'formik';
 import {
     Select,
     Button,
@@ -13,15 +13,15 @@ import {
     Checkbox
 } from '@chakra-ui/react';
 import {axiosApi} from "../interceptor.js";
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import PageHeader from '../components/PageHeader.jsx';
 import theme from '../config/ThemeConfig.jsx';
 import Maintenance from "../assets/images/maintenance.png";
 
 const VehicleMaintenanceConfiguration = () => {
     const navigate = useNavigate();
-    const { isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose } = useDisclosure();
-    const { isOpen: isSuccessDialogOpen, onOpen: onSuccessDialogOpen, onClose: onSuccessDialogClose } = useDisclosure();
+    const {isOpen: isDialogOpen, onOpen: onDialogOpen, onClose: onDialogClose} = useDisclosure();
+    const {isOpen: isSuccessDialogOpen, onOpen: onSuccessDialogOpen, onClose: onSuccessDialogClose} = useDisclosure();
     const [dialogMessage, setDialogMessage] = useState('');
     const [successDialogMessage, setSuccessDialogMessage] = useState('');
     const [maintenanceTypeDetails, setMaintenanceTypeDetails] = useState([]);
@@ -31,10 +31,9 @@ const VehicleMaintenanceConfiguration = () => {
         try {
             const response = await axiosApi.get('https://localhost:7265/api/Vehicles');
             setVehicleRegNoDetails(response.data);
-            console.log(response.data);
         } catch (error) {
             console.error('Error fetching vehicle registration numbers:', error);
-            setVehicleRegNoDetails([]); // Set to empty array in case of an error
+            setVehicleRegNoDetails([]);
         }
     };
 
@@ -53,60 +52,46 @@ const VehicleMaintenanceConfiguration = () => {
     }, []);
 
     const breadcrumbs = [
-        { label: 'Vehicle', link: '/app/Vehicle' },
-        { label: 'Vehicle Maintenance Configuration', link: '/app/VehicleMaintenanceConfigurationTable' },
-        { label: 'Add Vehicle Maintenance Configuration', link: '/app/VehicleMaintenanceConfiguration' }
+        {label: 'Vehicle', link: '/app/Vehicle'},
+        {label: 'Vehicle Maintenance Configuration', link: '/app/VehicleMaintenanceConfigurationTable'},
+        {label: 'Add Vehicle Maintenance Configuration', link: '/app/VehicleMaintenanceConfiguration'}
     ];
 
     const handleSubmit = async (values) => {
         try {
-            // Find the selected vehicle and maintenance type details
-            const selectedVehicle = vehicleRegNoDetails.find(vehicle => vehicle.id === parseInt(values.vehicleRegistrationNo));
+            console.log('Form Values:', values);
+
+            const selectedVehicle = vehicleRegNoDetails.find(vehicle => vehicle.vehicleId === parseInt(values.vehicleRegistrationNo));
             const selectedMaintenanceType = maintenanceTypeDetails.find(type => type.id === parseInt(values.maintenanceType));
 
-            // Check and log the selected values for debugging
             console.log('Selected Vehicle:', selectedVehicle);
             console.log('Selected Maintenance Type:', selectedMaintenanceType);
 
-            // Create the payload with the necessary fields
             const payload = {
-                vehicleId: parseInt(values.vehicleRegistrationNo),
+                vehicleId: selectedVehicle ? selectedVehicle.vehicleId : null,
                 vehicleRegistrationNo: selectedVehicle ? selectedVehicle.vehicleRegistrationNo : '',
-                vehicleMaintenanceTypeId: parseInt(values.maintenanceType),
+                vehicleMaintenanceTypeId: selectedMaintenanceType ? selectedMaintenanceType.id : null,
                 typeName: selectedMaintenanceType ? selectedMaintenanceType.typeName : '',
                 duration: values.duration,
                 status: values.isActive
             };
 
-            // Log the payload for debugging
             console.log('Payload:', payload);
 
             const response = await axiosApi.post('https://localhost:7265/api/VehicleMaintenanceConfiguration', payload);
 
-            const data = await response.json();
+            console.log('Response:', response);
 
-            // Handle the response
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to add maintenance configuration');
-            }
-
-            // Check for existing configuration message
-            if (data.message && data.message.toLowerCase().includes('exist')) {
-                setDialogMessage('Vehicle Maintenance configuration already exists');
-                onDialogOpen();
-            } else {
-                setSuccessDialogMessage('Maintenance configuration added successfully');
-                onSuccessDialogOpen();
-            }
+            // If we reach this point, it means the request was successful
+            setSuccessDialogMessage('Maintenance configuration added successfully');
+            onSuccessDialogOpen();
         } catch (error) {
-            if (error instanceof TypeError) {
-                setDialogMessage('Failed to connect to the server');
-            } else {
-                setDialogMessage(error.message || 'Failed to add maintenance configuration.');
-            }
+            console.error('Error:', error);
+            setDialogMessage(error.response?.data?.message || error.message || 'Failed to add maintenance configuration.');
             onDialogOpen();
         }
     };
+
 
     const handleCancel = () => {
         navigate('/app/VehicleMaintenanceConfigurationTable');
@@ -119,7 +104,7 @@ const VehicleMaintenanceConfiguration = () => {
 
     return (
         <>
-            <PageHeader title="Add Vehicle Maintenance Configurations" breadcrumbs={breadcrumbs} />
+            <PageHeader title="Add Vehicle Maintenance Configurations" breadcrumbs={breadcrumbs}/>
 
             <Formik
                 initialValues={{
@@ -144,12 +129,12 @@ const VehicleMaintenanceConfiguration = () => {
                 }}
             >
 
-            {({ errors, touched }) => (
+                {({errors, touched}) => (
                     <Form className="flex justify-between vertical-container">
                         <div className="flex flex-col gap-6 mt-5 w-1/4">
                             <p>Vehicle Registration No</p>
                             <Field name="vehicleRegistrationNo">
-                                {({ field }) => (
+                                {({field}) => (
                                     <div>
                                         <Select
                                             {...field}
@@ -158,9 +143,11 @@ const VehicleMaintenanceConfiguration = () => {
                                             borderRadius="md"
                                             size="md"
                                             width="100%"
+                                            value={field.value}
                                         >
                                             {vehicleRegNoDetails.map((option, index) => (
-                                                <option key={index} value={option.vehicleId}>
+                                                <option key={index}
+                                                        value={option.vehicleId}>
                                                     {option.vehicleRegistrationNo}
                                                 </option>
                                             ))}
@@ -173,7 +160,7 @@ const VehicleMaintenanceConfiguration = () => {
                             </Field>
                             <p>Vehicle Maintenance Type</p>
                             <Field name="maintenanceType">
-                                {({ field }) => (
+                                {({field}) => (
                                     <div>
                                         <Select
                                             {...field}
@@ -197,7 +184,7 @@ const VehicleMaintenanceConfiguration = () => {
                             </Field>
                             <p>Duration</p>
                             <Field name="duration">
-                                {({ field }) => (
+                                {({field}) => (
                                     <div>
                                         <Select
                                             {...field}
@@ -220,7 +207,7 @@ const VehicleMaintenanceConfiguration = () => {
                                 )}
                             </Field>
                             <Field name="isActive">
-                                {({ field, form }) => (
+                                {({field, form}) => (
                                     <div>
                                         <Checkbox
                                             {...field}
@@ -239,7 +226,7 @@ const VehicleMaintenanceConfiguration = () => {
                             <div className="flex gap-4 mt-10">
                                 <Button
                                     bg="gray.400"
-                                    _hover={{ bg: 'gray.500' }}
+                                    _hover={{bg: 'gray.500'}}
                                     color="#ffffff"
                                     variant="solid"
                                     size="md"
@@ -250,7 +237,7 @@ const VehicleMaintenanceConfiguration = () => {
                                 </Button>
                                 <Button
                                     bg={theme.purple}
-                                    _hover={{ bg: theme.onHoverPurple }}
+                                    _hover={{bg: theme.onHoverPurple}}
                                     color="#ffffff"
                                     variant="solid"
                                     size="md"
@@ -262,14 +249,14 @@ const VehicleMaintenanceConfiguration = () => {
                             </div>
                         </div>
                         <div className="flex items-end">
-                            <img src={Maintenance} alt="Change Password" width="400" height="400" className="mr-14" />
+                            <img src={Maintenance} alt="Change Password" width="400" height="400" className="mr-14"/>
                         </div>
                     </Form>
                 )}
             </Formik>
 
             <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay />
+                <AlertDialogOverlay/>
                 <AlertDialogContent
                     position="absolute"
                     top="30%"
@@ -287,7 +274,7 @@ const VehicleMaintenanceConfiguration = () => {
             </AlertDialog>
 
             <AlertDialog isOpen={isSuccessDialogOpen} onClose={onSuccessDialogClose} motionPreset="slideInBottom">
-                <AlertDialogOverlay />
+                <AlertDialogOverlay/>
                 <AlertDialogContent
                     position="absolute"
                     top="30%"

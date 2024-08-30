@@ -58,6 +58,11 @@ export default function VehicleMaintenanceConfigurationTable() {
         fetchVehicleMaintenanceTypes();
     }, []);
 
+    useEffect(() => {
+        console.log("Fetched Vehicle Details:", vehicleDetails);
+    }, [vehicleDetails]);
+
+
     const onClickDelete = (maintenanceType) => {
         setSelectedType(maintenanceType);
         onDialogOpen();
@@ -96,7 +101,7 @@ export default function VehicleMaintenanceConfigurationTable() {
 
     const columns = [
         {
-            accessorKey: 'registrationNo',
+            accessorKey: 'vehicleRegistrationNo',
             header: 'Vehicle Registration No',
             meta: { isNumeric: false, filter: 'text' }
         },
@@ -250,7 +255,7 @@ export default function VehicleMaintenanceConfigurationTable() {
                     ) : (
                         currentData.map((maintenanceType, index) => (
                             <Tr key={index}>
-                                <Td className="custom-table-td">{maintenanceType.vehicleRegistrationNo}</Td>
+                                <Td className="custom-table-td">{maintenanceType.vehicleRegistrationNo || "N/A"}</Td>
                                 <Td className="custom-table-td">{maintenanceType.typeName}</Td>
                                 <Td className="custom-table-td">{maintenanceType.duration}</Td>
                                 <Td className="custom-table-td">{maintenanceType.status ? "Active" : "Inactive"}</Td>

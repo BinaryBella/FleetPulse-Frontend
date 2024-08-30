@@ -46,10 +46,23 @@ export default function EditAccidentDetails() {
     { label: "Edit Accident Details", link: `/app/EditAccidentDetails/${id}` },
   ];
 
+  useEffect(() => {
+    console.log("Accident ID:", id); // Debugging line
+
+    if (id) {
+      fetchVehicleRegNos();
+      fetchDriverNICs();
+      fetchAccidentDetails(); // This should be called after the dropdown data is fetched
+    } else {
+      setDialogMessage("Invalid accident ID.");
+      onDialogOpen();
+    }
+  }, [id]);
+
   const validateAccidentInfo = (values) => {
     const errors = {};
     const requiredFields = [
-      "vehicleRegistrationNumber",
+      "vehicleRegistrationNo",
       "venue",
       "dateTime",
       "driverNIC",
@@ -75,6 +88,7 @@ export default function EditAccidentDetails() {
     try {
       const response = await axiosApi.get(`https://localhost:7265/api/Accidents/${id}`);
       setFormData(response.data);
+      console.log("data in accident",response.data);
     } catch (error) {
       console.error("Error fetching accident details:", error);
       setDialogMessage("Failed to fetch accident details.");
@@ -100,12 +114,6 @@ export default function EditAccidentDetails() {
       console.error("Error fetching driver NICs:", error);
     }
   };
-
-  useEffect(() => {
-    fetchAccidentDetails();
-    fetchVehicleRegNos();
-    fetchDriverNICs();
-  }, [id]);
 
   const handleSubmit = async (values) => {
     try {
@@ -191,7 +199,7 @@ export default function EditAccidentDetails() {
                           </div>
                       )}
                     </Field>
-                    <Field name="vehicleRegistrationNumber">
+                    <Field name="vehicleRegistrationNo">
                       {({ field }) => (
                           <div className="flex flex-col gap-3">
                             <p>Vehicle Registration No</p>
@@ -205,15 +213,16 @@ export default function EditAccidentDetails() {
                                 py={2}
                                 mt={1}
                                 width="400px"
+                                value={formData.vehicleRegistrationNo} // Ensure the correct value is used
                             >
                               {vehicleRegNoDetails.map((option) => (
-                                  <option key={option.id} value={option.id}>
+                                  <option key={option.id} value={option.vehicleRegistrationNo}>
                                     {option.vehicleRegistrationNo}
                                   </option>
                               ))}
                             </Select>
-                            {errors.vehicleRegistrationNumber && touched.vehicleRegistrationNumber && (
-                                <div className="text-red-500">{errors.vehicleRegistrationNumber}</div>
+                            {errors.vehicleRegistrationNo && touched.vehicleRegistrationNo && (
+                                <div className="text-red-500">{errors.vehicleRegistrationNo}</div>
                             )}
                           </div>
                       )}
@@ -326,7 +335,7 @@ export default function EditAccidentDetails() {
                         type="submit"
                         isDisabled={!isValid || isSubmitting}
                     >
-                      Update
+                      Save
                     </Button>
                   </div>
                 </Form>

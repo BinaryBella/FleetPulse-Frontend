@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import {
     Button,
     Input,
@@ -25,7 +25,6 @@ import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import PasswordStrengthBar from 'react-password-strength-bar';
 import { useNavigate, useLocation } from "react-router-dom";
 import {axiosApi} from "../interceptor.js";
-import { useNotifications } from '../context/NotificationContext';
 import PropTypes from 'prop-types';
 
 const PasswordField = ({ fieldId, label, showPassword, handleShowPassword, placeholder, error }) => (
@@ -77,7 +76,7 @@ export default function ResetPasswordDriverHelper() {
     const location = useLocation();
     const query = new URLSearchParams(location.search);
     const username = query.get('username');
-    const emailAddress = query.get('emailAddress');
+    const emailAddress = query.get('emailAddress') || '';
 
     const handleShowPassword = (setter) => () => setter(prev => !prev);
 
@@ -113,10 +112,6 @@ export default function ResetPasswordDriverHelper() {
         }
     };
 
-    useEffect(() => {
-        console.log("Retrieved emailAddress:", emailAddress); // Log email for debugging
-    }, [emailAddress]);
-
     const handleCancel = () => {
         navigate('/app/Dashboard');
     };
@@ -129,20 +124,20 @@ export default function ResetPasswordDriverHelper() {
                     <Formik
                         onSubmit={handleSubmit}
                         initialValues={{
-                            emailAddress: emailAddress || '', // Initialize emailAddress field with emailAddress from URL or empty
+                            emailAddress: emailAddress,
                             newPassword: "",
                             confirmPassword: ""
                         }}
                         validate={(values) => {
                             const errors = {};
                             if (!values.emailAddress) {
-                                errors.emailAddress = "Please enter your emailAddress.";
+                                errors.emailAddress = "Please enter your email address.";
                             }
                             if (!values.newPassword) {
                                 errors.newPassword = "Please enter your new password.";
                             }
                             if (!values.confirmPassword) {
-                                errors.confirmPassword = "Please confirm your confirm password.";
+                                errors.confirmPassword = "Please confirm your password.";
                             }
                             if (values.newPassword !== values.confirmPassword) {
                                 errors.confirmPassword = "Passwords do not match.";
