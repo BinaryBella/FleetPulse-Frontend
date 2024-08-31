@@ -338,7 +338,7 @@ export default function EditAccidentDetails() {
           </Formik>
         </Box>
 
-        <AlertDialog
+        {isDialogOpen && <AlertDialog
             isOpen={isDialogOpen}
             leastDestructiveRef={undefined}
             onClose={onDialogClose}
@@ -355,9 +355,9 @@ export default function EditAccidentDetails() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialogOverlay>
-        </AlertDialog>
+        </AlertDialog>}
 
-        <AlertDialog
+        {isSuccessDialogOpen && <AlertDialog
             isOpen={isSuccessDialogOpen}
             leastDestructiveRef={undefined}
             onClose={handleSuccessDialogClose}
@@ -381,7 +381,7 @@ export default function EditAccidentDetails() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialogOverlay>
-        </AlertDialog>
+        </AlertDialog>}
       </>
   );
 }

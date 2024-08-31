@@ -372,7 +372,7 @@ export default function HelperDetails() {
             </Table>
             <Pagination pageCount={pageCount} onPageChange={handlePageClick} currentPage={currentPage}/>
 
-            <AlertDialog
+            {isDialogOpen && <AlertDialog
                 isOpen={isDialogOpen}
                 onClose={onDialogClose}
                 motionPreset="slideInBottom"
@@ -402,10 +402,10 @@ export default function HelperDetails() {
                         </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog>}
 
             {/* Modal for Column Selection */}
-            <Modal isOpen={isColumnSelectionOpen} onClose={() => setIsColumnSelectionOpen(false)} isCentered>
+            {isColumnSelectionOpen && <Modal isOpen={isColumnSelectionOpen} onClose={() => setIsColumnSelectionOpen(false)} isCentered>
                 <ModalOverlay/>
                 <ModalContent>
                     <ModalHeader>Select Columns for Report</ModalHeader>
@@ -437,10 +437,10 @@ export default function HelperDetails() {
                         <Button ml={3} onClick={() => setIsColumnSelectionOpen(false)}>Cancel</Button>
                     </ModalFooter>
                 </ModalContent>
-            </Modal>
+            </Modal>}
 
             {/* Modal for Preview */}
-            <Modal
+            {isPreviewOpen && <Modal
                 isOpen={isPreviewOpen}
                 onClose={() => setIsPreviewOpen(false)}
                 size="6xl"
@@ -503,7 +503,7 @@ export default function HelperDetails() {
                         <Button ml={3} onClick={() => setIsPreviewOpen(false)}>Close</Button>
                     </ModalFooter>
                 </ModalContent>
-            </Modal>
+            </Modal>}
         </>
     );
 }

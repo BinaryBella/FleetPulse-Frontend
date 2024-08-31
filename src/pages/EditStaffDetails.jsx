@@ -295,7 +295,7 @@ export default function EditStaffDetails() {
                 </Formik>
             </Box>
 
-            <AlertDialog
+            {isOpen && <AlertDialog
                 motionPreset='slideInBottom'
                 leastDestructiveRef={cancelRef}
                 onClose={onClose}
@@ -316,7 +316,7 @@ export default function EditStaffDetails() {
                         </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog>}
         </>
     );
 }

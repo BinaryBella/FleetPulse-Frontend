@@ -308,7 +308,7 @@ export default function EditHelperDetails() {
                 </Formik>
             </Box>
 
-            <AlertDialog
+            {isOpen && <AlertDialog
                 motionPreset='slideInBottom'
                 leastDestructiveRef={cancelRef}
                 onClose={onClose}
@@ -329,7 +329,7 @@ export default function EditHelperDetails() {
                         </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog>}
         </>
     );
 }

@@ -285,7 +285,7 @@ const EditVehicleMaintenanceConfiguration = () => {
                 )}
             </Formik>
 
-            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
+            {isDialogOpen && <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
                 <AlertDialogOverlay/>
                 <AlertDialogContent
                     position="absolute"
@@ -301,9 +301,9 @@ const EditVehicleMaintenanceConfiguration = () => {
                         </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog>}
 
-            <AlertDialog isOpen={isSuccessDialogOpen} onClose={onSuccessDialogClose} motionPreset="slideInBottom">
+            {isSuccessDialogOpen && <AlertDialog isOpen={isSuccessDialogOpen} onClose={onSuccessDialogClose} motionPreset="slideInBottom">
                 <AlertDialogOverlay/>
                 <AlertDialogContent
                     position="absolute"
@@ -319,7 +319,7 @@ const EditVehicleMaintenanceConfiguration = () => {
                         </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog>}
         </>
     );
 };

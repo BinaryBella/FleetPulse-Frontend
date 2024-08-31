@@ -218,7 +218,7 @@ export default function ResetPasswordDriverHelper() {
                     <img src={Password} alt="Change Password" width="400" height="400" className="mr-14" />
                 </div>
             </div>
-            <AlertDialog
+            {isAlertOpen && <AlertDialog
                 isOpen={isAlertOpen}
                 leastDestructiveRef={cancelRef}
                 onClose={handleAlertClose}
@@ -239,7 +239,7 @@ export default function ResetPasswordDriverHelper() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>
-            </AlertDialog>
+            </AlertDialog>}
         </>
     );
 }

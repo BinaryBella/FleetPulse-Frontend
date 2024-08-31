@@ -274,7 +274,7 @@ export default function VehicleTypeDetails() {
                 currentPage={currentPage}
                 onPageChange={handlePageClick}
             />
-            <AlertDialog
+            {isDialogOpen && <AlertDialog
                 isOpen={isDialogOpen}
                 leastDestructiveRef={cancelRef}
                 onClose={onDialogClose}
@@ -302,7 +302,7 @@ export default function VehicleTypeDetails() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>
-            </AlertDialog>
+            </AlertDialog>}
         </div>
     );
 }

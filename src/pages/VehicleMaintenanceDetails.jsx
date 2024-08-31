@@ -484,7 +484,7 @@ export default function VehicleMaintenanceDetails() {
                 <Pagination pageCount={pageCount} onPageChange={handlePageClick}/>
             )}
 
-            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom"
+            {isDialogOpen && <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom"
                          leastDestructiveRef={cancelRef}>
                 <AlertDialogOverlay/>
                 <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
@@ -506,9 +506,9 @@ export default function VehicleMaintenanceDetails() {
                         </div>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog>}
 
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} isCentered>
+            {isModalOpen && <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} isCentered>
                 <ModalOverlay/>
                 <ModalContent>
                     <ModalHeader>Maintenance Details</ModalHeader>
@@ -534,9 +534,9 @@ export default function VehicleMaintenanceDetails() {
                         </Button>
                     </ModalFooter>
                 </ModalContent>
-            </Modal>
+            </Modal>}
 
-            <Modal
+            {isPreviewOpen && <Modal
                 isOpen={isPreviewOpen}
                 onClose={() => setIsPreviewOpen(false)}
                 size="6xl"
@@ -607,9 +607,9 @@ export default function VehicleMaintenanceDetails() {
                         <Button ml={3} onClick={() => setIsPreviewOpen(false)}>Close</Button>
                     </ModalFooter>
                 </ModalContent>
-            </Modal>
+            </Modal>}
 
-            <Modal
+            {isPreviewOpen && <Modal
                 isOpen={isPreviewOpen}
                 onClose={() => setIsPreviewOpen(false)}
                 size="6xl"
@@ -676,7 +676,7 @@ export default function VehicleMaintenanceDetails() {
                         <Button ml={3} onClick={() => setIsPreviewOpen(false)}>Close</Button>
                     </ModalFooter>
                 </ModalContent>
-            </Modal>
+            </Modal>}
         </div>
     );
 }

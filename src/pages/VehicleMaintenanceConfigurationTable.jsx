@@ -286,7 +286,7 @@ export default function VehicleMaintenanceConfigurationTable() {
                 </Tbody>
             </Table>
             <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
-            <AlertDialog
+            {isDialogOpen && <AlertDialog
                 isOpen={isDialogOpen}
                 leastDestructiveRef={cancelRef}
                 onClose={onDialogClose}
@@ -309,7 +309,7 @@ export default function VehicleMaintenanceConfigurationTable() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>
-            </AlertDialog>
+            </AlertDialog>}
         </div>
     );
 }

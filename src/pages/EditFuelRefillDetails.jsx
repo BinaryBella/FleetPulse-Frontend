@@ -418,7 +418,7 @@ export default function EditFuelRefillDetails() {
                     </Form>
                 )}
             </Formik>
-            <AlertDialog
+            {isDialogOpen && <AlertDialog
                 isOpen={isDialogOpen}
                 leastDestructiveRef={undefined}
                 onClose={onDialogClose}
@@ -437,8 +437,9 @@ export default function EditFuelRefillDetails() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>
-            </AlertDialog>
-            <AlertDialog
+            </AlertDialog>}
+
+            {isSuccessDialogOpen && <AlertDialog
                 isOpen={isSuccessDialogOpen}
                 leastDestructiveRef={undefined}
                 onClose={handleSuccessDialogClose}
@@ -457,7 +458,7 @@ export default function EditFuelRefillDetails() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>
-            </AlertDialog>
+            </AlertDialog>}
         </>
     );
 }

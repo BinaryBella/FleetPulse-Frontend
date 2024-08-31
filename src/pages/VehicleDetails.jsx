@@ -451,7 +451,7 @@ export default function VehicleDetails() {
                 />
             </Box>
 
-            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} leastDestructiveRef={cancelRef}>
+            {isDialogOpen && <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} leastDestructiveRef={cancelRef}>
                 <AlertDialogOverlay>
                     <AlertDialogContent position="absolute" top="30%" left="35%" transform="translate(-50%, -50%)">
                         <AlertDialogHeader>
@@ -468,10 +468,10 @@ export default function VehicleDetails() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>
-            </AlertDialog>
+            </AlertDialog>}
 
             {/* Modal for Column Selection */}
-            <Modal isOpen={isColumnSelectionOpen} onClose={() => setIsColumnSelectionOpen(false)} isCentered>
+            {isColumnSelectionOpen && <Modal isOpen={isColumnSelectionOpen} onClose={() => setIsColumnSelectionOpen(false)} isCentered>
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Select Columns for Report</ModalHeader>
@@ -503,10 +503,10 @@ export default function VehicleDetails() {
                         <Button ml={3} onClick={() => setIsColumnSelectionOpen(false)}>Cancel</Button>
                     </ModalFooter>
                 </ModalContent>
-            </Modal>
+            </Modal>}
 
             {/* Modal for Preview */}
-            <Modal
+            {isPreviewOpen && <Modal
                 isOpen={isPreviewOpen}
                 onClose={() => setIsPreviewOpen(false)}
                 size="6xl"
@@ -573,7 +573,7 @@ export default function VehicleDetails() {
                         <Button ml={3} onClick={() => setIsPreviewOpen(false)}>Close</Button>
                     </ModalFooter>
                 </ModalContent>
-            </Modal>
+            </Modal>}
         </div>
     );
 }

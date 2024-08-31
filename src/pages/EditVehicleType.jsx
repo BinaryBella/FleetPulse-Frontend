@@ -187,7 +187,7 @@ export default function EditVehicleType() {
                     </form>
                 )}
             </Formik>
-            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
+            {isDialogOpen && <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
                 <AlertDialogOverlay />
                 <AlertDialogContent
                     position="absolute"
@@ -203,9 +203,9 @@ export default function EditVehicleType() {
                         <Button bg={theme.purple} color="#FFFFFF" onClick={onDialogClose}>Close</Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog>}
 
-            <AlertDialog isOpen={isSuccessDialogOpen} onClose={handleSuccessDialogClose} motionPreset="slideInBottom">
+            {isSuccessDialogOpen && <AlertDialog isOpen={isSuccessDialogOpen} onClose={handleSuccessDialogClose} motionPreset="slideInBottom">
                 <AlertDialogOverlay />
                 <AlertDialogContent
                     position="absolute"
@@ -221,7 +221,7 @@ export default function EditVehicleType() {
                         <Button bg={theme.purple} color="#FFFFFF" onClick={handleSuccessDialogClose}>Ok</Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog>}
         </>
     );
 }

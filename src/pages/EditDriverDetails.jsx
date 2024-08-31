@@ -361,7 +361,7 @@ export default function EditDriverDetails() {
                 </Formik>
             </Box>
 
-            <Modal isOpen={isModalOpen} onClose={handleSuccessModalClose} isCentered size='lg'>
+            {isModalOpen && <Modal isOpen={isModalOpen} onClose={handleSuccessModalClose} isCentered size='lg'>
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Success</ModalHeader>
@@ -374,9 +374,9 @@ export default function EditDriverDetails() {
                         </Button>
                     </ModalFooter>
                 </ModalContent>
-            </Modal>
+            </Modal>}
 
-            <AlertDialog
+            {isOpen && <AlertDialog
                 motionPreset='slideInBottom'
                 leastDestructiveRef={cancelRef}
                 onClose={onClose}
@@ -396,7 +396,7 @@ export default function EditDriverDetails() {
                         </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog>}
         </>
     );
 }

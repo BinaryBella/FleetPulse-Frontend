@@ -598,7 +598,7 @@ export default function AccidentDetails() {
             />
         )}
 
-        <AlertDialog
+        {isDialogOpen && <AlertDialog
             isOpen={isDialogOpen}
             onClose={onDialogClose}
             leastDestructiveRef={cancelRef}
@@ -632,10 +632,9 @@ export default function AccidentDetails() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialogOverlay>
-        </AlertDialog>
+        </AlertDialog>}
 
-        {/* Modal for Column Selection */}
-        <Modal
+        {isColumnSelectionOpen && <Modal
             isOpen={isColumnSelectionOpen}
             onClose={() => setIsColumnSelectionOpen(false)}
             isCentered
@@ -674,10 +673,9 @@ export default function AccidentDetails() {
               </Button>
             </ModalFooter>
           </ModalContent>
-        </Modal>
+        </Modal>}
 
-        {/* Modal for Preview */}
-        <Modal
+        {isPreviewOpen && <Modal
             isOpen={isPreviewOpen}
             onClose={() => setIsPreviewOpen(false)}
             size="6xl"
@@ -735,10 +733,9 @@ export default function AccidentDetails() {
               </Button>
             </ModalFooter>
           </ModalContent>
-        </Modal>
+        </Modal>}
 
-        {/* Modal for More Details */}
-        <Modal
+        {isSpecialNotesOpen && <Modal
             isOpen={isSpecialNotesOpen}
             onClose={() => setIsSpecialNotesOpen(false)}
             isCentered
@@ -761,9 +758,9 @@ export default function AccidentDetails() {
               </Button>
             </ModalFooter>
           </ModalContent>
-        </Modal>
+        </Modal>}
 
-        <Modal
+        {isPhotoDialogOpen && <Modal
             closeOnOverlayClick={false}
             isOpen={isPhotoDialogOpen}
             onClose={onPhotoDialogClose}
@@ -793,7 +790,7 @@ export default function AccidentDetails() {
               <Button onClick={onPhotoDialogClose}>Close</Button>
             </ModalFooter>
           </ModalContent>
-        </Modal>
+        </Modal>}
       </div>
   );
 }

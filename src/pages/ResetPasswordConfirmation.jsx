@@ -113,7 +113,7 @@ export default function ResetPasswordConfirmation() {
                     </form>
                 )}
             </Formik>
-            <AlertDialog
+            {isAlertOpen && <AlertDialog
                 isOpen={isAlertOpen}
                 leastDestructiveRef={undefined}
                 onClose={handleAlertClose}
@@ -135,7 +135,7 @@ export default function ResetPasswordConfirmation() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>
-            </AlertDialog>
+            </AlertDialog>}
         </>
     );
 }

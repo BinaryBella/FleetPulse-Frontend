@@ -605,7 +605,7 @@ export default function AddDriverDetails() {
             </Box>
 
 
-            <Modal isOpen={isModalOpen} onClose={onModalClose} isCentered size='lg'>
+            {isModalOpen && <Modal isOpen={isModalOpen} onClose={onModalClose} isCentered size='lg'>
                 <ModalOverlay/>
                 <ModalContent>
                     <ModalHeader>Success</ModalHeader>
@@ -619,9 +619,9 @@ export default function AddDriverDetails() {
                         </Button>
                     </ModalFooter>
                 </ModalContent>
-            </Modal>
+            </Modal>}
 
-            <AlertDialog
+            {isOpen && <AlertDialog
                 motionPreset='slideInBottom'
                 leastDestructiveRef={cancelRef}
                 onClose={onClose}
@@ -642,7 +642,7 @@ export default function AddDriverDetails() {
                         </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog>}
         </>
     );
 }

@@ -450,7 +450,7 @@ export default function UserProfile() {
                 )}
             </Formik>
 
-            <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
+            {isDialogOpen && <AlertDialog isOpen={isDialogOpen} onClose={onDialogClose} motionPreset="slideInBottom">
                 <AlertDialogOverlay/>
                 <AlertDialogContent
                     position="absolute"
@@ -465,9 +465,9 @@ export default function UserProfile() {
                         <Button bg={theme.purple} color="#FFFFFF" onClick={onDialogClose}>Close</Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog>}
 
-            <AlertDialog isOpen={isSuccessDialogOpen} onClose={onSuccessDialogClose} motionPreset="slideInBottom">
+            {isSuccessDialogOpen && <AlertDialog isOpen={isSuccessDialogOpen} onClose={onSuccessDialogClose} motionPreset="slideInBottom">
                 <AlertDialogOverlay/>
                 <AlertDialogContent
                     position="absolute"
@@ -483,7 +483,7 @@ export default function UserProfile() {
                         <Button bg={theme.purple} color="#FFFFFF" onClick={handleSuccessDialogClose}>Ok</Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog>}
         </>
     );
 }
