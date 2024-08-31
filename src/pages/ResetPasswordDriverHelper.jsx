@@ -39,7 +39,7 @@ const PasswordField = ({ fieldId, label, showPassword, handleShowPassword, place
                 type={showPassword ? "text" : "password"}
                 variant="filled"
                 placeholder={placeholder}
-                size="sm"
+                size="md"
                 borderRadius="md"
             />
             <InputRightElement width="4.5rem">
@@ -193,7 +193,7 @@ export default function ResetPasswordDriverHelper() {
                                         gap="18"
                                         onClick={handleCancel}
                                         isDisabled={isSubmitting}
-                                        size="sm"
+                                        size="md"
                                     >
                                         Cancel
                                     </Button>
@@ -205,7 +205,7 @@ export default function ResetPasswordDriverHelper() {
                                         w="200px"
                                         type="submit"
                                         isLoading={isSubmitting}
-                                        size="sm"
+                                        size="md"
                                     >
                                         Save
                                     </Button>
