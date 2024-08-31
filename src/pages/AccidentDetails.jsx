@@ -99,6 +99,7 @@ export default function AccidentDetails() {
     }
   };
 
+
   const columns = [
     {
       accessorKey: "vehicleRegistrationNo",
@@ -106,14 +107,22 @@ export default function AccidentDetails() {
       meta: { isNumeric: false, filter: "text" },
     },
     {
-      accessorKey: "date",
+      accessorKey: "dateTime", // Original accessor
       header: "Date",
       meta: { isNumeric: false, filter: "text" },
+      cell: ({ row }) => {
+        const date = new Date(row.original.dateTime).toLocaleDateString();
+        return date;
+      },
     },
     {
-      accessorKey: "time",
+      accessorKey: "dateTime", // Reuse the original accessor
       header: "Time",
       meta: { isNumeric: false, filter: "text" },
+      cell: ({ row }) => {
+        const time = new Date(row.original.dateTime).toLocaleTimeString();
+        return time;
+      },
     },
     {
       accessorKey: "venue",
@@ -136,7 +145,7 @@ export default function AccidentDetails() {
       meta: { isNumeric: false, filter: "text" },
     },
     {
-      accessorKey: "driversNic",
+      accessorKey: "nic",
       header: "Driver's NIC",
       meta: { isNumeric: false, filter: "text" },
     },
@@ -222,8 +231,18 @@ export default function AccidentDetails() {
     marginLeft: "3.75px",
   };
 
+
+
+
   const handleGenerateReport = () => {
     setIsColumnSelectionOpen(true);
+  };
+
+  const renderCellContent = (columnKey, value) => {
+    if (columnKey === 'driverInjuredStatus' || columnKey === 'helperInjuredStatus' || columnKey === 'vehicleDamagedStatus') {
+      return value ? 'Yes' : 'No';
+    }
+    return value;
   };
 
   const handleColumnSelection = () => {
@@ -297,7 +316,14 @@ export default function AccidentDetails() {
       startY: creationDateY + 10,
       head: [selectedColumns.map((column) => column.header)],
       body: previewData.map((item) =>
-          selectedColumns.map((column) => item[column.accessorKey])
+          selectedColumns.map((column) => {
+            if (column.accessorKey === "dateTime") {
+              const date = new Date(item[column.accessorKey]).toLocaleDateString();
+              const time = new Date(item[column.accessorKey]).toLocaleTimeString();
+              return `${date} ${time}`;
+            }
+            return item[column.accessorKey];
+          })
       ),
     });
 
@@ -670,23 +696,19 @@ export default function AccidentDetails() {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {previewData.length > 0 ? (
-                      previewData.map((row, rowIndex) => (
-                          <Tr key={rowIndex}>
-                            {selectedColumns.map((column) => (
-                                <Td key={column.accessorKey}>
-                                  {row[column.accessorKey]}
-                                </Td>
-                            ))}
-                          </Tr>
-                      ))
-                  ) : (
-                      <Tr>
-                        <Td colSpan={selectedColumns.length} textAlign="center">
-                          No data available
-                        </Td>
+                  {previewData.map((item, index) => (
+                      <Tr key={index}>
+                        {selectedColumns.map((column) => {
+                          console.log(item[column.accessorKey]); // Debugging
+                          return (
+                              <Td key={column.accessorKey}>
+                                {renderCellContent(column.accessorKey, item[column.accessorKey])}
+                              </Td>
+                          );
+                        })}
+
                       </Tr>
-                  )}
+                  ))}
                 </Tbody>
               </Table>
             </ModalBody>

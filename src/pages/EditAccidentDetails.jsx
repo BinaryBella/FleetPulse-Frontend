@@ -44,6 +44,11 @@ export default function EditAccidentDetails() {
     fetchDriverNICs();
   }, [id]);
 
+  useEffect(() => {
+    console.log("Form Data:", formData); // Debugging line
+  }, [formData]);
+
+
   const validateAccidentInfo = (values) => {
     const errors = {};
     const requiredFields = ["vehicleRegistrationNo", "venue", "dateTime", "nic"];
@@ -67,10 +72,11 @@ export default function EditAccidentDetails() {
   const fetchAccidentDetails = async () => {
     try {
       const response = await axiosApi.get(`https://localhost:7265/api/Accidents/${id}`);
+      console.log("API Response:", response.data); // Detailed API Response
       setFormData({
         ...response.data,
-        vehicleRegistrationNo: response.data.vehicleRegistrationNo || "", // Handle null value
-        nic: response.data.nic || "", // Handle null value
+        vehicleRegistrationNo: response.data.vehicleRegistrationNo || "",
+        nic: response.data.nic || "",
       });
     } catch (error) {
       console.error("Error fetching accident details:", error);
@@ -78,6 +84,7 @@ export default function EditAccidentDetails() {
       onDialogOpen();
     }
   };
+
 
   const fetchVehicleRegNos = async () => {
     try {
