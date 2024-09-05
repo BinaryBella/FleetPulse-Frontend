@@ -58,7 +58,7 @@ export default function EditDriverDetails() {
             }
 
             try {
-                const response = await axiosApi.get(`https://localhost:7265/api/Driver/${userId}`);
+                const response = await axiosApi.get(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Driver/${userId}`);
                 if (response.status === 200) {
                     const driverData = response.data;
                     // Format the date fields
@@ -127,7 +127,7 @@ export default function EditDriverDetails() {
     const handleSubmit = async (values, actions) => {
         setIsSubmitting(true);
         try {
-            const response = await axiosApi.put(`https://localhost:7265/api/Driver/${userId}`, values);
+            const response = await axiosApi.put(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Driver/${userId}`, values);
             if (response.status === 200) {
                 setModalMessage('Driver updated successfully.');
                 setIsModalOpen(true);

@@ -40,7 +40,7 @@ export default function AddTripDetails() {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axiosApi.get("https://localhost:7265/api/Vehicles");
+            const response = await axiosApi.get("https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Vehicles");
             setVehicleRegNoDetails(response.data);
             console.log("Vehicle registration numbers fetched:", response.data);
         } catch (error) {
@@ -58,7 +58,7 @@ export default function AddTripDetails() {
 
     const fetchDriverNICs = async () => {
         try {
-            const response = await axiosApi.get("https://localhost:7265/api/Auth/drivers/nics");
+            const response = await axiosApi.get("https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Auth/drivers/nics");
             setNICs(response.data);
             console.log("Driver NICs fetched:", response.data);
         } catch (error) {
@@ -68,7 +68,7 @@ export default function AddTripDetails() {
 
     const handleSubmit = async (values) => {
         try {
-            const response = await axiosApi.post('https://localhost:7265/api/Trip', {
+            const response = await axiosApi.post('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Trip', {
                 vehicleRegistrationNo: values.vehicleRegistrationNo,
                 nic: values.nic,
                 Date: values.Date,
