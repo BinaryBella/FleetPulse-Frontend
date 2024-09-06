@@ -65,7 +65,7 @@ export default function VehicleTypeDetails() {
 
     const onConfirmDelete = async () => {
         try {
-            const endpoint = `https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleType/${selectedType.vehicleTypeId}/${selectedType.status ? 'deactivate' : 'activate'}`;
+            const endpoint = `https://localhost:7265/api/VehicleType/${selectedType.vehicleTypeId}/${selectedType.status ? 'deactivate' : 'activate'}`;
             await axiosApi.put(endpoint);
             fetchVehicleTypes();
             onDialogClose();
@@ -86,7 +86,7 @@ export default function VehicleTypeDetails() {
 
     const fetchVehicleTypes = async () => {
         try {
-            const response = await axiosApi.get("https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleType");
+            const response = await axiosApi.get("https://localhost:7265/api/VehicleType");
             console.log(response.data);
             setVehicleDetails(response.data);
         } catch (error) {

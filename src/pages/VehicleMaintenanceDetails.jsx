@@ -211,7 +211,7 @@ export default function VehicleMaintenanceDetails() {
 
     const fetchVehicleMaintenance = async () => {
         try {
-            const response = await axiosApi.get("https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleMaintenance");
+            const response = await axiosApi.get("https://localhost:7265/api/VehicleMaintenance");
             setVehicleMaintenance(response.data);
             console.log(response.data);
         } catch (error) {
@@ -226,7 +226,7 @@ export default function VehicleMaintenanceDetails() {
 
     const onConfirmDelete = async () => {
         try {
-            await axiosApi.put(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleMaintenance/${selectedMaintenance.maintenanceId}`, {
+            await axiosApi.put(`https://localhost:7265/api/VehicleMaintenance/${selectedMaintenance.maintenanceId}`, {
                 ...selectedMaintenance,
                 status: !selectedMaintenance.status,
             });

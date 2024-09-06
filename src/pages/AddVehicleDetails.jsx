@@ -23,7 +23,7 @@ export default function AddVehicleDetails() {
 
     useEffect(() => {
         // Fetch Vehicle Types
-        axiosApi.get('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleType')
+        axiosApi.get('https://localhost:7265/api/VehicleType')
             .then(response => {
                 console.log('Vehicle Types data fetched:', response.data);
                 setVehicleTypes(response.data); // Assuming data is an array of vehicle types
@@ -33,7 +33,7 @@ export default function AddVehicleDetails() {
             });
 
         // Fetch Manufacturers
-        axiosApi.get('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Manufacture')
+        axiosApi.get('https://localhost:7265/api/Manufacture')
             .then(response => {
                 console.log('Manufacturers data fetched:', response.data);
                 setManufacturers(response.data); // Assuming data is an array of manufacturers
@@ -58,7 +58,7 @@ export default function AddVehicleDetails() {
                 status: values.status
             };
 
-            await axiosApi.post('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Vehicles', dataToSend);
+            await axiosApi.post('https://localhost:7265/api/Vehicles', dataToSend);
 
             setSuccessDialogMessage('Vehicle details added successfully.');
             onSuccessDialogOpen();

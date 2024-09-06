@@ -43,7 +43,7 @@ export default function ResetPassword() {
         try {
             setLoading(true); // Set loading to true when submitting form
 
-            const response = await axiosApi.post('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Auth/reset-password', {
+            const response = await axiosApi.post('https://localhost:7265/api/Auth/reset-password', {
                 email: location.state.email, // Assuming location.state.email is defined elsewhere
                 newPassword: values.newpassword
             }, {

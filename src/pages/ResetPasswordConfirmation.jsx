@@ -52,7 +52,7 @@ export default function ResetPasswordConfirmation() {
                     try {
                         setLoading(true);
                         if (verificationCode.toString().length === 6) {
-                            const response = await axiosApi.post('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Auth/validate-verification-code', {
+                            const response = await axiosApi.post('https://localhost:7265/api/Auth/validate-verification-code', {
                                 email: email,
                                 code: verificationCode
                             }, {

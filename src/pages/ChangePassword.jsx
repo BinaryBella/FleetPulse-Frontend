@@ -83,7 +83,7 @@ export default function ChangePassword() {
                 return;
             }
 
-            const response = await axiosApi.post('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Auth/change-password', {
+            const response = await axiosApi.post('https://localhost:7265/api/Auth/change-password', {
                 username: storedUsername,
                 oldPassword: values.oldPassword,
                 newPassword: values.newPassword,

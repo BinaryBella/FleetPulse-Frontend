@@ -35,7 +35,7 @@ export default function AddVehicleType() {
         try {
             const status = values.isActive === false ? "false" : "true";
 
-            const response = await axiosApi.post('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleType', {
+            const response = await axiosApi.post('https://localhost:7265/api/VehicleType', {
                 Type: values.type,
                 Status: status
             }, {

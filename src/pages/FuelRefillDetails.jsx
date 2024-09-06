@@ -139,7 +139,7 @@ export default function FuelRefillDetails() {
 
     const fetchFuelRefill = async () => {
         try {
-            const response = await axiosApi.get("https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/FuelRefill");
+            const response = await axiosApi.get("https://localhost:7265/api/FuelRefill");
             const responseData = response.data;
             setFuelRefillDetails(responseData);
         } catch (error) {
@@ -161,7 +161,7 @@ export default function FuelRefillDetails() {
                 return;
             }
 
-            const endpoint = `https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/FuelRefill/${selectedFuelRefill.status ? 'deactivate' : 'activate'}/${selectedFuelRefill.fuelRefillId}`;
+            const endpoint = `https://localhost:7265/api/FuelRefill/${selectedFuelRefill.status ? 'deactivate' : 'activate'}/${selectedFuelRefill.fuelRefillId}`;
 
             const response = await axiosApi.put(endpoint, null, {
                 headers: {

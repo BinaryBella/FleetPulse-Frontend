@@ -35,7 +35,7 @@ export default function Login() {
                 onSubmit={(values) => {
                     setLoading(true); // Set loading to true when submitting form
 
-                    axiosApi.post('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Auth/login', {
+                    axiosApi.post('https://localhost:7265/api/Auth/login', {
                         username: values.username,
                         password: values.password
                     }, {
