@@ -70,7 +70,7 @@ export default function VehicleMaintenanceConfigurationTable() {
 
     const onConfirmDelete = async () => {
         try {
-            const endpoint = `https://localhost:7265api/VehicleMaintenanceConfiguration/${selectedType.id}`;
+            const endpoint = `https://localhost:7265/api/VehicleMaintenanceConfiguration/${selectedType.id}`;
             await axiosApi.delete(endpoint);
             fetchVehicleMaintenanceTypes();
             onDialogClose();
@@ -91,7 +91,7 @@ export default function VehicleMaintenanceConfigurationTable() {
 
     const fetchVehicleMaintenanceTypes = async () => {
         try {
-            const response = await axiosApi.get("https://localhost:7265api/VehicleMaintenanceConfiguration");
+            const response = await axiosApi.get("https://localhost:7265/api/VehicleMaintenanceConfiguration");
             setVehicleDetails(response.data);
             console.log(response.data);
         } catch (error) {

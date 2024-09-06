@@ -45,7 +45,7 @@ export default function EditTripDetails() {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axiosApi.get("https://localhost:7265api/Vehicles");
+            const response = await axiosApi.get("https://localhost:7265/api/Vehicles");
             setVehicleRegNoDetails(response.data);
         } catch (error) {
             console.error("Error fetching vehicle registration numbers:", error);
@@ -54,7 +54,7 @@ export default function EditTripDetails() {
 
     const fetchDriverNICs = async () => {
         try {
-            const response = await axiosApi.get("https://localhost:7265api/Driver");
+            const response = await axiosApi.get("https://localhost:7265/api/Driver");
             console.log("Driver NICs fetched:", response.data); // Debugging line
             setNICs(response.data);
         } catch (error) {
@@ -64,7 +64,7 @@ export default function EditTripDetails() {
 
     const fetchTripDetails = async () => {
         try {
-            const response = await axiosApi.get(`https://localhost:7265api/Trip/${tripId}`);
+            const response = await axiosApi.get(`https://localhost:7265/api/Trip/${tripId}`);
             const data = response.data;
             data.date = data.date.split('T')[0];
             setTripDetails(data);
@@ -78,7 +78,7 @@ export default function EditTripDetails() {
 
     const handleSubmit = async (values, { setFieldError }) => {
         try {
-            const response = await axiosApi.put(`https://localhost:7265api/Trip/${tripId}`, values);
+            const response = await axiosApi.put(`https://localhost:7265/api/Trip/${tripId}`, values);
 
             if (response.status === 200) {
                 setSuccessDialogMessage('Trip record updated successfully.');

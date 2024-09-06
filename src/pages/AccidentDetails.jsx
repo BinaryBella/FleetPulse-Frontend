@@ -90,7 +90,7 @@ export default function AccidentDetails() {
   const fetchAccidentDetails = async () => {
     try {
       const response = await axiosApi.get(
-          "https://localhost:7265api/Accidents"
+          "https://localhost:7265/api/Accidents"
       );
       setAccidentDetails(response.data);
       console.log(response.data);
@@ -376,7 +376,7 @@ export default function AccidentDetails() {
 
   const onViewPhotos = async (accident) => {
     try {
-      const response = await axiosApi.get(`https://localhost:7265api/accidents/photos/${accident.accidentId}`);
+      const response = await axiosApi.get(`https://localhost:7265/api/accidents/photos/${accident.accidentId}`);
       if (response.data && response.data.data) {
         const base64Photos = response.data.data.map(byteArray => {
           console.log(byteArray);
@@ -403,7 +403,7 @@ export default function AccidentDetails() {
         return;
       }
 
-      const endpoint = `https://localhost:7265api/Accidents/${
+      const endpoint = `https://localhost:7265/api/Accidents/${
           selectedAccident.accidentId
       }/${selectedAccident.status ? "deactivate" : "activate"}`;
 

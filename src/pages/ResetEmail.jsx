@@ -33,7 +33,7 @@ export default function ResetEmail() {
                         console.log("Submitting form with values:", values);
                         setLoading(true);
 
-                        const response = await axiosApi.post('https://localhost:7265api/Auth/forgot-password', {
+                        const response = await axiosApi.post('https://localhost:7265/api/Auth/forgot-password', {
                             email: values.email
                         }, {
                             headers: {

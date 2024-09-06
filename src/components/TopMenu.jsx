@@ -17,7 +17,7 @@ export default function TopMenu() {
         try {
             const username = sessionStorage.getItem("Username");
             if (username) {
-                const response = await axiosApi.get(`https://localhost:7265api/Auth/userProfile?username=${username}`);
+                const response = await axiosApi.get(`https://localhost:7265/api/Auth/userProfile?username=${username}`);
                 const responseData = response.data;
                 setImage(responseData.profilePicture);
             } else {
@@ -42,7 +42,7 @@ export default function TopMenu() {
 
     const handleMarkAsRead = async (index, id) => {
         try {
-            await axiosApi.post(`https://localhost:7265api/Notification/mark-as-read/${id}`);
+            await axiosApi.post(`https://localhost:7265/api/Notification/mark-as-read/${id}`);
             markAsRead(index); // Update local state as well
         } catch (error) {
             console.error("Error marking notification as read:", error);
@@ -51,7 +51,7 @@ export default function TopMenu() {
 
     const handleDeleteNotification = async (index, id) => {
         try {
-            await axiosApi.delete(`https://localhost:7265api/Notification/delete/${id}`);
+            await axiosApi.delete(`https://localhost:7265/api/Notification/delete/${id}`);
             deleteNotification(index); // Update local state as well
         } catch (error) {
             console.error("Error deleting notification:", error);

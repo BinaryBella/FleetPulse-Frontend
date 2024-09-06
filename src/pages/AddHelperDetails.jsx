@@ -169,7 +169,7 @@ export default function AddDriverDetails() {
     }, {});
 
     try {
-      const response = await axiosApi.post('https://localhost:7265api/Helper', allValues);
+      const response = await axiosApi.post('https://localhost:7265/api/Helper', allValues);
       console.log(response)
       if (response.status === 200) {
         if (response.data.status) {

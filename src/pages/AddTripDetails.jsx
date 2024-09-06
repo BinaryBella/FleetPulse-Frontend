@@ -40,7 +40,7 @@ export default function AddTripDetails() {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axiosApi.get("https://localhost:7265api/Vehicles");
+            const response = await axiosApi.get("https://localhost:7265/api/Vehicles");
             setVehicleRegNoDetails(response.data);
             console.log("Vehicle registration numbers fetched:", response.data);
         } catch (error) {
@@ -58,7 +58,7 @@ export default function AddTripDetails() {
 
     const fetchDriverNICs = async () => {
         try {
-            const response = await axiosApi.get("https://localhost:7265api/Auth/drivers/nics");
+            const response = await axiosApi.get("https://localhost:7265/api/Auth/drivers/nics");
             setNICs(response.data);
             console.log("Driver NICs fetched:", response.data);
         } catch (error) {
@@ -68,7 +68,7 @@ export default function AddTripDetails() {
 
     const handleSubmit = async (values) => {
         try {
-            const response = await axiosApi.post('https://localhost:7265api/Trip', {
+            const response = await axiosApi.post('https://localhost:7265/api/Trip', {
                 vehicleRegistrationNo: values.vehicleRegistrationNo,
                 nic: values.nic,
                 Date: values.Date,

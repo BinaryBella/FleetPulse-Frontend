@@ -38,7 +38,7 @@ export default function EditManufactureDetails() {
     useEffect(() => {
         const fetchManufacturerDetails = async () => {
             try {
-                const response = await axiosApi.get(`https://localhost:7265api/Manufacture/${id}`);
+                const response = await axiosApi.get(`https://localhost:7265/api/Manufacture/${id}`);
                 const { manufacturer, status } = response.data;
                 setInitialValues({
                     manufacturer,
@@ -56,7 +56,7 @@ export default function EditManufactureDetails() {
 
     const handleSubmit = async (values) => {
         try {
-            const response = await axiosApi.put(`https://localhost:7265api/Manufacture/UpdateManufacture/${id}`, {
+            const response = await axiosApi.put(`https://localhost:7265/api/Manufacture/UpdateManufacture/${id}`, {
                 manufacturer: values.manufacturer,
                 status: values.status
             }, {

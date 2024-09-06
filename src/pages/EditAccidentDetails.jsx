@@ -71,7 +71,7 @@ export default function EditAccidentDetails() {
 
   const fetchAccidentDetails = async () => {
     try {
-      const response = await axiosApi.get(`https://localhost:7265api/Accidents/${id}`);
+      const response = await axiosApi.get(`https://localhost:7265/api/Accidents/${id}`);
       console.log("API Response:", response.data); // Detailed API Response
       setFormData({
         ...response.data,
@@ -88,7 +88,7 @@ export default function EditAccidentDetails() {
 
   const fetchVehicleRegNos = async () => {
     try {
-      const response = await axiosApi.get("https://localhost:7265api/Vehicles");
+      const response = await axiosApi.get("https://localhost:7265/api/Vehicles");
       setVehicleRegNoDetails(response.data);
     } catch (error) {
       console.error("Error fetching vehicle registration numbers:", error);
@@ -97,7 +97,7 @@ export default function EditAccidentDetails() {
 
   const fetchDriverNICs = async () => {
     try {
-      const response = await axiosApi.get("https://localhost:7265api/Auth/drivers/nics");
+      const response = await axiosApi.get("https://localhost:7265/api/Auth/drivers/nics");
       const uniqueNICs = [...new Set(response.data)];
       setNICs(uniqueNICs);
     } catch (error) {
@@ -108,7 +108,7 @@ export default function EditAccidentDetails() {
   const handleSubmit = async (values) => {
     try {
       setIsSubmitting(true);
-      const response = await axiosApi.put(`https://localhost:7265api/Accidents/${id}`, values);
+      const response = await axiosApi.put(`https://localhost:7265/api/Accidents/${id}`, values);
 
       if (!response.data.status) {
         throw new Error(response.data.message || "Failed to update accident details.");

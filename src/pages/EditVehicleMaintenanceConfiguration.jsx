@@ -36,7 +36,7 @@ const EditVehicleMaintenanceConfiguration = () => {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axiosApi.get('https://localhost:7265api/Vehicles');
+            const response = await axiosApi.get('https://localhost:7265/api/Vehicles');
             setVehicleRegNoDetails(response.data);
         } catch (error) {
             console.error('Error fetching vehicle registration numbers:', error);
@@ -46,7 +46,7 @@ const EditVehicleMaintenanceConfiguration = () => {
 
     const fetchVehicleMaintenanceTypes = async () => {
         try {
-            const response = await axiosApi.get('https://localhost:7265api/VehicleMaintenanceType');
+            const response = await axiosApi.get('https://localhost:7265/api/VehicleMaintenanceType');
             setMaintenanceTypeDetails(response.data);
         } catch (error) {
             console.error('Error fetching vehicle maintenance types:', error);
@@ -55,7 +55,7 @@ const EditVehicleMaintenanceConfiguration = () => {
 
     const fetchMaintenanceConfiguration = async () => {
         try {
-            const response = await axiosApi.get(`https://localhost:7265api/VehicleMaintenanceConfiguration/${id}`);
+            const response = await axiosApi.get(`https://localhost:7265/api/VehicleMaintenanceConfiguration/${id}`);
             setInitialValues({
                 vehicleRegistrationNo: response.data.vehicleId.toString(),
                 maintenanceType: response.data.vehicleMaintenanceTypeId.toString(),
@@ -98,7 +98,7 @@ const EditVehicleMaintenanceConfiguration = () => {
 
             console.log('Update Payload:', payload);
 
-            const response = await axiosApi.put(`https://localhost:7265api/VehicleMaintenanceConfiguration/${id}`, payload);
+            const response = await axiosApi.put(`https://localhost:7265/api/VehicleMaintenanceConfiguration/${id}`, payload);
 
             console.log('Update Response:', response);
 

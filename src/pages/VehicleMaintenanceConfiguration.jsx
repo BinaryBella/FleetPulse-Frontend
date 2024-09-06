@@ -29,7 +29,7 @@ const VehicleMaintenanceConfiguration = () => {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axiosApi.get('https://localhost:7265api/Vehicles');
+            const response = await axiosApi.get('https://localhost:7265/api/Vehicles');
             setVehicleRegNoDetails(response.data);
         } catch (error) {
             console.error('Error fetching vehicle registration numbers:', error);
@@ -39,7 +39,7 @@ const VehicleMaintenanceConfiguration = () => {
 
     const fetchVehicleMaintenanceTypes = async () => {
         try {
-            const response = await axiosApi.get('https://localhost:7265api/VehicleMaintenanceType');
+            const response = await axiosApi.get('https://localhost:7265/api/VehicleMaintenanceType');
             setMaintenanceTypeDetails(response.data);
         } catch (error) {
             console.error('Error fetching vehicle maintenance types:', error);
@@ -78,7 +78,7 @@ const VehicleMaintenanceConfiguration = () => {
 
             console.log('Payload:', payload);
 
-            const response = await axiosApi.post('https://localhost:7265api/VehicleMaintenanceConfiguration', payload);
+            const response = await axiosApi.post('https://localhost:7265/api/VehicleMaintenanceConfiguration', payload);
 
             console.log('Response:', response);
 
