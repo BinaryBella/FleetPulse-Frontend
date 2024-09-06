@@ -42,7 +42,7 @@ export default function DriverDetails() {
 
     const fetchDriverDetails = async () => {
         try {
-            const response = await axiosApi.get(" http://localhost:5173/api/Driver");
+            const response = await axiosApi.get("https://localhost:7265api/Driver");
             setDriverDetails(response.data);
         } catch (error) {
             console.error("Error fetching driver details:", error);
@@ -157,7 +157,7 @@ export default function DriverDetails() {
 
     const onConfirmDelete = async () => {
         try {
-            const endpoint = ` http://localhost:5173/api/Driver/${selectedDriver.userId}/${selectedDriver.status ? 'deactivate' : 'activate'}`;
+            const endpoint = `https://localhost:7265api/Driver/${selectedDriver.userId}/${selectedDriver.status ? 'deactivate' : 'activate'}`;
             await axiosApi.put(endpoint);
             fetchDriverDetails();
             onDialogClose();

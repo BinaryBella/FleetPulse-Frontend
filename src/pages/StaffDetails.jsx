@@ -50,8 +50,8 @@ export default function StaffDetails() {
     const onConfirmDelete = async () => {
         try {
             const endpoint = selectedStaff.status
-                ? ` http://localhost:5173/api/Staff/${selectedStaff.userId}/deactivate`
-                : ` http://localhost:5173/api/Staff/${selectedStaff.userId}/activate`;
+                ? `https://localhost:7265api/Staff/${selectedStaff.userId}/deactivate`
+                : `https://localhost:7265api/Staff/${selectedStaff.userId}/activate`;
             await axiosApi.put(endpoint);
             fetchStaffDetails();
             onDialogClose();
@@ -72,7 +72,7 @@ export default function StaffDetails() {
 
     const fetchStaffDetails = async () => {
         try {
-            const response = await axiosApi.get(" http://localhost:5173/api/Staff");
+            const response = await axiosApi.get("https://localhost:7265api/Staff");
             setStaffDetails(response.data);
         } catch (error) {
             console.error("Error fetching staff details:", error);

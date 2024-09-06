@@ -41,7 +41,7 @@ export default function UserProfile() {
         try {
             const username = sessionStorage.getItem("Username");
             if (username) {
-                const response = await axiosApi.get(` http://localhost:5173/api/Auth/userProfile?username=${username}`);
+                const response = await axiosApi.get(`https://localhost:7265api/Auth/userProfile?username=${username}`);
                 const responseData = response.data;
 
                 console.log(responseData);
@@ -87,7 +87,7 @@ export default function UserProfile() {
         try {
             const username = sessionStorage.getItem("Username");
             const profilePicture = isImageRemoved ? "" : image;
-            const response = await axiosApi.put(' http://localhost:5173/api/Auth/UpdateUser', {
+            const response = await axiosApi.put('https://localhost:7265api/Auth/UpdateUser', {
                     Username: username,
                     FirstName: values.FirstName,
                     LastName: values.LastName,

@@ -83,7 +83,7 @@ export default function ChangePassword() {
                 return;
             }
 
-            const response = await axiosApi.post(' http://localhost:5173/api/Auth/change-password', {
+            const response = await axiosApi.post('https://localhost:7265api/Auth/change-password', {
                 username: storedUsername,
                 oldPassword: values.oldPassword,
                 newPassword: values.newPassword,

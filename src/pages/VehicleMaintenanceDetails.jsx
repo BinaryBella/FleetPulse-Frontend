@@ -211,7 +211,7 @@ export default function VehicleMaintenanceDetails() {
 
     const fetchVehicleMaintenance = async () => {
         try {
-            const response = await axiosApi.get(" http://localhost:5173/api/VehicleMaintenance");
+            const response = await axiosApi.get("https://localhost:7265api/VehicleMaintenance");
             setVehicleMaintenance(response.data);
             console.log(response.data);
         } catch (error) {
@@ -226,7 +226,7 @@ export default function VehicleMaintenanceDetails() {
 
     const onConfirmDelete = async () => {
         try {
-            await axiosApi.put(` http://localhost:5173/api/VehicleMaintenance/${selectedMaintenance.maintenanceId}`, {
+            await axiosApi.put(`https://localhost:7265api/VehicleMaintenance/${selectedMaintenance.maintenanceId}`, {
                 ...selectedMaintenance,
                 status: !selectedMaintenance.status,
             });

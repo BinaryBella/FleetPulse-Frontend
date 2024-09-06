@@ -23,7 +23,7 @@ export default function AddVehicleDetails() {
 
     useEffect(() => {
         // Fetch Vehicle Types
-        axiosApi.get(' http://localhost:5173/api/VehicleType')
+        axiosApi.get('https://localhost:7265api/VehicleType')
             .then(response => {
                 console.log('Vehicle Types data fetched:', response.data);
                 setVehicleTypes(response.data); // Assuming data is an array of vehicle types
@@ -33,7 +33,7 @@ export default function AddVehicleDetails() {
             });
 
         // Fetch Manufacturers
-        axiosApi.get(' http://localhost:5173/api/Manufacture')
+        axiosApi.get('https://localhost:7265api/Manufacture')
             .then(response => {
                 console.log('Manufacturers data fetched:', response.data);
                 setManufacturers(response.data); // Assuming data is an array of manufacturers
@@ -58,7 +58,7 @@ export default function AddVehicleDetails() {
                 status: values.status
             };
 
-            await axiosApi.post(' http://localhost:5173/api/Vehicles', dataToSend);
+            await axiosApi.post('https://localhost:7265api/Vehicles', dataToSend);
 
             setSuccessDialogMessage('Vehicle details added successfully.');
             onSuccessDialogOpen();

@@ -43,7 +43,7 @@ export default function TripDetails() {
 
     const fetchTripDetails = async () => {
         try {
-            const response = await axiosApi.get(" http://localhost:5173/api/Trip");
+            const response = await axiosApi.get("https://localhost:7265api/Trip");
             setTripDetails(response.data);
             console.log(response.data);
         } catch (error) {
@@ -59,7 +59,7 @@ export default function TripDetails() {
     const onConfirmDelete = async () => {
         try {
             const action = selectedTrip.status ? 'deactivate' : 'activate';
-            const endpoint = ` http://localhost:5173/api/Trip/${action}/${selectedTrip.tripId}`;
+            const endpoint = `https://localhost:7265api/Trip/${action}/${selectedTrip.tripId}`;
 
             // Log to debug
             console.log("Trip ID:", selectedTrip.tripId);

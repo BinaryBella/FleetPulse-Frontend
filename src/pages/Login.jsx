@@ -35,7 +35,7 @@ export default function Login() {
                 onSubmit={(values) => {
                     setLoading(true); // Set loading to true when submitting form
 
-                    axiosApi.post(' http://localhost:5173/api/Auth/login', {
+                    axiosApi.post('https://localhost:7265api/Auth/login', {
                         username: values.username,
                         password: values.password
                     }, {

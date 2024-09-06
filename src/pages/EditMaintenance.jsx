@@ -54,7 +54,7 @@ export default function EditMaintenance() {
     // Fetch vehicle registration numbers
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axiosApi.get(" http://localhost:5173/api/Vehicles");
+            const response = await axiosApi.get("https://localhost:7265api/Vehicles");
             const mappedData = response.data.map(vehicle => ({
                 id: vehicle.vehicleId,
                 vehicleRegistrationNo: vehicle.vehicleRegistrationNo
@@ -69,7 +69,7 @@ export default function EditMaintenance() {
     const fetchVehicleMaintenanceDetails = async () => {
         if (id) {
             try {
-                const response = await axiosApi.get(` http://localhost:5173/api/VehicleMaintenance/${id}`);
+                const response = await axiosApi.get(`https://localhost:7265api/VehicleMaintenance/${id}`);
                 const maintenance = response.data;
                 console.log("maintenance data", maintenance);
                 const selectedVehicle = vehicleRegNoDetails.find(v => v.id === maintenance.vehicleId);
@@ -94,7 +94,7 @@ export default function EditMaintenance() {
     // Fetch vehicle maintenance types
     const fetchVehicleMaintenanceTypes = async () => {
         try {
-            const response = await axiosApi.get(" http://localhost:5173/api/VehicleMaintenanceType");
+            const response = await axiosApi.get("https://localhost:7265api/VehicleMaintenanceType");
             setMaintenanceTypeDetails(response.data);
         } catch (error) {
             console.error("Error fetching vehicle maintenance types:", error);
@@ -130,7 +130,7 @@ export default function EditMaintenance() {
                 vehicleRegistrationNo: values.vehicleRegistrationNo
             };
 
-            const response = await axiosApi.put(` http://localhost:5173/api/VehicleMaintenance/${id}`, dataToSend);
+            const response = await axiosApi.put(`https://localhost:7265api/VehicleMaintenance/${id}`, dataToSend);
 
             if (response.status === 200) {
                 setSuccessDialogMessage('Maintenance details updated successfully.');

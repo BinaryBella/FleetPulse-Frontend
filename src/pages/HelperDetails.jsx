@@ -55,7 +55,7 @@ export default function HelperDetails() {
 
     const fetchHelperDetails = async () => {
         try {
-            const response = await axiosApi.get(' http://localhost:5173/api/Helper');
+            const response = await axiosApi.get('https://localhost:7265api/Helper');
             setHelperDetails(response.data);
         } catch (error) {
             console.error('Error fetching helper details:', error);
@@ -76,8 +76,8 @@ export default function HelperDetails() {
     const onConfirmInactive = async () => {
         try {
             const endpoint = selectedHelper.status
-                ? ` http://localhost:5173/api/Helper/${selectedHelper.userId}/deactivate`
-                : ` http://localhost:5173/api/Helper/${selectedHelper.userId}/activate`;
+                ? `https://localhost:7265api/Helper/${selectedHelper.userId}/deactivate`
+                : `https://localhost:7265api/Helper/${selectedHelper.userId}/activate`;
 
             await axiosApi.put(endpoint);
             fetchHelperDetails();

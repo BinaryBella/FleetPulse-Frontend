@@ -132,7 +132,7 @@ export default function AddAccidentDetails() {
     const fetchVehicleRegNos = async () => {
         try {
             const response = await axiosApi.get(
-                " http://localhost:5173/api/Vehicles"
+                "https://localhost:7265api/Vehicles"
             );
             setVehicleRegNoDetails(response.data);
             console.log("Vehicle registration numbers fetched:", response.data);
@@ -145,7 +145,7 @@ export default function AddAccidentDetails() {
     const fetchDriverNICs = async () => {
         try {
             const response = await axiosApi.get(
-                " http://localhost:5173/api/Auth/drivers/nics"
+                "https://localhost:7265api/Auth/drivers/nics"
             );
             // Remove duplicates
             const uniqueNICs = [...new Set(response.data)];
@@ -183,7 +183,7 @@ export default function AddAccidentDetails() {
 
             try {
                 const response = await axiosApi.post(
-                    " http://localhost:5173/api/Accidents",
+                    "https://localhost:7265api/Accidents",
                     data,
                     {
                         headers: {
@@ -208,7 +208,7 @@ export default function AddAccidentDetails() {
             //   console.log(formData);
 
             //   const response = await axiosApi.post(
-            //     " http://localhost:5173/api/Accidents",
+            //     "https://localhost:7265api/Accidents",
             //     formData,
             //     {
             //       headers: {

@@ -34,7 +34,7 @@ export default function EditVehicleType() {
     ];
 
     useEffect(() => {
-        axiosApi.get(` http://localhost:5173/api/VehicleType/${id}`)
+        axiosApi.get(`https://localhost:7265api/VehicleType/${id}`)
             .then(response => {
                 if (response.data) {
                     setVehicleTypeData(response.data);
@@ -53,7 +53,7 @@ export default function EditVehicleType() {
 
     const handleSubmit = async (values, { setSubmitting }) => {
         try {
-            const response = await axiosApi.put(` http://localhost:5173/api/VehicleType/UpdateVehicleType`, {
+            const response = await axiosApi.put(`https://localhost:7265api/VehicleType/UpdateVehicleType`, {
                 VehicleTypeId: vehicleTypeData.vehicleTypeId, // Ensure correct ID is used
                 Type: values.type,
                 Status: values.isActive ? "true" : "false"
