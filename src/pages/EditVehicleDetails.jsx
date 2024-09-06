@@ -25,7 +25,7 @@ export default function EditVehicleDetails() {
 
     useEffect(() => {
         // Fetch Vehicle Types
-        axiosApi.get('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleType')
+        axiosApi.get(' http://localhost:5173/api/VehicleType')
             .then(response => {
                 setVehicleTypes(response.data);
             })
@@ -34,7 +34,7 @@ export default function EditVehicleDetails() {
             });
 
         // Fetch Manufacturers
-        axiosApi.get('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Manufacture')
+        axiosApi.get(' http://localhost:5173/api/Manufacture')
             .then(response => {
                 setManufacturers(response.data);
             })
@@ -43,7 +43,7 @@ export default function EditVehicleDetails() {
             });
 
         // Fetch Vehicle Data
-        axiosApi.get(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Vehicles/${id}`)
+        axiosApi.get(` http://localhost:5173/api/Vehicles/${id}`)
             .then(response => {
                 setVehicleData(response.data);
             })
@@ -65,7 +65,7 @@ export default function EditVehicleDetails() {
                 status: values.status
             };
 
-            await axiosApi.put(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Vehicles/${id}`, dataToSend);
+            await axiosApi.put(` http://localhost:5173/api/Vehicles/${id}`, dataToSend);
 
             setSuccessDialogMessage('Vehicle details updated successfully.');
             onSuccessDialogOpen();

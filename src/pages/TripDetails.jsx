@@ -43,7 +43,7 @@ export default function TripDetails() {
 
     const fetchTripDetails = async () => {
         try {
-            const response = await axiosApi.get("https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Trip");
+            const response = await axiosApi.get(" http://localhost:5173/api/Trip");
             setTripDetails(response.data);
             console.log(response.data);
         } catch (error) {
@@ -59,7 +59,7 @@ export default function TripDetails() {
     const onConfirmDelete = async () => {
         try {
             const action = selectedTrip.status ? 'deactivate' : 'activate';
-            const endpoint = `https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Trip/${action}/${selectedTrip.tripId}`;
+            const endpoint = ` http://localhost:5173/api/Trip/${action}/${selectedTrip.tripId}`;
 
             // Log to debug
             console.log("Trip ID:", selectedTrip.tripId);

@@ -50,8 +50,8 @@ export default function StaffDetails() {
     const onConfirmDelete = async () => {
         try {
             const endpoint = selectedStaff.status
-                ? `https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Staff/${selectedStaff.userId}/deactivate`
-                : `https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Staff/${selectedStaff.userId}/activate`;
+                ? ` http://localhost:5173/api/Staff/${selectedStaff.userId}/deactivate`
+                : ` http://localhost:5173/api/Staff/${selectedStaff.userId}/activate`;
             await axiosApi.put(endpoint);
             fetchStaffDetails();
             onDialogClose();
@@ -72,7 +72,7 @@ export default function StaffDetails() {
 
     const fetchStaffDetails = async () => {
         try {
-            const response = await axiosApi.get("https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Staff");
+            const response = await axiosApi.get(" http://localhost:5173/api/Staff");
             setStaffDetails(response.data);
         } catch (error) {
             console.error("Error fetching staff details:", error);

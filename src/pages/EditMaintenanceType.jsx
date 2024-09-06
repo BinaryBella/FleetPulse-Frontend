@@ -32,7 +32,7 @@ export default function EditMaintenanceType() {
 
     const fetchMaintenanceTypeData = async (id) => {
         try {
-            const response = await axiosApi.get(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleMaintenanceType/${id}`);
+            const response = await axiosApi.get(` http://localhost:5173/api/VehicleMaintenanceType/${id}`);
             const data = response.data;
 
             if (response.status !== 200) {
@@ -51,7 +51,7 @@ export default function EditMaintenanceType() {
 
     const handleSubmit = async (values) => {
         try {
-            const response = await axiosApi.put(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleMaintenanceType/UpdateVehicleMaintenanceType`, {
+            const response = await axiosApi.put(` http://localhost:5173/api/VehicleMaintenanceType/UpdateVehicleMaintenanceType`, {
                 Id: id,
                 TypeName: values.TypeName,
                 Status: values.isActive

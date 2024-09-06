@@ -55,7 +55,7 @@ export default function AddFuelRefillDetails() {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axiosApi.get("https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Vehicles");
+            const response = await axiosApi.get(" http://localhost:5173/api/Vehicles");
             console.log("vehicle data", response); // Debugging line
 
             // Map the data to use 'vehicleId' instead of 'id'
@@ -110,7 +110,7 @@ export default function AddFuelRefillDetails() {
             };
 
             // Make sure to handle response correctly
-            const response = await axiosApi.post('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/FuelRefill', payload, {
+            const response = await axiosApi.post(' http://localhost:5173/api/FuelRefill', payload, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -151,7 +151,7 @@ export default function AddFuelRefillDetails() {
         try {
             const username = sessionStorage.getItem("Username");
             if (username) {
-                const response = await axiosApi.get(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Auth/userProfile?username=${username}`);
+                const response = await axiosApi.get(` http://localhost:5173/api/Auth/userProfile?username=${username}`);
                 const responseData = response.data;
                 setFieldValue("nic", responseData.nic);
                 setFieldValue("userId", responseData.userId); // Assuming the user profile response contains userId

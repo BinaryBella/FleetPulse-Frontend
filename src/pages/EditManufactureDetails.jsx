@@ -38,7 +38,7 @@ export default function EditManufactureDetails() {
     useEffect(() => {
         const fetchManufacturerDetails = async () => {
             try {
-                const response = await axiosApi.get(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Manufacture/${id}`);
+                const response = await axiosApi.get(` http://localhost:5173/api/Manufacture/${id}`);
                 const { manufacturer, status } = response.data;
                 setInitialValues({
                     manufacturer,
@@ -56,7 +56,7 @@ export default function EditManufactureDetails() {
 
     const handleSubmit = async (values) => {
         try {
-            const response = await axiosApi.put(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Manufacture/UpdateManufacture/${id}`, {
+            const response = await axiosApi.put(` http://localhost:5173/api/Manufacture/UpdateManufacture/${id}`, {
                 manufacturer: values.manufacturer,
                 status: values.status
             }, {

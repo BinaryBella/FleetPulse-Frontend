@@ -69,7 +69,7 @@ export default function ManufacturerDetails() {
                 return;
             }
 
-            const endpoint = `https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Manufacture/${selectedManufacturer.manufactureId}/${selectedManufacturer.status ? 'deactivate' : 'activate'}`;
+            const endpoint = ` http://localhost:5173/api/Manufacture/${selectedManufacturer.manufactureId}/${selectedManufacturer.status ? 'deactivate' : 'activate'}`;
 
             const response = await axiosApi.put(endpoint, null, {
                 headers: {
@@ -91,7 +91,7 @@ export default function ManufacturerDetails() {
 
     const fetchManufacturers = async () => {
         try {
-            const response = await axiosApi.get("https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Manufacture");
+            const response = await axiosApi.get(" http://localhost:5173/api/Manufacture");
             setManufacturerDetails(response.data);
         } catch (error) {
             console.error("Error fetching manufacturers:", error);

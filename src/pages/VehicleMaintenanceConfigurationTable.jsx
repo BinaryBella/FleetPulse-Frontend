@@ -70,7 +70,7 @@ export default function VehicleMaintenanceConfigurationTable() {
 
     const onConfirmDelete = async () => {
         try {
-            const endpoint = `https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleMaintenanceConfiguration/${selectedType.id}`;
+            const endpoint = ` http://localhost:5173/api/VehicleMaintenanceConfiguration/${selectedType.id}`;
             await axiosApi.delete(endpoint);
             fetchVehicleMaintenanceTypes();
             onDialogClose();
@@ -91,7 +91,7 @@ export default function VehicleMaintenanceConfigurationTable() {
 
     const fetchVehicleMaintenanceTypes = async () => {
         try {
-            const response = await axiosApi.get("https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleMaintenanceConfiguration");
+            const response = await axiosApi.get(" http://localhost:5173/api/VehicleMaintenanceConfiguration");
             setVehicleDetails(response.data);
             console.log(response.data);
         } catch (error) {

@@ -19,7 +19,7 @@ export const NotificationProvider = ({ children }) => {
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
-                const response = await fetch('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Notification/unread'); // Replace with your backend API URL
+                const response = await fetch(' http://localhost:5173/api/Notification/unread'); // Replace with your backend API URL
                 console.log(response);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');

@@ -68,7 +68,7 @@ export default function EditFuelRefillDetails() {
 
     const fetchVehicleRegNos = async () => {
         try {
-            const response = await axiosApi.get("https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Vehicles");
+            const response = await axiosApi.get(" http://localhost:5173/api/Vehicles");
 
             const mappedData = response.data.map(vehicle => ({
                 id: vehicle.vehicleId,
@@ -82,7 +82,7 @@ export default function EditFuelRefillDetails() {
 
     const fetchFuelRefillDetails = async () => {
         try {
-            const response = await axiosApi.get(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/FuelRefill/${id}`);
+            const response = await axiosApi.get(` http://localhost:5173/api/FuelRefill/${id}`);
             const data = response.data;
             console.log('Fetched Fuel Refill Data:', data);
 
@@ -136,7 +136,7 @@ export default function EditFuelRefillDetails() {
                 Status: values.IsActive
             };
 
-            const response = await axiosApi.put(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/FuelRefill/${id}`, payload, {
+            const response = await axiosApi.put(` http://localhost:5173/api/FuelRefill/${id}`, payload, {
                 headers: {
                     'Content-Type': 'application/json'
                 }

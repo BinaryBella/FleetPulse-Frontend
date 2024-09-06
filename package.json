@@ -22,7 +22,7 @@
     "dayjs": "^1.11.11",
     "dayjs-plugin-utc": "^0.1.2",
     "exceljs": "^4.4.0",
-    "firebase": "^10.12.2",
+    "firebase": "^10.13.1",
     "formik": "^2.4.5",
     "framer-motion": "^4.1.17",
     "jquery": "^3.7.1",

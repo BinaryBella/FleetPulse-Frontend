@@ -7,7 +7,7 @@ const getAuthToken = () => localStorage.getItem('Token');
 // Create the Axios instance
 const createAxiosInstance = (baseURL) => {
     const instance = axios.create({
-        baseURL: baseURL || 'https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/', // Use provided baseURL or default
+        baseURL: baseURL || ' http://localhost:5173/api/', // Use provided baseURL or default
     });
 
     // Request interceptor

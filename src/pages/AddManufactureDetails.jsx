@@ -36,7 +36,7 @@ export default function AddManufactureDetails() {
             console.log(values.TypeName, values.isActive);
             const status = values.isActive === false ? false : true;
 
-            const response = await axiosApi.post('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Manufacture', {
+            const response = await axiosApi.post(' http://localhost:5173/api/Manufacture', {
                 Manufacturer: values.TypeName,
                 Status: status
             }, {

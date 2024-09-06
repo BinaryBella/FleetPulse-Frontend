@@ -45,7 +45,7 @@ export default function EditStaffDetails() {
     useEffect(() => {
         async function fetchHelperDetails() {
             try {
-                const response = await axiosApi.get(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Staff/${userId}`);
+                const response = await axiosApi.get(` http://localhost:5173/api/Staff/${userId}`);
                 if (response.status === 200) {
                     setInitialValues(response.data);
                 }
@@ -86,7 +86,7 @@ export default function EditStaffDetails() {
     const handleSubmit = async (values, actions) => {
         setIsSubmitting(true);
         try {
-            const response = await axiosApi.put(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Staff/${userId}`, values);
+            const response = await axiosApi.put(` http://localhost:5173/api/Staff/${userId}`, values);
             if (response.status === 200) {
                 setModalMessage('Staff details updated successfully!');
                 navigate("/app/StaffDetails");

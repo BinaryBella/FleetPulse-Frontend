@@ -169,7 +169,7 @@ export default function AddDriverDetails() {
     }, {});
 
     try {
-      const response = await axiosApi.post('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Helper', allValues);
+      const response = await axiosApi.post(' http://localhost:5173/api/Helper', allValues);
       console.log(response)
       if (response.status === 200) {
         if (response.data.status) {

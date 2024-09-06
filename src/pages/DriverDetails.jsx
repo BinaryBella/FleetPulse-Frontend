@@ -42,7 +42,7 @@ export default function DriverDetails() {
 
     const fetchDriverDetails = async () => {
         try {
-            const response = await axiosApi.get("https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Driver");
+            const response = await axiosApi.get(" http://localhost:5173/api/Driver");
             setDriverDetails(response.data);
         } catch (error) {
             console.error("Error fetching driver details:", error);
@@ -157,7 +157,7 @@ export default function DriverDetails() {
 
     const onConfirmDelete = async () => {
         try {
-            const endpoint = `https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Driver/${selectedDriver.userId}/${selectedDriver.status ? 'deactivate' : 'activate'}`;
+            const endpoint = ` http://localhost:5173/api/Driver/${selectedDriver.userId}/${selectedDriver.status ? 'deactivate' : 'activate'}`;
             await axiosApi.put(endpoint);
             fetchDriverDetails();
             onDialogClose();
