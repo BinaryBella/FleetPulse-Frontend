@@ -51,7 +51,7 @@ export default function EditHelperDetails() {
             }
 
             try {
-                const response = await axiosApi.get(`https://localhost:7265/api/Helper/${userId}`);
+                const response = await axiosApi.get(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Helper/${userId}`);
                 if (response.status === 200) {
                     const helperData = response.data;
                     // Format the date fields
@@ -97,7 +97,7 @@ export default function EditHelperDetails() {
     const handleSubmit = async (values, actions) => {
         setIsSubmitting(true);
         try {
-            const response = await axiosApi.put(`https://localhost:7265/api/Helper/${userId}`, values);
+            const response = await axiosApi.put(`https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Helper/${userId}`, values);
             if (response.status === 200) {
                 setModalMessage('Helper details updated successfully!');
                 navigate("/app/HelperDetails");

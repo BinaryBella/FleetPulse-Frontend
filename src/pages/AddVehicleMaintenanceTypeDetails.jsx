@@ -24,7 +24,7 @@ export default function AddVehicleMaintenanceTypeDetails() {
         try {
             const status = values.isActive || false;
 
-            const response = await axiosApi.post('https://localhost:7265/api/VehicleMaintenanceType', {
+            const response = await axiosApi.post('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleMaintenanceType', {
                 TypeName: values.TypeName,
                 Status: status
             }, {

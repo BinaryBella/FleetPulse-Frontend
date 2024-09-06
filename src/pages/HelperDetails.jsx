@@ -55,7 +55,7 @@ export default function HelperDetails() {
 
     const fetchHelperDetails = async () => {
         try {
-            const response = await axiosApi.get('https://localhost:7265/api/Helper');
+            const response = await axiosApi.get('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Helper');
             setHelperDetails(response.data);
         } catch (error) {
             console.error('Error fetching helper details:', error);
@@ -76,8 +76,8 @@ export default function HelperDetails() {
     const onConfirmInactive = async () => {
         try {
             const endpoint = selectedHelper.status
-                ? `https://localhost:7265/api/Helper/${selectedHelper.userId}/deactivate`
-                : `https://localhost:7265/api/Helper/${selectedHelper.userId}/activate`;
+                ? `https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Helper/${selectedHelper.userId}/deactivate`
+                : `https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Helper/${selectedHelper.userId}/activate`;
 
             await axiosApi.put(endpoint);
             fetchHelperDetails();

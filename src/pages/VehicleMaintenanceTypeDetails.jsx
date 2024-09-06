@@ -65,7 +65,7 @@ export default function VehicleMaintenanceTypeDetails() {
 
     const onConfirmDelete = async () => {
         try {
-            const endpoint = `https://localhost:7265/api/VehicleMaintenanceType/${selectedType.id}/${selectedType.status ? 'deactivate' : 'activate'}`;
+            const endpoint = `https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleMaintenanceType/${selectedType.id}/${selectedType.status ? 'deactivate' : 'activate'}`;
             await axiosApi.put(endpoint);
             fetchVehicleMaintenanceTypes();
             onDialogClose();
@@ -86,7 +86,7 @@ export default function VehicleMaintenanceTypeDetails() {
 
     const fetchVehicleMaintenanceTypes = async () => {
         try {
-            const response = await axiosApi.get("https://localhost:7265/api/VehicleMaintenanceType");
+            const response = await axiosApi.get("https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/VehicleMaintenanceType");
             setVehicleDetails(response.data);
         } catch (error) {
             console.error("Error fetching vehicle maintenance types:", error);

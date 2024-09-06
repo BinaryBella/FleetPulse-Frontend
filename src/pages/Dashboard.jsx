@@ -32,27 +32,27 @@ export default function Dashboard() {
             window.location.reload();
         }
 
-        axiosApi.get('https://localhost:7265/api/Auth/count', { headers: headers })
+        axiosApi.get('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Auth/count', { headers: headers })
             .then(response => setUserCount(response.data))
             .catch(error => console.error('Error fetching user count:', error));
 
-        axiosApi.get('https://localhost:7265/api/Driver/count', { headers: headers })
+        axiosApi.get('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Driver/count', { headers: headers })
             .then(response => setDriverCount(response.data))
             .catch(error => console.error('Error fetching driver count:', error));
 
-        axiosApi.get('https://localhost:7265/api/Helper/count', { headers: headers })
+        axiosApi.get('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Helper/count', { headers: headers })
             .then(response => setHelperCount(response.data))
             .catch(error => console.error('Error fetching driver count:', error));
 
-        axiosApi.get('https://localhost:7265/api/Vehicles/count', { headers: headers })
+        axiosApi.get('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Vehicles/count', { headers: headers })
             .then(response => setVehicleCount(response.data))
             .catch(error => console.error('Error fetching vehicle count:', error));
 
-        axiosApi.get('https://localhost:7265/api/Trip/dailycount', { headers: headers })
+        axiosApi.get('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Trip/dailycount', { headers: headers })
             .then(response => setDailyTripCount(response.data))
             .catch(error => console.error('Error fetching daily trip count:', error));
 
-        axiosApi.get('https://localhost:7265/api/Accidents/latest-month/count', { headers: headers })
+        axiosApi.get('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Accidents/latest-month/count', { headers: headers })
             .then(response => setAccidentCount(response.data))
             .catch(error => console.error('Error fetching daily trip count:', error));
     }, []);

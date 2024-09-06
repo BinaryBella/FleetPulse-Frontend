@@ -167,7 +167,7 @@ export default function VehicleDetails() {
 
     const fetchVehicleDetails = async () => {
         try {
-            const response = await axiosApi.get('https://localhost:7265/api/Vehicles');
+            const response = await axiosApi.get('https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Vehicles');
             setVehicleDetails(response.data);
             console.log(response.data);
         } catch (error) {
@@ -187,7 +187,7 @@ export default function VehicleDetails() {
                 return;
             }
 
-            const endpoint = `https://localhost:7265/api/Vehicles/${selectedVehicle.vehicleId}/${selectedVehicle.status ? 'deactivate' : 'activate'}`;
+            const endpoint = `https://fleetpulsebackenddevelopment20240904063639.azurewebsites.net/api/Vehicles/${selectedVehicle.vehicleId}/${selectedVehicle.status ? 'deactivate' : 'activate'}`;
 
             const response = await axiosApi.put(endpoint, null, {
                 headers: {
